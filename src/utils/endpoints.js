@@ -26,6 +26,7 @@ export const ENDPOINT = {
   CREATE_PRESCRIPTION_ORDER: '/orders/prescription',
   CANCEL_ORDER: (id) => `/orders/${id}/cancel`,
   UPDATE_ORDER_STATUS: (id) => `/orders/${id}/status`,
+  ADMIN_ORDERS: '/orders/admin/all',
 
   // Cart
   CART: '/cart',
@@ -42,8 +43,19 @@ export const ENDPOINT = {
   // Admin
   ADMIN_DASHBOARD: '/admin/dashboard',
   ADMIN_USERS: '/admin/users',
+  ADMIN_USER_DETAIL: (userId) => `/admin/users/${userId}`,
   ADMIN_REVENUE: '/admin/revenue',
   ADMIN_SETTINGS: '/admin/settings',
+  ADMIN_LOGS: '/admin/logs',
+
+  // Banners
+  BANNERS: '/banners',
+  BANNER_DETAIL: (id) => `/banners/${id}`,
+
+  // Promotions
+  PROMOTIONS: '/promotions',
+  PROMOTION_DETAIL: (id) => `/promotions/${id}`,
+  PROMOTION_TOGGLE: (id) => `/promotions/${id}/toggle`,
 };
 
 // Query Keys for React Query
@@ -60,7 +72,21 @@ export const QUERY_KEYS = {
   ORDERS: ['orders'],
   ORDER_DETAIL: (id) => ['orders', id],
   USER_ORDERS: ['user', 'orders'],
+  ADMIN_ORDERS: ['admin', 'orders'],
 
   // Cart
   CART: ['cart'],
+
+  // Admin
+  ADMIN_DASHBOARD: ['admin', 'dashboard'],
+  ADMIN_USERS: ['admin', 'users'],
+  ADMIN_REVENUE: ['admin', 'revenue'],
+  ADMIN_SETTINGS: ['admin', 'settings'],
+  ADMIN_LOGS: ['admin', 'logs'],
+
+  // Banners
+  BANNERS: ['banners'],
+
+  // Promotions
+  PROMOTIONS: ['promotions'],
 };

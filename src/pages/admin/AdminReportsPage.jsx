@@ -1,6 +1,6 @@
 // Admin Reports Page - Báo cáo cho System Admin
 import { useAuth } from '@/contexts/AuthContext'
-import { dashboardStats, products, revenueByDay } from '@/mocks/data'
+import { useAdminDashboard, useAdminRevenue } from '@/hooks/useAdmin'
 import {
   TrendingUp,
   TrendingDown,
@@ -10,7 +10,8 @@ import {
   ShoppingCart,
   ChevronRight,
   Filter,
-  Calendar
+  Calendar,
+  Loader2
 } from 'lucide-react'
 import {
   AreaChart,
@@ -32,21 +33,34 @@ import {
 
 const AdminReportsPage = () => {
   const { user } = useAuth()
-  const stats = dashboardStats
+  const { data: stats, isLoading: loadingStats } = useAdminDashboard()
+  const { data: revenueData, isLoading: loadingRevenue } = useAdminRevenue()
 
   const formatCurrency = (amount) =>
     new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount)
 
   const COLORS = ['#0f5dd9', '#22c55e', '#f59e0b', '#8b5cf6', '#ef4444', '#64748b']
 
-  const statusData = Object.entries(stats.ordersByStatus).map(([name, value]) => ({
-    name: name === 'pending' ? 'Chờ xử lý' :
-      name === 'confirmed' ? 'Đã xác nhận' :
-        name === 'processing' ? 'Đang gia công' :
-          name === 'shipped' ? 'Đang giao' :
-            name === 'delivered' ? 'Hoàn thành' : 'Đã hủy',
-    value
-  }))
+  const statusData = stats?.ordersByStatus
+    ? Object.entries(stats.ordersByStatus).map(([name, value]) => ({
+      name: name === 'pending' ? 'Chờ xử lý' :
+        name === 'confirmed' ? 'Đã xác nhận' :
+          name === 'processing' ? 'Đang gia công' :
+            name === 'shipped' ? 'Đang giao' :
+              name === 'delivered' ? 'Hoàn thành' : 'Đã hủy',
+      value
+    }))
+    : []
+
+  const revenueByDay = revenueData?.revenueByDay || []
+
+  if (loadingStats || loadingRevenue) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-8 pb-10">
@@ -72,33 +86,33 @@ const AdminReportsPage = () => {
         <KPICard
           icon={<DollarSign className="text-green-600" />}
           title="Doanh thu tháng này"
-          value={formatCurrency(stats.totalRevenue)}
-          trend="+12.5%"
-          isUp={true}
+          value={formatCurrency(Number(revenueData?.thisMonthRevenue ?? 0))}
+          trend={`${Number(revenueData?.growthPercent ?? 0) >= 0 ? '+' : ''}${Number(revenueData?.growthPercent ?? 0).toFixed(1)}%`}
+          isUp={Number(revenueData?.growthPercent ?? 0) >= 0}
           bgColor="bg-green-50"
         />
         <KPICard
           icon={<ShoppingCart className="text-blue-600" />}
           title="Tổng đơn hàng"
-          value={stats.totalOrders}
-          trend="+5.2%"
+          value={stats?.totalOrders ?? 0}
+          trend=""
           isUp={true}
           bgColor="bg-blue-50"
         />
         <KPICard
           icon={<Users className="text-purple-600" />}
-          title="Khách hàng mới"
-          value={stats.totalCustomers.toLocaleString()}
-          trend="+8.3%"
+          title="Khách hàng"
+          value={(stats?.totalCustomers ?? 0).toLocaleString()}
+          trend=""
           isUp={true}
           bgColor="bg-purple-50"
         />
         <KPICard
           icon={<Package className="text-orange-600" />}
           title="Sản phẩm đang bán"
-          value={stats.totalProducts}
-          trend="-2.1%"
-          isUp={false}
+          value={stats?.totalProducts ?? 0}
+          trend=""
+          isUp={true}
           bgColor="bg-orange-50"
         />
       </div>
@@ -165,7 +179,7 @@ const AdminReportsPage = () => {
           </div>
           <div className="h-[300px] w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={stats.revenueByMonth}>
+              <AreaChart data={stats?.revenueByMonth || []}>
                 <defs>
                   <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#0f5dd9" stopOpacity={0.1} />
@@ -251,7 +265,7 @@ const AdminReportsPage = () => {
             </button>
           </div>
           <div className="space-y-4">
-            {stats.topProducts.map((item, i) => (
+            {(stats?.topProducts || []).map((item, i) => (
               <div key={i} className="flex items-center gap-4 group cursor-pointer hover:bg-gray-50 p-2 rounded-xl transition">
                 <div className="w-10 h-10 bg-[#f3f3f3] rounded-lg flex items-center justify-center font-bold text-[#0f5dd9]">
                   {i + 1}
@@ -261,7 +275,7 @@ const AdminReportsPage = () => {
                   <div className="w-full bg-gray-100 h-1.5 rounded-full mt-1.5">
                     <div
                       className="h-full bg-[#0f5dd9] rounded-full transition-all duration-1000"
-                      style={{ width: `${(item.sold / stats.topProducts[0].sold) * 100}%` }}
+                      style={{ width: `${(stats?.topProducts?.[0]?.sold ? (item.sold / stats.topProducts[0].sold) * 100 : 0)}%` }}
                     ></div>
                   </div>
                 </div>
@@ -274,39 +288,42 @@ const AdminReportsPage = () => {
           </div>
         </div>
 
-        {/* Inventory Table */}
+        {/* Revenue Summary */}
         <div className="bg-white rounded-2xl p-6 shadow-[0_10px_30px_rgba(13,22,39,0.06)] border border-[#f0f0f0]">
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-bold text-[#222]">Cảnh báo tồn kho</h3>
-            <span className="px-3 py-1 bg-red-50 text-red-600 text-xs font-bold rounded-full">
-              {products.filter(p => p.stock < 20).length} Cảnh báo
-            </span>
+            <h3 className="text-lg font-bold text-[#222]">Tổng quan doanh thu</h3>
           </div>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="text-left text-xs font-bold text-gray-400 uppercase tracking-wider border-b border-gray-100">
-                  <th className="pb-3 px-2">Sản phẩm</th>
-                  <th className="pb-3 px-2">SKU</th>
-                  <th className="pb-3 px-2 text-right">Tồn kho</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-50">
-                {products.filter(p => p.stock < 20).slice(0, 5).map((product) => (
-                  <tr key={product.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="py-4 px-2">
-                      <p className="text-sm font-medium text-[#222] truncate max-w-[180px]">{product.name}</p>
-                    </td>
-                    <td className="py-4 px-2 text-sm text-[#4f5562] uppercase">{product.sku}</td>
-                    <td className="py-4 px-2 text-right">
-                      <span className={`px-2 py-1 rounded-lg text-xs font-bold ${product.stock <= 5 ? 'bg-red-50 text-red-600' : 'bg-orange-50 text-orange-600'}`}>
-                        {product.stock}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="space-y-5">
+            <div className="flex items-center justify-between p-4 bg-green-50 rounded-xl">
+              <div>
+                <p className="text-sm text-[#4f5562]">Tổng doanh thu</p>
+                <p className="text-xl font-bold text-green-700">{formatCurrency(Number(revenueData?.totalRevenue ?? 0))}</p>
+              </div>
+              <DollarSign className="text-green-600" size={28} />
+            </div>
+            <div className="flex items-center justify-between p-4 bg-blue-50 rounded-xl">
+              <div>
+                <p className="text-sm text-[#4f5562]">Tháng này</p>
+                <p className="text-xl font-bold text-blue-700">{formatCurrency(Number(revenueData?.thisMonthRevenue ?? 0))}</p>
+              </div>
+              <TrendingUp className="text-blue-600" size={28} />
+            </div>
+            <div className="flex items-center justify-between p-4 bg-purple-50 rounded-xl">
+              <div>
+                <p className="text-sm text-[#4f5562]">Tháng trước</p>
+                <p className="text-xl font-bold text-purple-700">{formatCurrency(Number(revenueData?.lastMonthRevenue ?? 0))}</p>
+              </div>
+              <Calendar className="text-purple-600" size={28} />
+            </div>
+            <div className="flex items-center justify-between p-4 bg-orange-50 rounded-xl">
+              <div>
+                <p className="text-sm text-[#4f5562]">Tăng trưởng</p>
+                <p className={`text-xl font-bold ${Number(revenueData?.growthPercent ?? 0) >= 0 ? 'text-green-700' : 'text-red-700'}`}>
+                  {Number(revenueData?.growthPercent ?? 0) >= 0 ? '+' : ''}{Number(revenueData?.growthPercent ?? 0).toFixed(1)}%
+                </p>
+              </div>
+              {Number(revenueData?.growthPercent ?? 0) >= 0 ? <TrendingUp className="text-green-600" size={28} /> : <TrendingDown className="text-red-600" size={28} />}
+            </div>
           </div>
         </div>
       </div>

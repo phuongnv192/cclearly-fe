@@ -1,24 +1,37 @@
 import { useState } from 'react';
-import { Plus, Trash2, Edit2, Eye, EyeOff, GripVertical, Image as ImageIcon } from 'lucide-react';
-import { toast } from 'react-toastify';
-import { POSITIONS, mockBanners } from '@/mocks/data';
+import { Plus, Trash2, Edit2, Image as ImageIcon, Loader2 } from 'lucide-react';
+import { useBanners, useCreateBanner, useUpdateBanner, useDeleteBanner } from '@/hooks/useAdmin';
 import BannerModal from '@/components/admin/bannar/BannerModal';
 
+const POSITIONS = [
+  { value: 'header', label: 'Header (Banner trên cùng)' },
+  { value: 'home_main', label: 'Trang chủ - Banner chính' },
+  { value: 'home_promo', label: 'Trang chủ - Khuyến mãi' },
+  { value: 'footer', label: 'Footer (Banner dưới cùng)' },
+  { value: 'popup', label: 'Popup (Quảng cáo popup)' },
+];
+
 const BannerPage = () => {
-  const [banners, setBanners] = useState(mockBanners);
   const [showModal, setShowModal] = useState(false);
   const [editingBanner, setEditingBanner] = useState(null);
   const [formData, setFormData] = useState({
-    title: '', image: '', position: 'home_main', order: 1, isActive: true, startDate: '', endDate: ''
+    imageUrl: '', position: 'home_main'
   });
+
+  const { data: bannersData, isLoading } = useBanners();
+  const createBannerMutation = useCreateBanner();
+  const updateBannerMutation = useUpdateBanner();
+  const deleteBannerMutation = useDeleteBanner();
+
+  const banners = Array.isArray(bannersData) ? bannersData : [];
 
   const handleOpenModal = (banner = null) => {
     if (banner) {
       setEditingBanner(banner);
-      setFormData({ ...banner });
+      setFormData({ imageUrl: banner.imageUrl || '', position: banner.position || 'home_main' });
     } else {
       setEditingBanner(null);
-      setFormData({ title: '', image: '', position: 'home_main', order: 1, isActive: true, startDate: '', endDate: '' });
+      setFormData({ imageUrl: '', position: 'home_main' });
     }
     setShowModal(true);
   };
@@ -26,21 +39,30 @@ const BannerPage = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (editingBanner) {
-      setBanners(banners.map(b => b.id === editingBanner.id ? { ...b, ...formData } : b));
-      toast.success('Cập nhật thành công');
+      updateBannerMutation.mutate(
+        { id: editingBanner.bannerId, data: formData },
+        { onSuccess: () => setShowModal(false) }
+      );
     } else {
-      setBanners([...banners, { id: 'b' + Date.now(), ...formData, clicks: 0, views: 0 }]);
-      toast.success('Thêm mới thành công');
+      createBannerMutation.mutate(formData, {
+        onSuccess: () => setShowModal(false)
+      });
     }
-    setShowModal(false);
   };
 
   const handleDelete = (id) => {
     if (window.confirm('Xóa banner này?')) {
-      setBanners(banners.filter(b => b.id !== id));
-      toast.error('Đã xóa banner');
+      deleteBannerMutation.mutate(id);
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -57,12 +79,14 @@ const BannerPage = () => {
         </button>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
         {[
           { label: 'Tổng banner', val: banners.length, color: 'text-gray-900' },
-          { label: 'Đang hiển thị', val: banners.filter(b => b.isActive).length, color: 'text-green-600' },
-          { label: 'Lượt xem', val: banners.reduce((s, b) => s + b.views, 0).toLocaleString(), color: 'text-blue-600' },
-          { label: 'Lượt click', val: banners.reduce((s, b) => s + b.clicks, 0).toLocaleString(), color: 'text-purple-600' },
+          ...POSITIONS.map(pos => ({
+            label: pos.label.split(' - ').pop() || pos.label,
+            val: banners.filter(b => b.position === pos.value).length,
+            color: 'text-blue-600'
+          })).filter(s => s.val > 0),
         ].map((stat, i) => (
           <div key={i} className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
             <p className={`text-2xl font-bold ${stat.color}`}>{stat.val}</p>
@@ -73,7 +97,7 @@ const BannerPage = () => {
 
       <div className="space-y-4">
         {POSITIONS.map(pos => {
-          const items = banners.filter(b => b.position === pos.value).sort((a, b) => a.order - b.order);
+          const items = banners.filter(b => b.position === pos.value);
           if (items.length === 0) return null;
 
           return (
@@ -85,33 +109,24 @@ const BannerPage = () => {
               <table className="w-full text-left">
                 <tbody className="divide-y divide-gray-100">
                   {items.map(banner => (
-                    <tr key={banner.id} className="group hover:bg-gray-50 transition-colors">
-                      <td className="px-6 py-4 w-10"><GripVertical className="text-gray-300 w-4 h-4 cursor-move" /></td>
+                    <tr key={banner.bannerId} className="group hover:bg-gray-50 transition-colors">
                       <td className="px-4 py-4">
                         <div className="flex items-center gap-4">
                           <div className="w-20 h-12 bg-gray-100 rounded-lg overflow-hidden border border-gray-200">
-                            {banner.image ? (
-                              <img src={banner.image} className="w-full h-full object-cover" />
+                            {banner.imageUrl ? (
+                              <img src={banner.imageUrl} className="w-full h-full object-cover" alt="banner" />
                             ) : (
                               <div className="w-full h-full flex items-center justify-center"><ImageIcon className="text-gray-300 w-5 h-5" /></div>
                             )}
                           </div>
-                          <p className="font-semibold text-[#222]">{banner.title}</p>
+                          <p className="font-semibold text-[#222] text-sm truncate max-w-xs">{banner.imageUrl}</p>
                         </div>
                       </td>
-                      <td className="px-4 py-4 text-sm text-gray-500">Thứ tự: {banner.order}</td>
-                      <td className="px-4 py-4">
-                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold ${
-                          banner.isActive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-                        }`}>
-                          {banner.isActive ? <Eye size={12} /> : <EyeOff size={12} />}
-                          {banner.isActive ? 'ĐANG HIỆN' : 'ĐANG ẨN'}
-                        </span>
-                      </td>
+                      <td className="px-4 py-4 text-sm text-gray-500">{banner.position}</td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex justify-end gap-2">
                           <button onClick={() => handleOpenModal(banner)} className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all"><Edit2 size={16}/></button>
-                          <button onClick={() => handleDelete(banner.id)} className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all"><Trash2 size={16}/></button>
+                          <button onClick={() => handleDelete(banner.bannerId)} className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all"><Trash2 size={16}/></button>
                         </div>
                       </td>
                     </tr>

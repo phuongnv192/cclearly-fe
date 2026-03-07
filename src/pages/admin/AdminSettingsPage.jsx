@@ -1,19 +1,40 @@
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { 
   Globe, Store, CreditCard, Truck, ShieldCheck, Bell, 
-  Save, ChevronRight, MapPin, Wrench, Mail, Eye, EyeOff, Send, AlertTriangle 
+  Save, ChevronRight, MapPin, Wrench, Mail, Eye, EyeOff, Send, AlertTriangle, Loader2 
 } from "lucide-react";
 import { toast } from "react-toastify";
 
 // Import components con
 import { SectionHeader, FormField, SelectField } from "@/components/common/CommonControls";
 import PaymentTab from "@/components/admin/setting/PaymentTab";
+import { useAdminSettings, useUpdateSettings } from "@/hooks/useAdmin";
 
 const AdminSettingsPage = () => {
   const [activeTab, setActiveTab] = useState("general");
-  const [maintenanceMode, setMaintenanceMode] = useState(false);
-  const [whitelistedIPs, setWhitelistedIPs] = useState("192.168.1.100");
   const [showPassword, setShowPassword] = useState(false);
+  const [localSettings, setLocalSettings] = useState({});
+
+  const { data: settingsData, isLoading } = useAdminSettings();
+  const updateSettingsMutation = useUpdateSettings();
+
+  // Build settings map from API data
+  useEffect(() => {
+    if (settingsData) {
+      const settingsArray = Array.isArray(settingsData) ? settingsData : [];
+      const map = {};
+      settingsArray.forEach(s => { map[s.key] = s.value; });
+      setLocalSettings(map);
+    }
+  }, [settingsData]);
+
+  const getSetting = (key, fallback = '') => localSettings[key] ?? fallback;
+
+  const updateLocal = (key, value) => {
+    setLocalSettings(prev => ({ ...prev, [key]: value }));
+  };
+
+  const maintenanceMode = getSetting('maintenance_mode', 'false') === 'true';
 
   const tabs = [
     { key: "general", label: "Cấu hình chung", icon: Globe, description: "Tên cửa hàng, SEO, liên hệ" },
@@ -27,20 +48,28 @@ const AdminSettingsPage = () => {
   ];
 
   const handleSave = () => {
-    toast.success("Đã lưu cấu hình hệ thống!");
+    updateSettingsMutation.mutate(localSettings);
   };
 
   const renderTabContent = () => {
+    if (isLoading) {
+      return (
+        <div className="flex items-center justify-center py-20">
+          <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+        </div>
+      );
+    }
+
     switch (activeTab) {
       case "general":
         return (
           <div className="space-y-8">
             <SectionHeader title="Cấu hình chung" description="Thông tin cơ bản website" />
             <div className="grid grid-cols-2 gap-6">
-              <FormField label="Tên cửa hàng" defaultValue="CClearly - Eye Care Center" />
-              <FormField label="Slogan" defaultValue="See Clearly, Live Better" />
-              <FormField label="Email hỗ trợ" defaultValue="support@cclearly.com" />
-              <FormField label="Số điện thoại" defaultValue="091 234 5678" />
+              <FormField label="Tên cửa hàng" defaultValue={getSetting('store_name', 'CClearly - Eye Care Center')} onChange={(e) => updateLocal('store_name', e.target.value)} />
+              <FormField label="Slogan" defaultValue={getSetting('slogan', 'See Clearly, Live Better')} onChange={(e) => updateLocal('slogan', e.target.value)} />
+              <FormField label="Email hỗ trợ" defaultValue={getSetting('support_email', 'support@cclearly.com')} onChange={(e) => updateLocal('support_email', e.target.value)} />
+              <FormField label="Số điện thoại" defaultValue={getSetting('support_phone', '091 234 5678')} onChange={(e) => updateLocal('support_phone', e.target.value)} />
             </div>
           </div>
         );
@@ -61,7 +90,7 @@ const AdminSettingsPage = () => {
                 </div>
               </div>
               <button
-                onClick={() => setMaintenanceMode(!maintenanceMode)}
+                onClick={() => updateLocal('maintenance_mode', maintenanceMode ? 'false' : 'true')}
                 className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors ${maintenanceMode ? 'bg-red-500' : 'bg-gray-300'}`}
               >
                 <span className={`inline-block h-6 w-6 transform rounded-full bg-white transition-transform ${maintenanceMode ? 'translate-x-7' : 'translate-x-1'}`} />
@@ -87,8 +116,13 @@ const AdminSettingsPage = () => {
           <h1 className="text-2xl font-bold">System Settings</h1>
           <p className="text-gray-500 text-sm">Quản lý toàn bộ cấu hình hệ thống</p>
         </div>
-        <button onClick={handleSave} className="flex items-center gap-2 bg-blue-600 text-white px-5 py-2.5 rounded-lg text-sm hover:bg-blue-700">
-          <Save size={16} /> Lưu thay đổi
+        <button
+          onClick={handleSave}
+          disabled={updateSettingsMutation.isPending}
+          className="flex items-center gap-2 bg-blue-600 text-white px-5 py-2.5 rounded-lg text-sm hover:bg-blue-700 disabled:opacity-50"
+        >
+          {updateSettingsMutation.isPending ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+          Lưu thay đổi
         </button>
       </div>
 

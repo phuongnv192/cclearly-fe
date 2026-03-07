@@ -1,5 +1,6 @@
 import { useAuth, ROLES } from "@/contexts/AuthContext"
-import { dashboardStats, orders, getLowStockProducts } from "@/mocks/data"
+import { useAdminDashboard } from "@/hooks/useAdmin"
+import { useOrders } from "@/hooks/useOrder"
 
 import {
   Package,
@@ -7,6 +8,7 @@ import {
   Users,
   DollarSign,
   AlertTriangle,
+  Loader2,
 } from "lucide-react"
 
 import {
@@ -20,9 +22,10 @@ import {
 const AdminDashboard = () => {
   const { user, hasRole } = useAuth()
 
-  const stats = dashboardStats
-  const lowStockProducts = getLowStockProducts()
-  const recentOrders = orders.slice(0, 5)
+  const { data: stats, isLoading: loadingStats } = useAdminDashboard()
+  const { data: ordersData, isLoading: loadingOrders } = useOrders({ page: 0, size: 5 })
+
+  const recentOrders = ordersData?.content || ordersData || []
 
   const formatCurrency = (amount) =>
     new Intl.NumberFormat("vi-VN", {
@@ -43,6 +46,14 @@ const AdminDashboard = () => {
     return map[status] || "bg-gray-100 text-gray-800"
   }
 
+  if (loadingStats) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+      </div>
+    )
+  }
+
   return (
     <div className="max-w-[1400px] mx-auto">
 
@@ -60,13 +71,13 @@ const AdminDashboard = () => {
         <StatCard
           icon={<Package className="text-blue-600" />}
           title="Đơn hàng mới"
-          value={stats.pendingOrders}
+          value={stats?.pendingOrders ?? 0}
         />
 
         <StatCard
           icon={<CheckCircle className="text-green-600" />}
           title="Đã hoàn thành"
-          value={stats.ordersByStatus.delivered}
+          value={stats?.deliveredOrders ?? 0}
         />
 
         {hasRole([ROLES.MANAGER, ROLES.ADMIN]) && (
@@ -74,13 +85,13 @@ const AdminDashboard = () => {
             <StatCard
               icon={<Users className="text-purple-600" />}
               title="Khách hàng"
-              value={stats.totalCustomers.toLocaleString()}
+              value={(stats?.totalCustomers ?? 0).toLocaleString()}
             />
 
             <StatCard
               icon={<DollarSign className="text-orange-600" />}
               title="Doanh thu"
-              value={(stats.totalRevenue / 1000000).toFixed(0) + "M"}
+              value={(Number(stats?.totalRevenue ?? 0) / 1000000).toFixed(0) + "M"}
             />
           </>
         )}
@@ -98,7 +109,7 @@ const AdminDashboard = () => {
           </h3>
 
           <ResponsiveContainer width="100%" height={260}>
-            <BarChart data={stats.revenueByMonth}>
+            <BarChart data={stats?.revenueByMonth || []}>
               <XAxis dataKey="month" />
               <Tooltip formatter={(v) => formatCurrency(v)} />
               <Bar dataKey="revenue" fill="#0f5dd9" radius={[6,6,0,0]} />
@@ -107,37 +118,37 @@ const AdminDashboard = () => {
 
         </div>
 
-        {/* LOW STOCK */}
+        {/* TOP PRODUCTS */}
         <div className="bg-white rounded-2xl shadow p-6">
 
           <h3 className="font-semibold flex items-center gap-2 mb-4">
             <AlertTriangle className="w-5 h-5 text-orange-500" />
-            Sản phẩm tồn kho thấp
+            Sản phẩm bán chạy
           </h3>
 
           <div className="space-y-3">
 
-            {lowStockProducts.length > 0 ? (
-              lowStockProducts.slice(0,5).map((p) => (
+            {(stats?.topProducts || []).length > 0 ? (
+              stats.topProducts.slice(0,5).map((p, i) => (
                 <div
-                  key={p.id}
-                  className="flex justify-between bg-[#fff5f5] p-3 rounded-xl"
+                  key={i}
+                  className="flex justify-between bg-gray-50 p-3 rounded-xl"
                 >
                   <div>
                     <p className="font-medium">{p.name}</p>
                     <p className="text-xs text-gray-500">
-                      SKU: {p.sku}
+                      {p.type}
                     </p>
                   </div>
 
-                  <span className="text-red-600 font-semibold">
-                    {p.stock}
+                  <span className="text-blue-600 font-semibold">
+                    {p.sold} đã bán
                   </span>
                 </div>
               ))
             ) : (
               <p className="text-gray-500 text-sm">
-                Không có sản phẩm tồn kho thấp
+                Không có dữ liệu
               </p>
             )}
 
@@ -154,6 +165,11 @@ const AdminDashboard = () => {
           Đơn hàng gần đây
         </h3>
 
+        {loadingOrders ? (
+          <div className="flex justify-center py-8">
+            <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
+          </div>
+        ) : (
         <div className="overflow-x-auto">
 
           <table className="w-full text-sm">
@@ -169,15 +185,15 @@ const AdminDashboard = () => {
 
             <tbody>
 
-              {recentOrders.map((order) => (
-                <tr key={order.id} className="border-b">
+              {(Array.isArray(recentOrders) ? recentOrders : []).map((order) => (
+                <tr key={order.orderId || order.id} className="border-b">
 
                   <td className="py-3 font-medium">
-                    {order.id}
+                    {order.orderId || order.id}
                   </td>
 
                   <td>
-                    {order.shippingAddress?.name}
+                    {order.customerName || order.shippingAddress?.name}
                   </td>
 
                   <td>
@@ -200,6 +216,7 @@ const AdminDashboard = () => {
           </table>
 
         </div>
+        )}
 
       </div>
 
