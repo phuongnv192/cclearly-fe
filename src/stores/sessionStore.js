@@ -57,13 +57,13 @@ export const useSessionStore = create(
   )
 );
 
-// User roles
+// User roles - must match backend role names (uppercase)
 export const ROLES = {
-  CUSTOMER: 'customer',
-  SALES: 'sales',
-  OPERATIONS: 'operations',
-  MANAGER: 'manager',
-  ADMIN: 'admin',
+  CUSTOMER: 'CUSTOMER',
+  SALES: 'SALES_STAFF',
+  OPERATIONS: 'OPERATION_STAFF',
+  MANAGER: 'MANAGER',
+  ADMIN: 'ADMIN',
 };
 
 // Role permissions

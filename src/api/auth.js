@@ -34,7 +34,10 @@ export const authRequest = {
 
   // Forgot password - send reset email
   forgotPassword: async (email) => {
-    const res = await http.post(ENDPOINT.FORGOT_PASSWORD, { email });
+    const res = await http.post(ENDPOINT.FORGOT_PASSWORD, {
+      email,
+      domain: window.location.origin,
+    });
     return res.data;
   },
 
@@ -44,9 +47,9 @@ export const authRequest = {
     return res.data;
   },
 
-  // Verify email with token
-  verifyEmail: async (token) => {
-    const res = await http.post(ENDPOINT.VERIFY_EMAIL, { token });
+  // Verify email with OTP code
+  verifyEmail: async ({ email, otpCode }) => {
+    const res = await http.post(ENDPOINT.VERIFY_EMAIL, { email, otpCode });
     return res.data;
   },
 

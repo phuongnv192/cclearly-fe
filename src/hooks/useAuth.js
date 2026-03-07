@@ -20,7 +20,12 @@ export const useLogin = () => {
       return data;
     },
     onSuccess: (data) => {
-      const { accessToken, refreshToken } = data;
+      const { accessToken, refreshToken, user } = data;
+      // Don't store session if email is not verified
+      if (user?.isEmailVerified === false) {
+        toast.info('Email chưa được xác thực. Vui lòng xác thực email.');
+        return;
+      }
       login(accessToken, refreshToken);
       toast.success('Đăng nhập thành công!');
     },
@@ -32,19 +37,14 @@ export const useLogin = () => {
 
 // Register mutation
 export const useRegister = () => {
-  const login = useAuthContext().login;
-
   return useMutation({
     mutationFn: async (data) => {
       const res = await authRequest.register(data);
       return res;
     },
-    onSuccess: (data) => {
-      const { accessToken, refreshToken } = data;
-      if (accessToken && refreshToken) {
-        login(accessToken, refreshToken);
-      }
-      toast.success('Đăng ký thành công!');
+    onSuccess: () => {
+      // Don't store session - user needs to verify email first
+      toast.success('Đăng ký thành công! Vui lòng xác thực email.');
     },
     onError: (error) => {
       toast.error(error.message || 'Đăng ký thất bại');
@@ -150,6 +150,19 @@ export const useResendVerification = () => {
     },
     onError: (error) => {
       toast.error(error.message || 'Gửi email thất bại');
+    },
+  });
+};
+
+// Verify email with OTP mutation
+export const useVerifyEmail = () => {
+  return useMutation({
+    mutationFn: async ({ email, otpCode }) => {
+      const res = await authRequest.verifyEmail({ email, otpCode });
+      return res;
+    },
+    onError: (error) => {
+      toast.error(error.message || 'Mã OTP không hợp lệ');
     },
   });
 };
