@@ -300,18 +300,21 @@ export const handlers = [
     let filteredProducts = [...products];
 
     if (type) {
-      filteredProducts = filteredProducts.filter(p => p.type === type);
+      filteredProducts = filteredProducts.filter((p) => p.type === type);
     }
 
     if (categoryId) {
-      filteredProducts = filteredProducts.filter(p => p.categoryId === categoryId);
+      filteredProducts = filteredProducts.filter(
+        (p) => p.categoryId === categoryId
+      );
     }
 
     if (search) {
       const searchLower = search.toLowerCase();
-      filteredProducts = filteredProducts.filter(p =>
-        p.name.toLowerCase().includes(searchLower) ||
-        p.description.toLowerCase().includes(searchLower)
+      filteredProducts = filteredProducts.filter(
+        (p) =>
+          p.name.toLowerCase().includes(searchLower) ||
+          p.description.toLowerCase().includes(searchLower)
       );
     }
 
@@ -369,7 +372,7 @@ export const handlers = [
     const page = parseInt(url.searchParams.get('page') || '1');
     const limit = parseInt(url.searchParams.get('limit') || '10');
 
-    let filteredProducts = products.filter(p => p.type === 'frame');
+    let filteredProducts = products.filter((p) => p.type === 'frame');
 
     const total = filteredProducts.length;
     const start = (page - 1) * limit;
@@ -379,7 +382,12 @@ export const handlers = [
       success: true,
       data: {
         items,
-        meta: { currentPage: page, totalPages: Math.ceil(total / limit), total, limit },
+        meta: {
+          currentPage: page,
+          totalPages: Math.ceil(total / limit),
+          total,
+          limit,
+        },
       },
     });
   }),
@@ -391,7 +399,7 @@ export const handlers = [
     const page = parseInt(url.searchParams.get('page') || '1');
     const limit = parseInt(url.searchParams.get('limit') || '10');
 
-    let filteredProducts = products.filter(p => p.type === 'lens');
+    let filteredProducts = products.filter((p) => p.type === 'lens');
 
     const total = filteredProducts.length;
     const start = (page - 1) * limit;
@@ -401,7 +409,12 @@ export const handlers = [
       success: true,
       data: {
         items,
-        meta: { currentPage: page, totalPages: Math.ceil(total / limit), total, limit },
+        meta: {
+          currentPage: page,
+          totalPages: Math.ceil(total / limit),
+          total,
+          limit,
+        },
       },
     });
   }),
@@ -419,11 +432,11 @@ export const handlers = [
     let filteredOrders = [...orders];
 
     if (status) {
-      filteredOrders = filteredOrders.filter(o => o.status === status);
+      filteredOrders = filteredOrders.filter((o) => o.status === status);
     }
 
     if (type) {
-      filteredOrders = filteredOrders.filter(o => o.type === type);
+      filteredOrders = filteredOrders.filter((o) => o.type === type);
     }
 
     const total = filteredOrders.length;
@@ -434,7 +447,12 @@ export const handlers = [
       success: true,
       data: {
         items,
-        meta: { currentPage: page, totalPages: Math.ceil(total / limit), total, limit },
+        meta: {
+          currentPage: page,
+          totalPages: Math.ceil(total / limit),
+          total,
+          limit,
+        },
       },
     });
   }),
@@ -554,7 +572,9 @@ export const handlers = [
     }
 
     // Check if item already in cart
-    const existingItem = cart.items.find(item => item.productId === productId);
+    const existingItem = cart.items.find(
+      (item) => item.productId === productId
+    );
 
     if (existingItem) {
       existingItem.quantity += quantity;
@@ -583,7 +603,7 @@ export const handlers = [
     const body = await request.json();
     const { quantity } = body;
 
-    const item = cart.items.find(item => item.id === params.itemId);
+    const item = cart.items.find((item) => item.id === params.itemId);
     if (!item) {
       return HttpResponse.json(
         { success: false, message: 'Sản phẩm không có trong giỏ' },
@@ -603,7 +623,7 @@ export const handlers = [
   // Remove Cart Item
   http.delete(`${BASE_URL}/cart/items/:itemId`, async ({ params }) => {
     await delay(200);
-    const index = cart.items.findIndex(item => item.id === params.itemId);
+    const index = cart.items.findIndex((item) => item.id === params.itemId);
 
     if (index === -1) {
       return HttpResponse.json(
@@ -665,7 +685,7 @@ export const handlers = [
   // Get User Orders
   http.get(`${BASE_URL}/users/orders`, async () => {
     await delay(300);
-    const userOrders = orders.filter(o => o.userId === '5');
+    const userOrders = orders.filter((o) => o.userId === '5');
 
     return HttpResponse.json({
       success: true,
@@ -705,7 +725,7 @@ export const handlers = [
   // Get Staff by Role
   http.get(`${BASE_URL}/staff/role/:role`, async ({ params }) => {
     await delay(200);
-    const filtered = staff.filter(s => s.role === params.role);
+    const filtered = staff.filter((s) => s.role === params.role);
     return HttpResponse.json({
       success: true,
       data: filtered,
@@ -731,7 +751,7 @@ export const handlers = [
 
     let filtered = [...returns];
     if (status) {
-      filtered = filtered.filter(r => r.status === status);
+      filtered = filtered.filter((r) => r.status === status);
     }
 
     return HttpResponse.json({
@@ -746,7 +766,7 @@ export const handlers = [
     const body = await request.json();
     const { status } = body;
 
-    const returnItem = returns.find(r => r.id === params.id);
+    const returnItem = returns.find((r) => r.id === params.id);
     if (!returnItem) {
       return HttpResponse.json(
         { success: false, message: 'Không tìm thấy yêu cầu đổi trả' },
@@ -787,7 +807,9 @@ export const handlers = [
   // Get Active Coupons
   http.get(`${BASE_URL}/coupons/active`, async () => {
     await delay(200);
-    const active = coupons.filter(c => c.isActive && new Date(c.validTo) > new Date());
+    const active = coupons.filter(
+      (c) => c.isActive && new Date(c.validTo) > new Date()
+    );
     return HttpResponse.json({
       success: true,
       data: active,

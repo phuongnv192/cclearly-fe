@@ -1,14 +1,16 @@
 // Generate JWT-like token for testing
 const generateToken = (user) => {
   const header = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
-  const payload = btoa(JSON.stringify({
-    sub: user.id,
-    email: user.email,
-    role: user.role,
-    name: user.name,
-    iat: Date.now(),
-    exp: Date.now() + 24 * 60 * 60 * 1000,
-  }));
+  const payload = btoa(
+    JSON.stringify({
+      sub: user.id,
+      email: user.email,
+      role: user.role,
+      name: user.name,
+      iat: Date.now(),
+      exp: Date.now() + 24 * 60 * 60 * 1000,
+    })
+  );
   const signature = btoa('mock-signature');
   return `${header}.${payload}.${signature}`;
 };
@@ -69,12 +71,48 @@ export const users = [
 
 // Categories
 export const categories = [
-  { id: '1', name: 'Gọng kính cận', slug: 'frame-near', description: 'Gọng kính cận thị', image: '/images/categories/frame-near.jpg' },
-  { id: '2', name: 'Gọng kính râm', slug: 'frame-sunglasses', description: 'Gọng kính râm', image: '/images/categories/frame-sunglasses.jpg' },
-  { id: '3', name: 'Tròng cận', slug: 'lens-near', description: 'Tròng kính cận thị', image: '/images/categories/lens-near.jpg' },
-  { id: '4', name: 'Tròng râm', slug: 'lens-sunglasses', description: 'Tròng kính râm', image: '/images/categories/lens-sunglasses.jpg' },
-  { id: '5', name: 'Kính trẻ em', slug: 'kids', description: 'Kính cho trẻ em', image: '/images/categories/kids.jpg' },
-  { id: '6', name: 'Phụ kiện', slug: 'accessories', description: 'Phụ kiện kính mắt', image: '/images/categories/accessories.jpg' },
+  {
+    id: '1',
+    name: 'Gọng kính cận',
+    slug: 'frame-near',
+    description: 'Gọng kính cận thị',
+    image: '/images/categories/frame-near.jpg',
+  },
+  {
+    id: '2',
+    name: 'Gọng kính râm',
+    slug: 'frame-sunglasses',
+    description: 'Gọng kính râm',
+    image: '/images/categories/frame-sunglasses.jpg',
+  },
+  {
+    id: '3',
+    name: 'Tròng cận',
+    slug: 'lens-near',
+    description: 'Tròng kính cận thị',
+    image: '/images/categories/lens-near.jpg',
+  },
+  {
+    id: '4',
+    name: 'Tròng râm',
+    slug: 'lens-sunglasses',
+    description: 'Tròng kính râm',
+    image: '/images/categories/lens-sunglasses.jpg',
+  },
+  {
+    id: '5',
+    name: 'Kính trẻ em',
+    slug: 'kids',
+    description: 'Kính cho trẻ em',
+    image: '/images/categories/kids.jpg',
+  },
+  {
+    id: '6',
+    name: 'Phụ kiện',
+    slug: 'accessories',
+    description: 'Phụ kiện kính mắt',
+    image: '/images/categories/accessories.jpg',
+  },
 ];
 
 // Products - Frames
@@ -88,7 +126,8 @@ export const products = [
     categoryId: '1',
     price: 890000,
     originalPrice: 990000,
-    description: 'Gọng kính cận thị nam/nữ MJ500 - Thiết kế hiện đại, nhẹ và bền với chất liệu Titanium cao cấp. Phù hợp cho văn phòng và cuộc sống hàng ngày.',
+    description:
+      'Gọng kính cận thị nam/nữ MJ500 - Thiết kế hiện đại, nhẹ và bền với chất liệu Titanium cao cấp. Phù hợp cho văn phòng và cuộc sống hàng ngày.',
     images: ['/images/products/frame1.jpg'],
     attributes: {
       material: 'Titanium',
@@ -102,9 +141,30 @@ export const products = [
       warranty: '12 tháng',
     },
     variants: [
-      { id: 'v1', color: 'Đen', colorCode: '#000000', sku: 'FRAME-MJ500-BLK', price: 890000, stock: 20 },
-      { id: 'v2', color: 'Xám', colorCode: '#808080', sku: 'FRAME-MJ500-GRY', price: 890000, stock: 15 },
-      { id: 'v3', color: 'Xanh Navy', colorCode: '#000080', sku: 'FRAME-MJ500-NVY', price: 920000, stock: 15 },
+      {
+        id: 'v1',
+        color: 'Đen',
+        colorCode: '#000000',
+        sku: 'FRAME-MJ500-BLK',
+        price: 890000,
+        stock: 20,
+      },
+      {
+        id: 'v2',
+        color: 'Xám',
+        colorCode: '#808080',
+        sku: 'FRAME-MJ500-GRY',
+        price: 890000,
+        stock: 15,
+      },
+      {
+        id: 'v3',
+        color: 'Xanh Navy',
+        colorCode: '#000080',
+        sku: 'FRAME-MJ500-NVY',
+        price: 920000,
+        stock: 15,
+      },
     ],
     stock: 50,
     isActive: true,
@@ -120,7 +180,8 @@ export const products = [
     sku: 'FRAME-JK2024',
     categoryId: '1',
     price: 1290000,
-    description: 'Gọng kính cận JK2024 - Phong cách vintage độc đáo. Chất liệu Acetate cao cấp với màu sắc tự nhiên.',
+    description:
+      'Gọng kính cận JK2024 - Phong cách vintage độc đáo. Chất liệu Acetate cao cấp với màu sắc tự nhiên.',
     images: ['/images/products/frame2.jpg'],
     attributes: {
       material: 'Acetate',
@@ -134,9 +195,30 @@ export const products = [
       warranty: '12 tháng',
     },
     variants: [
-      { id: 'v4', color: 'Vàng Gold', colorCode: '#FFD700', sku: 'FRAME-JK2024-GLD', price: 1290000, stock: 10 },
-      { id: 'v5', color: 'Đen', colorCode: '#000000', sku: 'FRAME-JK2024-BLK', price: 1290000, stock: 10 },
-      { id: 'v6', color: 'Đỏ Burgundy', colorCode: '#800020', sku: 'FRAME-JK2024-BUR', price: 1350000, stock: 10 },
+      {
+        id: 'v4',
+        color: 'Vàng Gold',
+        colorCode: '#FFD700',
+        sku: 'FRAME-JK2024-GLD',
+        price: 1290000,
+        stock: 10,
+      },
+      {
+        id: 'v5',
+        color: 'Đen',
+        colorCode: '#000000',
+        sku: 'FRAME-JK2024-BLK',
+        price: 1290000,
+        stock: 10,
+      },
+      {
+        id: 'v6',
+        color: 'Đỏ Burgundy',
+        colorCode: '#800020',
+        sku: 'FRAME-JK2024-BUR',
+        price: 1350000,
+        stock: 10,
+      },
     ],
     stock: 30,
     isActive: true,
@@ -152,7 +234,8 @@ export const products = [
     sku: 'FRAME-RB2131',
     categoryId: '2',
     price: 2100000,
-    description: 'Gọng kính râm RB2131 - Thương hiệu RayBan chính hãng. Thiết kế Wayfarer huyền thoại.',
+    description:
+      'Gọng kính râm RB2131 - Thương hiệu RayBan chính hãng. Thiết kế Wayfarer huyền thoại.',
     images: ['/images/products/frame3.jpg'],
     attributes: {
       material: 'Acetate',
@@ -166,9 +249,30 @@ export const products = [
       warranty: '24 tháng',
     },
     variants: [
-      { id: 'v7', color: 'Đen', colorCode: '#000000', sku: 'FRAME-RB2131-BLK', price: 2100000, stock: 10 },
-      { id: 'v8', color: 'Nâu', colorCode: '#8B4513', sku: 'FRAME-RB2131-BRN', price: 2100000, stock: 8 },
-      { id: 'v9', color: 'Xanh', colorCode: '#00008B', sku: 'FRAME-RB2131-BLU', price: 2150000, stock: 7 },
+      {
+        id: 'v7',
+        color: 'Đen',
+        colorCode: '#000000',
+        sku: 'FRAME-RB2131-BLK',
+        price: 2100000,
+        stock: 10,
+      },
+      {
+        id: 'v8',
+        color: 'Nâu',
+        colorCode: '#8B4513',
+        sku: 'FRAME-RB2131-BRN',
+        price: 2100000,
+        stock: 8,
+      },
+      {
+        id: 'v9',
+        color: 'Xanh',
+        colorCode: '#00008B',
+        sku: 'FRAME-RB2131-BLU',
+        price: 2150000,
+        stock: 7,
+      },
     ],
     stock: 25,
     isActive: true,
@@ -184,7 +288,8 @@ export const products = [
     sku: 'FRAME-KD001',
     categoryId: '5',
     price: 550000,
-    description: 'Gọng kính trẻ em KD001 - An toàn, màu sắc vui nhộn. Chất liệu nhựa dẻo TR90 không gây dị ứng.',
+    description:
+      'Gọng kính trẻ em KD001 - An toàn, màu sắc vui nhộn. Chất liệu nhựa dẻo TR90 không gây dị ứng.',
     images: ['/images/products/frame4.jpg'],
     attributes: {
       material: 'TR90',
@@ -210,7 +315,8 @@ export const products = [
     sku: 'FRAME-PIERO-C',
     categoryId: '1',
     price: 1890000,
-    description: 'Gọng kính Piero Classic - Phong cách thanh lịch châu Âu. Thiết kế dành cho quý ông lịch lãm.',
+    description:
+      'Gọng kính Piero Classic - Phong cách thanh lịch châu Âu. Thiết kế dành cho quý ông lịch lãm.',
     images: ['/images/products/frame5.jpg'],
     attributes: {
       material: 'Titanium',
@@ -236,7 +342,8 @@ export const products = [
     sku: 'FRAME-SR01',
     categoryId: '1',
     price: 1650000,
-    description: 'Gọng kính Semi-Rimless SR01 - Thiết kế hiện đại, nhẹ nhàng. Phù hợp cho người yêu thích sự tối giản.',
+    description:
+      'Gọng kính Semi-Rimless SR01 - Thiết kế hiện đại, nhẹ nhàng. Phù hợp cho người yêu thích sự tối giản.',
     images: ['/images/products/frame6.jpg'],
     attributes: {
       material: 'Titanium',
@@ -263,7 +370,8 @@ export const products = [
     sku: 'LENS-HOYA-156',
     categoryId: '3',
     price: 450000,
-    description: 'Tròng cận 1.56 Hoya - Chống trầy, chống tia UV. Công nghệ Nissany lọc ánh sáng xanh tốt cho mắt.',
+    description:
+      'Tròng cận 1.56 Hoya - Chống trầy, chống tia UV. Công nghệ Nissany lọc ánh sáng xanh tốt cho mắt.',
     images: ['/images/products/lens1.jpg'],
     attributes: {
       index: '1.56',
@@ -275,9 +383,27 @@ export const products = [
       brand: 'Hoya',
     },
     variants: [
-      { id: 'lv1', technology: 'Standard', sku: 'LENS-HOYA-156-STD', price: 450000, stock: 40 },
-      { id: 'lv2', technology: 'Blue Light Filter', sku: 'LENS-HOYA-156-BLF', price: 520000, stock: 35 },
-      { id: 'lv3', technology: 'UV Protection', sku: 'LENS-HOYA-156-UV', price: 480000, stock: 25 },
+      {
+        id: 'lv1',
+        technology: 'Standard',
+        sku: 'LENS-HOYA-156-STD',
+        price: 450000,
+        stock: 40,
+      },
+      {
+        id: 'lv2',
+        technology: 'Blue Light Filter',
+        sku: 'LENS-HOYA-156-BLF',
+        price: 520000,
+        stock: 35,
+      },
+      {
+        id: 'lv3',
+        technology: 'UV Protection',
+        sku: 'LENS-HOYA-156-UV',
+        price: 480000,
+        stock: 25,
+      },
     ],
     stock: 100,
     isActive: true,
@@ -293,7 +419,8 @@ export const products = [
     sku: 'LENS-ESSILOR-167',
     categoryId: '3',
     price: 890000,
-    description: 'Tròng cận 1.67 Essilor - Mỏng nhẹ, thẩm mỹ cao. Công nghệ Crizal chống lóa.',
+    description:
+      'Tròng cận 1.67 Essilor - Mỏng nhẹ, thẩm mỹ cao. Công nghệ Crizal chống lóa.',
     images: ['/images/products/lens2.jpg'],
     attributes: {
       index: '1.67',
@@ -305,9 +432,27 @@ export const products = [
       brand: 'Essilor',
     },
     variants: [
-      { id: 'lv4', technology: 'Standard', sku: 'LENS-ESSILOR-167-STD', price: 890000, stock: 30 },
-      { id: 'lv5', technology: 'Crizal Alize', sku: 'LENS-ESSILOR-167-ALZ', price: 950000, stock: 25 },
-      { id: 'lv6', technology: 'Crizal Sapphire', sku: 'LENS-ESSILOR-167-SAP', price: 1100000, stock: 25 },
+      {
+        id: 'lv4',
+        technology: 'Standard',
+        sku: 'LENS-ESSILOR-167-STD',
+        price: 890000,
+        stock: 30,
+      },
+      {
+        id: 'lv5',
+        technology: 'Crizal Alize',
+        sku: 'LENS-ESSILOR-167-ALZ',
+        price: 950000,
+        stock: 25,
+      },
+      {
+        id: 'lv6',
+        technology: 'Crizal Sapphire',
+        sku: 'LENS-ESSILOR-167-SAP',
+        price: 1100000,
+        stock: 25,
+      },
     ],
     stock: 80,
     isActive: true,
@@ -323,7 +468,8 @@ export const products = [
     sku: 'LENS-TRANS-156',
     categoryId: '4',
     price: 1500000,
-    description: 'Tròng râm đổi màu Transitions - Tự động đổi màu theo ánh sáng. Bảo vệ mắt trong mọi điều kiện.',
+    description:
+      'Tròng râm đổi màu Transitions - Tự động đổi màu theo ánh sáng. Bảo vệ mắt trong mọi điều kiện.',
     images: ['/images/products/lens3.jpg'],
     attributes: {
       index: '1.56',
@@ -335,9 +481,27 @@ export const products = [
       brand: 'Transitions',
     },
     variants: [
-      { id: 'lv7', technology: 'Signature', sku: 'LENS-TRANS-156-SIG', price: 1500000, stock: 20 },
-      { id: 'lv8', technology: 'XTRActive', sku: 'LENS-TRANS-156-XTR', price: 1800000, stock: 15 },
-      { id: 'lv9', technology: 'DriveWear', sku: 'LENS-TRANS-156-DRW', price: 2000000, stock: 15 },
+      {
+        id: 'lv7',
+        technology: 'Signature',
+        sku: 'LENS-TRANS-156-SIG',
+        price: 1500000,
+        stock: 20,
+      },
+      {
+        id: 'lv8',
+        technology: 'XTRActive',
+        sku: 'LENS-TRANS-156-XTR',
+        price: 1800000,
+        stock: 15,
+      },
+      {
+        id: 'lv9',
+        technology: 'DriveWear',
+        sku: 'LENS-TRANS-156-DRW',
+        price: 2000000,
+        stock: 15,
+      },
     ],
     stock: 50,
     isActive: true,
@@ -353,7 +517,8 @@ export const products = [
     sku: 'LENS-MIZUKAMI-174',
     categoryId: '3',
     price: 2100000,
-    description: 'Tròng cận 1.74 Mizukami - Siêu mỏng, chất lượng cao cấp. Công nghệ Nhật Bản.',
+    description:
+      'Tròng cận 1.74 Mizukami - Siêu mỏng, chất lượng cao cấp. Công nghệ Nhật Bản.',
     images: ['/images/products/lens4.jpg'],
     attributes: {
       index: '1.74',
@@ -376,7 +541,8 @@ export const products = [
     sku: 'LENS-VARILUX-160',
     categoryId: '3',
     price: 2800000,
-    description: 'Tròng đa tròng Varilux - Giải pháp hoàn hảo cho mắt lão thị. Nhìn rõ mọi khoảng cách.',
+    description:
+      'Tròng đa tròng Varilux - Giải pháp hoàn hảo cho mắt lão thị. Nhìn rõ mọi khoảng cách.',
     images: ['/images/products/lens5.jpg'],
     attributes: {
       index: '1.60',
@@ -399,7 +565,8 @@ export const products = [
     sku: 'LENS-BLUE-167',
     categoryId: '3',
     price: 950000,
-    description: 'Tròng chống ánh sáng xanh - Bảo vệ mắt khi làm việc với máy tính, điện thoại.',
+    description:
+      'Tròng chống ánh sáng xanh - Bảo vệ mắt khi làm việc với máy tính, điện thoại.',
     images: ['/images/products/lens6.jpg'],
     attributes: {
       index: '1.67',
@@ -423,7 +590,8 @@ export const products = [
     sku: 'ACC-BOX-001',
     categoryId: '6',
     price: 250000,
-    description: 'Hộp đựng kính làm từ da cao cấp, bảo vệ kính an toàn, thiết kế sang trọng.',
+    description:
+      'Hộp đựng kính làm từ da cao cấp, bảo vệ kính an toàn, thiết kế sang trọng.',
     images: ['/images/products/accessory1.jpg'],
     attributes: {
       material: 'Da cao cấp',
@@ -445,7 +613,8 @@ export const products = [
     categoryId: '6',
     price: 35000,
     originalPrice: 50000,
-    description: 'Khăn lau kính mềm mại, không để lại cặn, an toàn cho mọi loại tròng kính.',
+    description:
+      'Khăn lau kính mềm mại, không để lại cặn, an toàn cho mọi loại tròng kính.',
     images: ['/images/products/accessory2.jpg'],
     attributes: {
       material: 'Microfiber',
@@ -466,7 +635,8 @@ export const products = [
     sku: 'ACC-SPRAY-001',
     categoryId: '6',
     price: 65000,
-    description: 'Dung dịch vệ sinh kính mắt chuyên dụng, loại bết bụi và vết bẩn an toàn.',
+    description:
+      'Dung dịch vệ sinh kính mắt chuyên dụng, loại bết bụi và vết bẩn an toàn.',
     images: ['/images/products/accessory3.jpg'],
     attributes: {
       volume: '100ml',
@@ -487,7 +657,8 @@ export const products = [
     sku: 'ACC-STRAP-001',
     categoryId: '6',
     price: 120000,
-    description: 'Dây đeo kính sporty, chống trượt khi vận động, phù hợp cho người chơi thể thao.',
+    description:
+      'Dây đeo kính sporty, chống trượt khi vận động, phù hợp cho người chơi thể thao.',
     images: ['/images/products/accessory4.jpg'],
     attributes: {
       material: 'Silicone',
@@ -508,7 +679,8 @@ export const products = [
     sku: 'ACC-TOOL-001',
     categoryId: '6',
     price: 85000,
-    description: 'Bộ dụng cụ sửa kính đầy đủ: tua-vít, key lục giác, miếng đệm.',
+    description:
+      'Bộ dụng cụ sửa kính đầy đủ: tua-vít, key lục giác, miếng đệm.',
     images: ['/images/products/accessory5.jpg'],
     attributes: {
       pieces: '6 món',
@@ -529,7 +701,8 @@ export const products = [
     sku: 'ACC-NOSE-001',
     categoryId: '6',
     price: 25000,
-    description: 'Miếng đệm mũi thay thế cho gọng kính, mềm mại không để lại vết.',
+    description:
+      'Miếng đệm mũi thay thế cho gọng kính, mềm mại không để lại vết.',
     images: ['/images/products/accessory6.jpg'],
     attributes: {
       material: 'Silicone',
@@ -553,8 +726,20 @@ export const orders = [
     type: 'regular',
     status: 'pending',
     items: [
-      { productId: 'f1', name: 'Gọng kính MJ500', price: 890000, quantity: 1, image: '/images/products/frame1.jpg' },
-      { productId: 'l1', name: 'Tròng cận 1.56 Hoya', price: 450000, quantity: 1, image: '/images/products/lens1.jpg' },
+      {
+        productId: 'f1',
+        name: 'Gọng kính MJ500',
+        price: 890000,
+        quantity: 1,
+        image: '/images/products/frame1.jpg',
+      },
+      {
+        productId: 'l1',
+        name: 'Tròng cận 1.56 Hoya',
+        price: 450000,
+        quantity: 1,
+        image: '/images/products/lens1.jpg',
+      },
     ],
     totalAmount: 1340000,
     shippingFee: 30000,
@@ -577,15 +762,27 @@ export const orders = [
     type: 'prescription',
     status: 'processing',
     items: [
-      { productId: 'f2', name: 'Gọng kính JK2024', price: 1290000, quantity: 1, image: '/images/products/frame2.jpg' },
-      { productId: 'l2', name: 'Tròng cận 1.67 Essilor', price: 890000, quantity: 1, image: '/images/products/lens2.jpg' },
+      {
+        productId: 'f2',
+        name: 'Gọng kính JK2024',
+        price: 1290000,
+        quantity: 1,
+        image: '/images/products/frame2.jpg',
+      },
+      {
+        productId: 'l2',
+        name: 'Tròng cận 1.67 Essilor',
+        price: 890000,
+        quantity: 1,
+        image: '/images/products/lens2.jpg',
+      },
     ],
     totalAmount: 2230000,
     shippingFee: 30000,
     discount: 0,
     prescription: {
-      rightEye: { sph: -2.00, cyl: -0.75, axis: 180 },
-      leftEye: { sph: -1.75, cyl: -0.50, axis: 175 },
+      rightEye: { sph: -2.0, cyl: -0.75, axis: 180 },
+      leftEye: { sph: -1.75, cyl: -0.5, axis: 175 },
       pd: 62,
       add: null,
     },
@@ -607,7 +804,13 @@ export const orders = [
     type: 'pre-order',
     status: 'shipped',
     items: [
-      { productId: 'f3', name: 'Gọng kính RB2131', price: 2100000, quantity: 1, image: '/images/products/frame3.jpg' },
+      {
+        productId: 'f3',
+        name: 'Gọng kính RB2131',
+        price: 2100000,
+        quantity: 1,
+        image: '/images/products/frame3.jpg',
+      },
     ],
     totalAmount: 2130000,
     shippingFee: 30000,
@@ -632,7 +835,13 @@ export const orders = [
     type: 'regular',
     status: 'delivered',
     items: [
-      { productId: 'f4', name: 'Gọng kính trẻ em KD001', price: 550000, quantity: 2, image: '/images/products/frame4.jpg' },
+      {
+        productId: 'f4',
+        name: 'Gọng kính trẻ em KD001',
+        price: 550000,
+        quantity: 2,
+        image: '/images/products/frame4.jpg',
+      },
     ],
     totalAmount: 1150000,
     shippingFee: 30000,
@@ -657,17 +866,29 @@ export const orders = [
     type: 'prescription',
     status: 'cancelled',
     items: [
-      { productId: 'f5', name: 'Gọng kính Piero Classic', price: 1890000, quantity: 1, image: '/images/products/frame5.jpg' },
-      { productId: 'l5', name: 'Tròng đa tròng 1.60 Varilux', price: 2800000, quantity: 1, image: '/images/products/lens5.jpg' },
+      {
+        productId: 'f5',
+        name: 'Gọng kính Piero Classic',
+        price: 1890000,
+        quantity: 1,
+        image: '/images/products/frame5.jpg',
+      },
+      {
+        productId: 'l5',
+        name: 'Tròng đa tròng 1.60 Varilux',
+        price: 2800000,
+        quantity: 1,
+        image: '/images/products/lens5.jpg',
+      },
     ],
     totalAmount: 4740000,
     shippingFee: 30000,
     discount: 0,
     prescription: {
-      rightEye: { sph: -4.50, cyl: -1.25, axis: 90 },
-      leftEye: { sph: -4.00, cyl: -1.00, axis: 85 },
+      rightEye: { sph: -4.5, cyl: -1.25, axis: 90 },
+      leftEye: { sph: -4.0, cyl: -1.0, axis: 85 },
       pd: 64,
-      add: 2.00,
+      add: 2.0,
     },
     shippingAddress: {
       name: 'Khách Hàng Demo',
@@ -689,7 +910,13 @@ export const orders = [
     type: 'regular',
     status: 'confirmed',
     items: [
-      { productId: 'f3', name: 'Gọng kính RB2131', price: 2100000, quantity: 1, image: '/images/products/frame3.jpg' },
+      {
+        productId: 'f3',
+        name: 'Gọng kính RB2131',
+        price: 2100000,
+        quantity: 1,
+        image: '/images/products/frame3.jpg',
+      },
     ],
     totalAmount: 2100000,
     shippingFee: 30000,
@@ -712,14 +939,26 @@ export const orders = [
     type: 'prescription',
     status: 'pending',
     items: [
-      { productId: 'f1', name: 'Gọng kính MJ500', price: 890000, quantity: 1, image: '/images/products/frame1.jpg' },
-      { productId: 'l4', name: 'Tròng cận 1.74 Mizukami', price: 2100000, quantity: 1, image: '/images/products/lens4.jpg' },
+      {
+        productId: 'f1',
+        name: 'Gọng kính MJ500',
+        price: 890000,
+        quantity: 1,
+        image: '/images/products/frame1.jpg',
+      },
+      {
+        productId: 'l4',
+        name: 'Tròng cận 1.74 Mizukami',
+        price: 2100000,
+        quantity: 1,
+        image: '/images/products/lens4.jpg',
+      },
     ],
     totalAmount: 3020000,
     shippingFee: 30000,
     discount: 0,
     prescription: {
-      rightEye: { sph: -3.00, cyl: -0.50, axis: 180 },
+      rightEye: { sph: -3.0, cyl: -0.5, axis: 180 },
       leftEye: { sph: -2.75, cyl: -0.75, axis: 175 },
       pd: 63,
       add: null,
@@ -746,7 +985,8 @@ export const reviews = [
     userId: '5',
     userName: 'Khách Hàng Demo',
     rating: 5,
-    comment: 'Gọng rất nhẹ, đeo cả ngày không mỏi. Màu sắc đẹp, giống như hình.',
+    comment:
+      'Gọng rất nhẹ, đeo cả ngày không mỏi. Màu sắc đẹp, giống như hình.',
     images: [],
     createdAt: '2024-01-10T14:30:00Z',
     helpful: 24,
@@ -840,8 +1080,8 @@ export const prescriptions = [
     id: 'p1',
     userId: '5',
     name: 'Đơn kính tháng 01/2024',
-    rightEye: { sph: -2.00, cyl: -0.75, axis: 180 },
-    leftEye: { sph: -1.75, cyl: -0.50, axis: 175 },
+    rightEye: { sph: -2.0, cyl: -0.75, axis: 180 },
+    leftEye: { sph: -1.75, cyl: -0.5, axis: 175 },
     pd: 62,
     add: null,
     note: 'Đo tại Bệnh viện Mắt TP.HCM',
@@ -852,7 +1092,7 @@ export const prescriptions = [
     id: 'p2',
     userId: '5',
     name: 'Đơn kính cũ',
-    rightEye: { sph: -1.50, cyl: -0.50, axis: 170 },
+    rightEye: { sph: -1.5, cyl: -0.5, axis: 170 },
     leftEye: { sph: -1.25, cyl: -0.25, axis: 165 },
     pd: 60,
     add: null,
@@ -949,25 +1189,157 @@ export const notificationSettings = {
 
 // ========== STAFF (Employees) ==========
 export const staff = [
-  { id: 's1', name: 'Trần Thị Bán Hàng', email: 'sales@cclearly.com', role: 'sales', phone: '0912345680', storeId: 'store1', status: 'active', hireDate: '2024-01-03', avatar: null },
-  { id: 's2', name: 'Lê Văn Vận Hành', email: 'ops@cclearly.com', role: 'operations', phone: '0912345681', storeId: 'store1', status: 'active', hireDate: '2024-01-04', avatar: null },
-  { id: 's3', name: 'Nguyễn Thị Mai', email: 'mai.sales@cclearly.com', role: 'sales', phone: '0912345701', storeId: 'store2', status: 'active', hireDate: '2024-02-15', avatar: null },
-  { id: 's4', name: 'Trần Văn Hùng', email: 'hung.ops@cclearly.com', role: 'operations', phone: '0912345702', storeId: 'store2', status: 'active', hireDate: '2024-02-20', avatar: null },
-  { id: 's5', name: 'Phạm Thị Lan', email: 'lan.sales@cclearly.com', role: 'sales', phone: '0912345703', storeId: 'store1', status: 'on_leave', hireDate: '2024-03-01', avatar: null },
+  {
+    id: 's1',
+    name: 'Trần Thị Bán Hàng',
+    email: 'sales@cclearly.com',
+    role: 'sales',
+    phone: '0912345680',
+    storeId: 'store1',
+    status: 'active',
+    hireDate: '2024-01-03',
+    avatar: null,
+  },
+  {
+    id: 's2',
+    name: 'Lê Văn Vận Hành',
+    email: 'ops@cclearly.com',
+    role: 'operations',
+    phone: '0912345681',
+    storeId: 'store1',
+    status: 'active',
+    hireDate: '2024-01-04',
+    avatar: null,
+  },
+  {
+    id: 's3',
+    name: 'Nguyễn Thị Mai',
+    email: 'mai.sales@cclearly.com',
+    role: 'sales',
+    phone: '0912345701',
+    storeId: 'store2',
+    status: 'active',
+    hireDate: '2024-02-15',
+    avatar: null,
+  },
+  {
+    id: 's4',
+    name: 'Trần Văn Hùng',
+    email: 'hung.ops@cclearly.com',
+    role: 'operations',
+    phone: '0912345702',
+    storeId: 'store2',
+    status: 'active',
+    hireDate: '2024-02-20',
+    avatar: null,
+  },
+  {
+    id: 's5',
+    name: 'Phạm Thị Lan',
+    email: 'lan.sales@cclearly.com',
+    role: 'sales',
+    phone: '0912345703',
+    storeId: 'store1',
+    status: 'on_leave',
+    hireDate: '2024-03-01',
+    avatar: null,
+  },
 ];
 
 // ========== STORES ==========
 export const stores = [
-  { id: 'store1', name: 'CCLEARLY Quận 1', address: '123 Đường Nguyễn Trãi, Quận 1, TP.HCM', phone: '02812345678', managerId: '2', isActive: true, openingHours: '8:00 - 21:00' },
-  { id: 'store2', name: 'CCLEARLY Quận 3', address: '456 Đường Lê Lợi, Quận 3, TP.HCM', phone: '02812345679', managerId: '2', isActive: true, openingHours: '8:00 - 21:00' },
-  { id: 'store3', name: 'CCLEARLY Quận 10', address: '789 Đường Pasteur, Quận 10, TP.HCM', phone: '02812345680', managerId: '2', isActive: false, openingHours: '9:00 - 20:00' },
+  {
+    id: 'store1',
+    name: 'CCLEARLY Quận 1',
+    address: '123 Đường Nguyễn Trãi, Quận 1, TP.HCM',
+    phone: '02812345678',
+    managerId: '2',
+    isActive: true,
+    openingHours: '8:00 - 21:00',
+  },
+  {
+    id: 'store2',
+    name: 'CCLEARLY Quận 3',
+    address: '456 Đường Lê Lợi, Quận 3, TP.HCM',
+    phone: '02812345679',
+    managerId: '2',
+    isActive: true,
+    openingHours: '8:00 - 21:00',
+  },
+  {
+    id: 'store3',
+    name: 'CCLEARLY Quận 10',
+    address: '789 Đường Pasteur, Quận 10, TP.HCM',
+    phone: '02812345680',
+    managerId: '2',
+    isActive: false,
+    openingHours: '9:00 - 20:00',
+  },
 ];
 
 // ========== RETURNS/EXCHANGES ==========
 export const returns = [
-  { id: 'RET001', orderId: 'ORD004', customerId: '5', customerName: 'Khách Hàng Demo', customerPhone: '0912345682', reason: 'Sản phẩm không đúng size', status: 'pending', type: 'return', items: [{ productId: 'f4', name: 'Gọng kính trẻ em KD001', quantity: 2, price: 550000 }], requestDate: '2024-01-09T10:00:00Z', processedDate: null, refundAmount: 1100000, note: 'Khách yêu cầu đổi sang size lớn hơn' },
-  { id: 'RET002', orderId: 'ORD002', customerId: '5', customerName: 'Khách Hàng Demo', customerPhone: '0912345682', reason: 'Tròng kính bị trầy', status: 'approved', type: 'exchange', items: [{ productId: 'l2', name: 'Tròng cận 1.67 Essilor', quantity: 1, price: 890000 }], requestDate: '2024-01-16T14:00:00Z', processedDate: '2024-01-17T09:00:00Z', refundAmount: 0, note: 'Đã xác nhận đổi tròng mới' },
-  { id: 'RET003', orderId: 'ORD001', customerId: '5', customerName: 'Nguyễn Văn Khách', customerPhone: '0912345699', reason: 'Sản phẩm lỗi từ nhà sản xuất', status: 'completed', type: 'return', items: [{ productId: 'f1', name: 'Gọng kính MJ500', quantity: 1, price: 890000 }], requestDate: '2024-01-08T11:00:00Z', processedDate: '2024-01-10T15:00:00Z', refundAmount: 890000, note: 'Đã hoàn tiền' },
+  {
+    id: 'RET001',
+    orderId: 'ORD004',
+    customerId: '5',
+    customerName: 'Khách Hàng Demo',
+    customerPhone: '0912345682',
+    reason: 'Sản phẩm không đúng size',
+    status: 'pending',
+    type: 'return',
+    items: [
+      {
+        productId: 'f4',
+        name: 'Gọng kính trẻ em KD001',
+        quantity: 2,
+        price: 550000,
+      },
+    ],
+    requestDate: '2024-01-09T10:00:00Z',
+    processedDate: null,
+    refundAmount: 1100000,
+    note: 'Khách yêu cầu đổi sang size lớn hơn',
+  },
+  {
+    id: 'RET002',
+    orderId: 'ORD002',
+    customerId: '5',
+    customerName: 'Khách Hàng Demo',
+    customerPhone: '0912345682',
+    reason: 'Tròng kính bị trầy',
+    status: 'approved',
+    type: 'exchange',
+    items: [
+      {
+        productId: 'l2',
+        name: 'Tròng cận 1.67 Essilor',
+        quantity: 1,
+        price: 890000,
+      },
+    ],
+    requestDate: '2024-01-16T14:00:00Z',
+    processedDate: '2024-01-17T09:00:00Z',
+    refundAmount: 0,
+    note: 'Đã xác nhận đổi tròng mới',
+  },
+  {
+    id: 'RET003',
+    orderId: 'ORD001',
+    customerId: '5',
+    customerName: 'Nguyễn Văn Khách',
+    customerPhone: '0912345699',
+    reason: 'Sản phẩm lỗi từ nhà sản xuất',
+    status: 'completed',
+    type: 'return',
+    items: [
+      { productId: 'f1', name: 'Gọng kính MJ500', quantity: 1, price: 890000 },
+    ],
+    requestDate: '2024-01-08T11:00:00Z',
+    processedDate: '2024-01-10T15:00:00Z',
+    refundAmount: 890000,
+    note: 'Đã hoàn tiền',
+  },
 ];
 
 // ========== REVENUE STATS BY DAY ==========
@@ -983,10 +1355,46 @@ export const revenueByDay = [
 
 // ========== CUSTOMERS (for Admin/Manager) ==========
 export const customers = [
-  { id: '5', name: 'Khách Hàng Demo', email: 'customer@gmail.com', phone: '0912345682', totalOrders: 5, totalSpent: 9360000, joinDate: '2024-01-05', status: 'active' },
-  { id: '6', name: 'Nguyễn Văn A', email: 'vana@gmail.com', phone: '0912345601', totalOrders: 3, totalSpent: 5200000, joinDate: '2024-01-10', status: 'active' },
-  { id: '7', name: 'Trần Thị B', email: 'thib@gmail.com', phone: '0912345602', totalOrders: 1, totalSpent: 2100000, joinDate: '2024-01-12', status: 'active' },
-  { id: '8', name: 'Lê Văn C', email: 'vanc@gmail.com', phone: '0912345603', totalOrders: 2, totalSpent: 3450000, joinDate: '2024-01-15', status: 'inactive' },
+  {
+    id: '5',
+    name: 'Khách Hàng Demo',
+    email: 'customer@gmail.com',
+    phone: '0912345682',
+    totalOrders: 5,
+    totalSpent: 9360000,
+    joinDate: '2024-01-05',
+    status: 'active',
+  },
+  {
+    id: '6',
+    name: 'Nguyễn Văn A',
+    email: 'vana@gmail.com',
+    phone: '0912345601',
+    totalOrders: 3,
+    totalSpent: 5200000,
+    joinDate: '2024-01-10',
+    status: 'active',
+  },
+  {
+    id: '7',
+    name: 'Trần Thị B',
+    email: 'thib@gmail.com',
+    phone: '0912345602',
+    totalOrders: 1,
+    totalSpent: 2100000,
+    joinDate: '2024-01-12',
+    status: 'active',
+  },
+  {
+    id: '8',
+    name: 'Lê Văn C',
+    email: 'vanc@gmail.com',
+    phone: '0912345603',
+    totalOrders: 2,
+    totalSpent: 3450000,
+    joinDate: '2024-01-15',
+    status: 'inactive',
+  },
 ];
 
 // Dashboard stats (for Admin)
@@ -996,7 +1404,7 @@ export const dashboardStats = {
   totalRevenue: 125000000,
   totalCustomers: 2340,
   totalProducts: products.length,
-  lowStockProducts: products.filter(p => p.stock < 10).length,
+  lowStockProducts: products.filter((p) => p.stock < 10).length,
   ordersByStatus: {
     pending: 12,
     confirmed: 8,
@@ -1030,26 +1438,100 @@ export const POSITIONS = [
 ];
 
 // Frame attributes options
-export const FRAME_MATERIALS = ['Titanium', 'Acetate', 'TR90', 'Steel', 'Beta Titanium', 'Optyl']
-export const FRAME_SHAPES = ['Oval', 'Round', 'Wayfarer', 'Rectangle', 'Square', 'Cat Eye', 'Aviator', 'Hexagonal']
-export const FRAME_COLORS = ['Đen', 'Xám', 'Vàng Gold', 'Bạc', 'Xanh Navy', 'Đỏ Burgundy', 'Nâu', 'Trong suốt']
-export const FRAME_ORIGINS = ['Nhật Bản', 'Ý', 'Mỹ', 'Hàn Quốc', 'Trung Quốc', 'Đức', 'Pháp']
+export const FRAME_MATERIALS = [
+  'Titanium',
+  'Acetate',
+  'TR90',
+  'Steel',
+  'Beta Titanium',
+  'Optyl',
+];
+export const FRAME_SHAPES = [
+  'Oval',
+  'Round',
+  'Wayfarer',
+  'Rectangle',
+  'Square',
+  'Cat Eye',
+  'Aviator',
+  'Hexagonal',
+];
+export const FRAME_COLORS = [
+  'Đen',
+  'Xám',
+  'Vàng Gold',
+  'Bạc',
+  'Xanh Navy',
+  'Đỏ Burgundy',
+  'Nâu',
+  'Trong suốt',
+];
+export const FRAME_ORIGINS = [
+  'Nhật Bản',
+  'Ý',
+  'Mỹ',
+  'Hàn Quốc',
+  'Trung Quốc',
+  'Đức',
+  'Pháp',
+];
 
 // Lens attributes options
-export const LENS_MATERIALS = ['Polycarbonate', 'CR-39', 'High Index', 'Trivex', 'MR-8']
-export const LENS_INDEXES = ['1.50', '1.56', '1.59', '1.60', '1.67', '1.74', '1.80']
-export const LENS_TECHNOLOGIES = ['Standard', 'Blue Light Filter', 'UV Protection', 'Anti-fog', 'Shock Resistant']
-export const LENS_COATINGS = ['Anti-scratch', 'Anti-reflection', 'Hydrophobic', 'Oleophobic', 'UV Protection']
-export const LENS_DIAMETERS = ['65mm', '70mm', '72mm', '75mm', '80mm']
-export const LENS_BRANDS = ['Hoya', 'Essilor', 'Transitions', 'Mizukami', 'Nikon', 'Zeiss', 'Rodenstock']
-export const LENS_TYPES = ['Đơn tròng', 'Đa tròng', 'Đổi màu', 'Cận lão', 'Trẻ em']
+export const LENS_MATERIALS = [
+  'Polycarbonate',
+  'CR-39',
+  'High Index',
+  'Trivex',
+  'MR-8',
+];
+export const LENS_INDEXES = [
+  '1.50',
+  '1.56',
+  '1.59',
+  '1.60',
+  '1.67',
+  '1.74',
+  '1.80',
+];
+export const LENS_TECHNOLOGIES = [
+  'Standard',
+  'Blue Light Filter',
+  'UV Protection',
+  'Anti-fog',
+  'Shock Resistant',
+];
+export const LENS_COATINGS = [
+  'Anti-scratch',
+  'Anti-reflection',
+  'Hydrophobic',
+  'Oleophobic',
+  'UV Protection',
+];
+export const LENS_DIAMETERS = ['65mm', '70mm', '72mm', '75mm', '80mm'];
+export const LENS_BRANDS = [
+  'Hoya',
+  'Essilor',
+  'Transitions',
+  'Mizukami',
+  'Nikon',
+  'Zeiss',
+  'Rodenstock',
+];
+export const LENS_TYPES = [
+  'Đơn tròng',
+  'Đa tròng',
+  'Đổi màu',
+  'Cận lão',
+  'Trẻ em',
+];
 
-export const PAGE_SIZES = [5, 10, 20, 30, 50]
+export const PAGE_SIZES = [5, 10, 20, 30, 50];
 export const mockBanners = [
   {
     id: 'b1',
     title: 'Đại tiệc gọng kính - Giảm tới 50%',
-    image: 'https://images.unsplash.com/photo-1574258495973-f010dfbb5371?q=80&w=2070&auto=format&fit=crop',
+    image:
+      'https://images.unsplash.com/photo-1574258495973-f010dfbb5371?q=80&w=2070&auto=format&fit=crop',
     position: 'home_main',
     order: 1,
     isActive: true,
@@ -1061,7 +1543,8 @@ export const mockBanners = [
   {
     id: 'b2',
     title: 'Miễn phí đo mắt & tư vấn',
-    image: 'https://images.unsplash.com/photo-1516062423079-7ca13cdc7f5a?q=80&w=2083&auto=format&fit=crop',
+    image:
+      'https://images.unsplash.com/photo-1516062423079-7ca13cdc7f5a?q=80&w=2083&auto=format&fit=crop',
     position: 'header',
     order: 1,
     isActive: true,
@@ -1073,7 +1556,8 @@ export const mockBanners = [
   {
     id: 'b3',
     title: 'Bộ sưu tập Kính Râm 2026',
-    image: 'https://images.unsplash.com/photo-1511499767390-a73359580bf1?q=80&w=1780&auto=format&fit=crop',
+    image:
+      'https://images.unsplash.com/photo-1511499767390-a73359580bf1?q=80&w=1780&auto=format&fit=crop',
     position: 'home_promo',
     order: 1,
     isActive: true,
@@ -1085,7 +1569,8 @@ export const mockBanners = [
   {
     id: 'b4',
     title: 'Flash Sale Cuối Tuần',
-    image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=2070&auto=format&fit=crop',
+    image:
+      'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=2070&auto=format&fit=crop',
     position: 'popup',
     order: 1,
     isActive: false,
@@ -1097,7 +1582,8 @@ export const mockBanners = [
   {
     id: 'b5',
     title: 'Kính cận thị cho trẻ em',
-    image: 'https://images.unsplash.com/photo-1543332164-6e82f355badc?q=80&w=2070&auto=format&fit=crop',
+    image:
+      'https://images.unsplash.com/photo-1543332164-6e82f355badc?q=80&w=2070&auto=format&fit=crop',
     position: 'home_main',
     order: 2,
     isActive: true,
@@ -1105,7 +1591,7 @@ export const mockBanners = [
     endDate: '2026-04-20',
     clicks: 670,
     views: 9800,
-  }
+  },
 ];
 export const LOG_TYPES = [
   { value: 'all', label: 'Tất cả' },
@@ -1213,24 +1699,34 @@ export const mockLogs = [
 ];
 
 // ========== HELPER FUNCTIONS ==========
-export const findUserByEmail = (email) => users.find(u => u.email === email);
-export const findUserById = (id) => users.find(u => u.id === id);
-export const findProductById = (id) => products.find(p => p.id === id);
-export const findOrderById = (id) => orders.find(o => o.id === id);
-export const getProductsByType = (type) => products.filter(p => p.type === type);
-export const getProductsByCategory = (categoryId) => products.filter(p => p.categoryId === categoryId);
-export const getReviewsByProduct = (productId) => reviews.filter(r => r.productId === productId);
-export const getAddressesByUser = (userId) => addresses.filter(a => a.userId === userId);
-export const getPrescriptionsByUser = (userId) => prescriptions.filter(p => p.userId === userId);
-export const getWishlistByUser = (userId) => wishlist.filter(w => w.userId === userId).map(w => findProductById(w.productId)).filter(Boolean);
-export const getActiveCoupons = () =>
-  coupons.filter(c => c.isActive);
+export const findUserByEmail = (email) => users.find((u) => u.email === email);
+export const findUserById = (id) => users.find((u) => u.id === id);
+export const findProductById = (id) => products.find((p) => p.id === id);
+export const findOrderById = (id) => orders.find((o) => o.id === id);
+export const getProductsByType = (type) =>
+  products.filter((p) => p.type === type);
+export const getProductsByCategory = (categoryId) =>
+  products.filter((p) => p.categoryId === categoryId);
+export const getReviewsByProduct = (productId) =>
+  reviews.filter((r) => r.productId === productId);
+export const getAddressesByUser = (userId) =>
+  addresses.filter((a) => a.userId === userId);
+export const getPrescriptionsByUser = (userId) =>
+  prescriptions.filter((p) => p.userId === userId);
+export const getWishlistByUser = (userId) =>
+  wishlist
+    .filter((w) => w.userId === userId)
+    .map((w) => findProductById(w.productId))
+    .filter(Boolean);
+export const getActiveCoupons = () => coupons.filter((c) => c.isActive);
 export const generateTokenForUser = (user) => generateToken(user);
 
 // New helpers
-export const getStaffByRole = (role) => staff.filter(s => s.role === role);
-export const getStaffByStore = (storeId) => staff.filter(s => s.storeId === storeId);
-export const getReturnsByStatus = (status) => returns.filter(r => r.status === status);
-export const getLowStockProducts = () => products.filter(p => p.stock < 10);
-export const getActiveStaff = () => staff.filter(s => s.status === 'active');
-export const getStoreById = (id) => stores.find(s => s.id === id);
+export const getStaffByRole = (role) => staff.filter((s) => s.role === role);
+export const getStaffByStore = (storeId) =>
+  staff.filter((s) => s.storeId === storeId);
+export const getReturnsByStatus = (status) =>
+  returns.filter((r) => r.status === status);
+export const getLowStockProducts = () => products.filter((p) => p.stock < 10);
+export const getActiveStaff = () => staff.filter((s) => s.status === 'active');
+export const getStoreById = (id) => stores.find((s) => s.id === id);

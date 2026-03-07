@@ -49,4 +49,16 @@ export const orderRequest = {
     const res = await http.post(ENDPOINT.REQUEST_RETURN(orderId), data);
     return res.data;
   },
+
+  // Get all orders for admin/staff (with pagination)
+  getAdminOrders: async (params) => {
+    const res = await http.get(ENDPOINT.ADMIN_ORDERS, { query: params });
+    return res.data;
+  },
+
+  // Save prescription for an order item
+  savePrescription: async (orderId, data) => {
+    const res = await http.put(ENDPOINT.ORDER_PRESCRIPTION(orderId), data);
+    return res.data;
+  },
 };

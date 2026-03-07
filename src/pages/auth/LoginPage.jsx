@@ -1,73 +1,90 @@
-import { useState, useEffect, useRef } from 'react'
-import { Link, useNavigate, useLocation } from 'react-router-dom'
-import { GoogleLogin } from '@react-oauth/google'
-import { useLogin, useLoginWithGoogle } from '@/hooks/useAuth'
-import { toast } from 'react-toastify'
+import { GoogleLogin } from '@react-oauth/google';
+import { useState, useEffect, useRef } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import { useLogin, useLoginWithGoogle } from '@/hooks/useAuth';
 
 const LoginPage = () => {
-  const navigate = useNavigate()
-  const location = useLocation()
-  const login = useLogin()
-  const loginWithGoogle = useLoginWithGoogle()
+  const navigate = useNavigate();
+  const location = useLocation();
+  const login = useLogin();
+  const loginWithGoogle = useLoginWithGoogle();
 
   const [formData, setFormData] = useState({
     email: '',
     password: '',
-  })
+  });
 
-  const from = location.state?.from?.pathname || '/'
+  const from = location.state?.from?.pathname || '/';
 
   // Show success message from verify-email or reset-password redirect
-  const toastShownRef = useRef(false)
+  const toastShownRef = useRef(false);
   useEffect(() => {
     if (location.state?.message && !toastShownRef.current) {
-      toastShownRef.current = true
-      toast.success(location.state.message)
-      window.history.replaceState({}, '')
+      toastShownRef.current = true;
+      toast.success(location.state.message);
+      window.history.replaceState({}, '');
     }
-  }, [location.state?.message])
+  }, [location.state?.message]);
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value })
-  }
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
+    e.preventDefault();
     try {
-      const data = await login.mutateAsync(formData)
+      const data = await login.mutateAsync(formData);
       // If email is not verified, redirect to verify-email page
       if (data?.user?.isEmailVerified === false) {
-        navigate('/verify-email', { replace: true, state: { email: formData.email } })
-        return
+        navigate('/verify-email', {
+          replace: true,
+          state: { email: formData.email },
+        });
+        return;
       }
-      navigate(from, { replace: true })
+      navigate(from, { replace: true });
     } catch (error) {
       // Error handled by hook
     }
-  }
+  };
 
   const handleGoogleSuccess = async (credentialResponse) => {
     try {
-      const data = await loginWithGoogle.mutateAsync(credentialResponse.credential)
+      const data = await loginWithGoogle.mutateAsync(
+        credentialResponse.credential
+      );
       if (data?.user?.isEmailVerified === false) {
-        navigate('/verify-email', { replace: true, state: { email: data.user.email } })
-        return
+        navigate('/verify-email', {
+          replace: true,
+          state: { email: data.user.email },
+        });
+        return;
       }
-      navigate(from, { replace: true })
+      navigate(from, { replace: true });
     } catch (error) {
       // Error handled by hook
     }
-  }
+  };
 
   const handleGoogleError = () => {
-    toast.error('Đăng nhập Google thất bại. Vui lòng thử lại.')
-  }
+    toast.error('Đăng nhập Google thất bại. Vui lòng thử lại.');
+  };
 
   return (
     <div>
       {/* Logo - Desktop */}
-      <Link to="/" className="hidden lg:flex items-center justify-center gap-2 mb-8 hover:opacity-80 transition-opacity">
-        <svg viewBox="0 0 120 40" className="h-10 w-24" fill="none" stroke="#222" strokeWidth="2">
+      <Link
+        to="/"
+        className="hidden lg:flex items-center justify-center gap-2 mb-8 hover:opacity-80 transition-opacity"
+      >
+        <svg
+          viewBox="0 0 120 40"
+          className="h-10 w-24"
+          fill="none"
+          stroke="#222"
+          strokeWidth="2"
+        >
           <circle cx="34" cy="20" r="12" />
           <circle cx="66" cy="20" r="12" />
           <path d="M46 20h8" strokeLinecap="round" />
@@ -75,11 +92,15 @@ const LoginPage = () => {
       </Link>
 
       <h2 className="text-3xl font-bold text-[#222] mb-2">Đăng nhập</h2>
-      <p className="text-[#4f5562] mb-8">Chào mừng trở lại! Vui lòng đăng nhập để tiếp tục.</p>
+      <p className="text-[#4f5562] mb-8">
+        Chào mừng trở lại! Vui lòng đăng nhập để tiếp tục.
+      </p>
 
       <form onSubmit={handleSubmit} className="space-y-5">
         <div>
-          <label className="block text-sm font-medium text-[#222] mb-2">Email</label>
+          <label className="block text-sm font-medium text-[#222] mb-2">
+            Email
+          </label>
           <input
             type="email"
             name="email"
@@ -92,7 +113,9 @@ const LoginPage = () => {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-[#222] mb-2">Mật khẩu</label>
+          <label className="block text-sm font-medium text-[#222] mb-2">
+            Mật khẩu
+          </label>
           <input
             type="password"
             name="password"
@@ -105,7 +128,10 @@ const LoginPage = () => {
         </div>
 
         <div className="flex justify-end">
-          <Link to="/forgot-password" className="text-sm text-[#0f5dd9] hover:underline">
+          <Link
+            to="/forgot-password"
+            className="text-sm text-[#0f5dd9] hover:underline"
+          >
             Quên mật khẩu?
           </Link>
         </div>
@@ -139,24 +165,44 @@ const LoginPage = () => {
 
       <p className="mt-8 text-center text-[#4f5562]">
         Chưa có tài khoản?{' '}
-        <Link to="/register" className="text-[#0f5dd9] hover:underline font-medium">
+        <Link
+          to="/register"
+          className="text-[#0f5dd9] hover:underline font-medium"
+        >
           Đăng ký ngay
         </Link>
       </p>
 
       {/* Demo accounts info */}
       <div className="mt-8 p-5 bg-[#ececec] rounded-2xl">
-        <p className="text-sm font-semibold text-[#222] mb-3">Tài khoản demo:</p>
+        <p className="text-sm font-semibold text-[#222] mb-3">
+          Tài khoản demo:
+        </p>
         <div className="text-xs text-[#4f5562] space-y-1.5">
-          <p><span className="font-medium">Customer:</span> customer@gmail.com / customer123</p>
-          <p><span className="font-medium">Sales/Staff:</span> sales@cclearly.com / sales123</p>
-          <p><span className="font-medium">Manager:</span> manager@cclearly.com / manager123</p>
-          <p><span className="font-medium">Admin:</span> admin@cclearly.com / admin123</p>
-          <p><span className="font-medium">Operations:</span>ops@cclearly.com / ops123</p>
+          <p>
+            <span className="font-medium">Customer:</span> customer@gmail.com /
+            customer123
+          </p>
+          <p>
+            <span className="font-medium">Sales/Staff:</span> sales@cclearly.com
+            / sales123
+          </p>
+          <p>
+            <span className="font-medium">Manager:</span> manager@cclearly.com /
+            manager123
+          </p>
+          <p>
+            <span className="font-medium">Admin:</span> admin@cclearly.com /
+            admin123
+          </p>
+          <p>
+            <span className="font-medium">Operations:</span>ops@cclearly.com /
+            ops123
+          </p>
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default LoginPage
+export default LoginPage;

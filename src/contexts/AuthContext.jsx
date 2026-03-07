@@ -1,11 +1,12 @@
 import { createContext, useContext, useEffect, useState } from 'react';
-import { useSessionStore, ROLES } from '@/stores/sessionStore';
 import { authRequest } from '@/api/auth';
+import { useSessionStore, ROLES } from '@/stores/sessionStore';
 
 const AuthContext = createContext(undefined);
 
 export const AuthProvider = ({ children }) => {
-  const { accessToken, refreshToken, setSession, clearSession, user } = useSessionStore();
+  const { accessToken, refreshToken, setSession, clearSession, user } =
+    useSessionStore();
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -69,11 +70,7 @@ export const AuthProvider = ({ children }) => {
     isStaff,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
 export const useAuth = () => {

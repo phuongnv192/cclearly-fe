@@ -1,13 +1,21 @@
 // Dashboard theo Flup style
-import { Link } from 'react-router-dom'
-import { useAuth } from '@/contexts/AuthContext'
-import { dashboardStats } from '@/mocks/data'
-import { Users, DollarSign, Package, RotateCcw, TrendingUp, TrendingDown, Plus } from 'lucide-react'
+import {
+  Users,
+  DollarSign,
+  Package,
+  RotateCcw,
+  TrendingUp,
+  TrendingDown,
+  Plus,
+} from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
+import { dashboardStats } from '@/mocks/data';
 
 const DashboardPage = () => {
-  const { user } = useAuth()
+  const { user } = useAuth();
 
-  const stats = dashboardStats
+  const stats = dashboardStats;
 
   return (
     <div className="space-y-6">
@@ -15,7 +23,9 @@ const DashboardPage = () => {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold text-[#222]">Dashboard</h1>
-          <p className="text-[#4f5562]">Welcome back, {user?.name || 'Admin'}!</p>
+          <p className="text-[#4f5562]">
+            Welcome back, {user?.name || 'Admin'}!
+          </p>
         </div>
         <button className="bg-[#0f5dd9] text-white px-5 py-2.5 rounded-full font-medium hover:bg-[#0b4fc0] transition flex items-center gap-2">
           <Plus className="w-4 h-4" />
@@ -34,7 +44,9 @@ const DashboardPage = () => {
               <TrendingUp className="w-3 h-3" /> 2.5%
             </span>
           </div>
-          <p className="text-3xl font-bold text-[#222]">{stats.totalCustomers.toLocaleString()}</p>
+          <p className="text-3xl font-bold text-[#222]">
+            {stats.totalCustomers.toLocaleString()}
+          </p>
           <p className="text-[#4f5562] text-sm">Total Customers</p>
         </div>
 
@@ -47,7 +59,9 @@ const DashboardPage = () => {
               <TrendingUp className="w-3 h-3" /> 0.5%
             </span>
           </div>
-          <p className="text-3xl font-bold text-[#222]">{(stats.totalRevenue / 1000000).toFixed(1)}M</p>
+          <p className="text-3xl font-bold text-[#222]">
+            {(stats.totalRevenue / 1000000).toFixed(1)}M
+          </p>
           <p className="text-[#4f5562] text-sm">Total Revenue</p>
         </div>
 
@@ -73,7 +87,9 @@ const DashboardPage = () => {
               <TrendingUp className="w-3 h-3" /> 0.12%
             </span>
           </div>
-          <p className="text-3xl font-bold text-[#222]">{stats.ordersByStatus.cancelled}</p>
+          <p className="text-3xl font-bold text-[#222]">
+            {stats.ordersByStatus.cancelled}
+          </p>
           <p className="text-[#4f5562] text-sm">Total Returns</p>
         </div>
       </div>
@@ -82,23 +98,32 @@ const DashboardPage = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Product Sales Chart */}
         <div className="lg:col-span-2 bg-white rounded-2xl p-6 shadow-[0_10px_30px_rgba(13,22,39,0.06)]">
-          <h3 className="text-lg font-semibold text-[#222] mb-4">Product Sales</h3>
+          <h3 className="text-lg font-semibold text-[#222] mb-4">
+            Product Sales
+          </h3>
           <div className="h-64 flex items-end justify-between gap-2">
-            {[40, 65, 45, 80, 55, 70, 90, 60, 75, 50, 85, 70].map((height, i) => (
-              <div key={i} className="flex-1 flex flex-col items-center gap-2">
+            {[40, 65, 45, 80, 55, 70, 90, 60, 75, 50, 85, 70].map(
+              (height, i) => (
                 <div
-                  className="w-full bg-[#0f5dd9] rounded-t-lg"
-                  style={{ height: `${height}%` }}
-                ></div>
-                <span className="text-xs text-[#4f5562]">{i + 1}th</span>
-              </div>
-            ))}
+                  key={i}
+                  className="flex-1 flex flex-col items-center gap-2"
+                >
+                  <div
+                    className="w-full bg-[#0f5dd9] rounded-t-lg"
+                    style={{ height: `${height}%` }}
+                  ></div>
+                  <span className="text-xs text-[#4f5562]">{i + 1}th</span>
+                </div>
+              )
+            )}
           </div>
         </div>
 
         {/* Sales by Category */}
         <div className="bg-white rounded-2xl p-6 shadow-[0_10px_30px_rgba(13,22,39,0.06)]">
-          <h3 className="text-lg font-semibold text-[#222] mb-4">Sales by Category</h3>
+          <h3 className="text-lg font-semibold text-[#222] mb-4">
+            Sales by Category
+          </h3>
           <div className="space-y-3">
             {[
               { name: 'Gọng kính cận', value: 25, color: '#0f5dd9' },
@@ -115,7 +140,10 @@ const DashboardPage = () => {
                 <div className="h-2 bg-[#ececec] rounded-full overflow-hidden">
                   <div
                     className="h-full rounded-full transition-all"
-                    style={{ width: `${cat.value}%`, backgroundColor: cat.color }}
+                    style={{
+                      width: `${cat.value}%`,
+                      backgroundColor: cat.color,
+                    }}
                   ></div>
                 </div>
               </div>
@@ -128,7 +156,10 @@ const DashboardPage = () => {
       <div className="bg-white rounded-2xl p-6 shadow-[0_10px_30px_rgba(13,22,39,0.06)]">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-lg font-semibold text-[#222]">Recent Orders</h3>
-          <Link to="/admin/orders" className="text-[#0f5dd9] text-sm font-medium hover:underline">
+          <Link
+            to="/admin/orders"
+            className="text-[#0f5dd9] text-sm font-medium hover:underline"
+          >
             View All
           </Link>
         </div>
@@ -136,35 +167,77 @@ const DashboardPage = () => {
           <table className="w-full">
             <thead className="border-b border-[#ececec]">
               <tr>
-                <th className="text-left py-3 text-sm font-medium text-[#4f5562]">Order ID</th>
-                <th className="text-left py-3 text-sm font-medium text-[#4f5562]">Customer</th>
-                <th className="text-left py-3 text-sm font-medium text-[#4f5562]">Status</th>
-                <th className="text-left py-3 text-sm font-medium text-[#4f5562]">Amount</th>
-                <th className="text-left py-3 text-sm font-medium text-[#4f5562]">Date</th>
+                <th className="text-left py-3 text-sm font-medium text-[#4f5562]">
+                  Order ID
+                </th>
+                <th className="text-left py-3 text-sm font-medium text-[#4f5562]">
+                  Customer
+                </th>
+                <th className="text-left py-3 text-sm font-medium text-[#4f5562]">
+                  Status
+                </th>
+                <th className="text-left py-3 text-sm font-medium text-[#4f5562]">
+                  Amount
+                </th>
+                <th className="text-left py-3 text-sm font-medium text-[#4f5562]">
+                  Date
+                </th>
               </tr>
             </thead>
             <tbody>
               {[
-                { id: 'ORD001', customer: 'Khách Hàng Demo', status: 'pending', amount: 1340000, date: '2024-01-15' },
-                { id: 'ORD002', customer: 'Nguyễn Văn B', status: 'processing', amount: 2230000, date: '2024-01-14' },
-                { id: 'ORD003', customer: 'Trần Thị C', status: 'shipped', amount: 2130000, date: '2024-01-10' },
-                { id: 'ORD004', customer: 'Lê Văn D', status: 'delivered', amount: 1150000, date: '2024-01-05' },
+                {
+                  id: 'ORD001',
+                  customer: 'Khách Hàng Demo',
+                  status: 'pending',
+                  amount: 1340000,
+                  date: '2024-01-15',
+                },
+                {
+                  id: 'ORD002',
+                  customer: 'Nguyễn Văn B',
+                  status: 'processing',
+                  amount: 2230000,
+                  date: '2024-01-14',
+                },
+                {
+                  id: 'ORD003',
+                  customer: 'Trần Thị C',
+                  status: 'shipped',
+                  amount: 2130000,
+                  date: '2024-01-10',
+                },
+                {
+                  id: 'ORD004',
+                  customer: 'Lê Văn D',
+                  status: 'delivered',
+                  amount: 1150000,
+                  date: '2024-01-05',
+                },
               ].map((order) => (
                 <tr key={order.id} className="border-b border-[#ececec]">
                   <td className="py-3 text-[#222] font-medium">{order.id}</td>
                   <td className="py-3 text-[#4f5562]">{order.customer}</td>
                   <td className="py-3">
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                      order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                      order.status === 'processing' ? 'bg-blue-100 text-blue-800' :
-                      order.status === 'shipped' ? 'bg-orange-100 text-orange-800' :
-                      'bg-green-100 text-green-800'
-                    }`}>
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs font-medium ${
+                        order.status === 'pending'
+                          ? 'bg-yellow-100 text-yellow-800'
+                          : order.status === 'processing'
+                            ? 'bg-blue-100 text-blue-800'
+                            : order.status === 'shipped'
+                              ? 'bg-orange-100 text-orange-800'
+                              : 'bg-green-100 text-green-800'
+                      }`}
+                    >
                       {order.status}
                     </span>
                   </td>
                   <td className="py-3 text-[#222] font-medium">
-                    {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(order.amount)}
+                    {new Intl.NumberFormat('vi-VN', {
+                      style: 'currency',
+                      currency: 'VND',
+                    }).format(order.amount)}
                   </td>
                   <td className="py-3 text-[#4f5562]">{order.date}</td>
                 </tr>
@@ -174,7 +247,7 @@ const DashboardPage = () => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default DashboardPage
+export default DashboardPage;

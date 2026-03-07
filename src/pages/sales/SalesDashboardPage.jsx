@@ -1,40 +1,63 @@
 // Sales Dashboard Page
-import { useState } from 'react'
-import { Link } from 'react-router-dom'
-import { useAuth } from '@/contexts/AuthContext'
-import { orders } from '@/mocks/data'
-import { Clock, Wrench, CheckCircle, Package, Search, Filter } from 'lucide-react'
+import {
+  Clock,
+  Wrench,
+  CheckCircle,
+  Package,
+  Search,
+  Filter,
+} from 'lucide-react';
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
+import { useAdminOrders } from '@/hooks/useOrder';
 
 const SalesDashboardPage = () => {
-  const { user } = useAuth()
-  const [searchTerm, setSearchTerm] = useState('')
-  const [statusFilter, setStatusFilter] = useState('all')
+  const { user } = useAuth();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
 
-  const filteredOrders = orders.filter(order => {
-    const matchesSearch = order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.shippingAddress?.name?.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesStatus = statusFilter === 'all' || order.status === statusFilter
-    return matchesSearch && matchesStatus
-  })
+  const { data: ordersData } = useAdminOrders({ size: 1000 });
+  const orders = ordersData?.items || ordersData || [];
 
-  const pendingOrders = orders.filter(o => o.status === 'pending')
-  const processingOrders = orders.filter(o => o.status === 'processing')
+  const filteredOrders = orders.filter((order) => {
+    const orderId = order.code || order.orderId || order.id || '';
+    const customerName = order.recipientName || order.shippingAddress?.name || '';
+    const matchesSearch =
+      orderId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      customerName.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus =
+      statusFilter === 'all' || order.status === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
+
+  const pendingOrders = orders.filter((o) => o.status === 'pending');
+  const processingOrders = orders.filter((o) => o.status === 'processing');
 
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount)
-  }
+    return new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND',
+    }).format(amount);
+  };
 
   const getStatusBadge = (status) => {
     const map = {
-      pending: { label: 'Chờ xác nhận', class: 'bg-yellow-100 text-yellow-800' },
+      pending: {
+        label: 'Chờ xác nhận',
+        class: 'bg-yellow-100 text-yellow-800',
+      },
       confirmed: { label: 'Đã xác nhận', class: 'bg-blue-100 text-blue-800' },
-      processing: { label: 'Đang xử lý', class: 'bg-purple-100 text-purple-800' },
+      processing: {
+        label: 'Đang xử lý',
+        class: 'bg-purple-100 text-purple-800',
+      },
       shipped: { label: 'Đang giao', class: 'bg-orange-100 text-orange-800' },
       delivered: { label: 'Hoàn thành', class: 'bg-green-100 text-green-800' },
       cancelled: { label: 'Đã hủy', class: 'bg-red-100 text-red-800' },
-    }
-    return map[status] || { label: status, class: 'bg-gray-100 text-gray-800' }
-  }
+    };
+    return map[status] || { label: status, class: 'bg-gray-100 text-gray-800' };
+  };
 
   return (
     <div className="space-y-6">
@@ -54,7 +77,9 @@ const SalesDashboardPage = () => {
               <Clock className="w-7 h-7 text-yellow-600" />
             </div>
             <div>
-              <p className="text-3xl font-bold text-[#222]">{pendingOrders.length}</p>
+              <p className="text-3xl font-bold text-[#222]">
+                {pendingOrders.length}
+              </p>
               <p className="text-[#4f5562]">Đơn chờ xác nhận</p>
             </div>
           </div>
@@ -66,7 +91,9 @@ const SalesDashboardPage = () => {
               <Wrench className="w-7 h-7 text-blue-600" />
             </div>
             <div>
-              <p className="text-3xl font-bold text-[#222]">{processingOrders.length}</p>
+              <p className="text-3xl font-bold text-[#222]">
+                {processingOrders.length}
+              </p>
               <p className="text-[#4f5562]">Đơn đang xử lý</p>
             </div>
           </div>
@@ -78,7 +105,9 @@ const SalesDashboardPage = () => {
               <CheckCircle className="w-7 h-7 text-green-600" />
             </div>
             <div>
-              <p className="text-3xl font-bold text-[#222]">{orders.filter(o => o.status === 'delivered').length}</p>
+              <p className="text-3xl font-bold text-[#222]">
+                {orders.filter((o) => o.status === 'delivered').length}
+              </p>
               <p className="text-[#4f5562]">Đơn hoàn thành</p>
             </div>
           </div>
@@ -119,25 +148,38 @@ const SalesDashboardPage = () => {
 
       {/* Orders List */}
       <div className="bg-white rounded-2xl p-6 shadow-[0_10px_30px_rgba(13,22,39,0.06)]">
-        <h3 className="text-lg font-semibold text-[#222] mb-4">Danh sách đơn hàng ({filteredOrders.length})</h3>
+        <h3 className="text-lg font-semibold text-[#222] mb-4">
+          Danh sách đơn hàng ({filteredOrders.length})
+        </h3>
         <div className="space-y-3">
           {filteredOrders.map((order) => {
-            const statusBadge = getStatusBadge(order.status)
+            const statusBadge = getStatusBadge(order.status);
             return (
-              <div key={order.id} className="flex items-center justify-between p-4 bg-[#f9f9f9] rounded-xl hover:bg-gray-100 transition cursor-pointer">
+              <div
+                key={order.orderId || order.id}
+                className="flex items-center justify-between p-4 bg-[#f9f9f9] rounded-xl hover:bg-gray-100 transition cursor-pointer"
+              >
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 bg-[#ececec] rounded-xl flex items-center justify-center">
                     <Package className="w-6 h-6 text-gray-500" />
                   </div>
                   <div>
-                    <p className="font-medium text-[#222]">{order.id}</p>
-                    <p className="text-sm text-[#4f5562]">{order.shippingAddress?.name}</p>
-                    <p className="text-xs text-[#4f5562]">{order.items?.length} sản phẩm</p>
+                    <p className="font-medium text-[#222]">{order.code || order.orderId || order.id}</p>
+                    <p className="text-sm text-[#4f5562]">
+                      {order.recipientName || order.shippingAddress?.name}
+                    </p>
+                    <p className="text-xs text-[#4f5562]">
+                      {order.items?.length} sản phẩm
+                    </p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="font-medium text-[#222]">{formatCurrency(order.totalAmount)}</p>
-                  <span className={`px-3 py-1 rounded-full text-xs ${statusBadge.class}`}>
+                  <p className="font-medium text-[#222]">
+                    {formatCurrency(order.finalAmount || order.totalAmount)}
+                  </p>
+                  <span
+                    className={`px-3 py-1 rounded-full text-xs ${statusBadge.class}`}
+                  >
                     {statusBadge.label}
                   </span>
                   <p className="text-xs text-[#4f5562] mt-1">
@@ -145,15 +187,17 @@ const SalesDashboardPage = () => {
                   </p>
                 </div>
               </div>
-            )
+            );
           })}
           {filteredOrders.length === 0 && (
-            <p className="text-center text-[#4f5562] py-8">Không tìm thấy đơn hàng nào</p>
+            <p className="text-center text-[#4f5562] py-8">
+              Không tìm thấy đơn hàng nào
+            </p>
           )}
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default SalesDashboardPage
+export default SalesDashboardPage;

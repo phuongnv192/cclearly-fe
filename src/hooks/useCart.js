@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'react-toastify';
 import { cartRequest } from '@/api/cart';
 import { handleErrorApi } from '@/lib/errors/handleError';
-import { toast } from 'react-toastify';
 import { QUERY_KEYS } from '@/utils/endpoints';
 
 // Get cart

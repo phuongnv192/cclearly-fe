@@ -1,5 +1,5 @@
-import { useSessionStore } from '@/stores/sessionStore';
 import { toast } from 'react-toastify';
+import { useSessionStore } from '@/stores/sessionStore';
 
 const BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
@@ -44,7 +44,9 @@ class TokenRefreshInterceptor {
     const data = await res.json();
     const { accessToken, refreshToken: newRefreshToken } = data.data;
 
-    useSessionStore.getState().updateSession({ accessToken, refreshToken: newRefreshToken });
+    useSessionStore
+      .getState()
+      .updateSession({ accessToken, refreshToken: newRefreshToken });
     return accessToken;
   }
 
@@ -99,7 +101,9 @@ async function request(method, url, options, retryCount = 0) {
   }
 
   const baseUrl = options?.baseURL || BASE_URL;
-  const fullUrl = url.startsWith('/') ? `${baseUrl}${url}` : `${baseUrl}/${url}`;
+  const fullUrl = url.startsWith('/')
+    ? `${baseUrl}${url}`
+    : `${baseUrl}/${url}`;
 
   const urlWithParams = options?.query
     ? `${fullUrl}?${new URLSearchParams(
@@ -119,7 +123,11 @@ async function request(method, url, options, retryCount = 0) {
   }
 
   // Handle 401 - Token expired
-  if (res.status === 401 && payload?.message === 'Token đã hết hạn' && !options?.skipAuth) {
+  if (
+    res.status === 401 &&
+    payload?.message === 'Token đã hết hạn' &&
+    !options?.skipAuth
+  ) {
     if (retryCount < MAX_RETRIES) {
       try {
         await tokenInterceptor.refreshToken();

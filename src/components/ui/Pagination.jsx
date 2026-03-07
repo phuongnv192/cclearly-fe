@@ -2,20 +2,20 @@ const Pagination = ({
   currentPage,
   totalPages,
   onPageChange,
-  className = ''
+  className = '',
 }) => {
-  const pages = []
-  const maxVisible = 5
+  const pages = [];
+  const maxVisible = 5;
 
-  let start = Math.max(1, currentPage - Math.floor(maxVisible / 2))
-  let end = Math.min(totalPages, start + maxVisible - 1)
+  let start = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+  let end = Math.min(totalPages, start + maxVisible - 1);
 
   if (end - start + 1 < maxVisible) {
-    start = Math.max(1, end - maxVisible + 1)
+    start = Math.max(1, end - maxVisible + 1);
   }
 
   for (let i = start; i <= end; i++) {
-    pages.push(i)
+    pages.push(i);
   }
 
   return (
@@ -43,14 +43,15 @@ const Pagination = ({
       )}
 
       {/* Pages */}
-      {pages.map(page => (
+      {pages.map((page) => (
         <button
           key={page}
           onClick={() => onPageChange(page)}
-          className={`px-3 py-1 rounded border ${page === currentPage
+          className={`px-3 py-1 rounded border ${
+            page === currentPage
               ? 'bg-blue-600 text-white border-blue-600'
               : 'hover:bg-gray-50'
-            }`}
+          }`}
         >
           {page}
         </button>
@@ -78,7 +79,7 @@ const Pagination = ({
         ›
       </button>
     </div>
-  )
-}
+  );
+};
 
-export default Pagination
+export default Pagination;

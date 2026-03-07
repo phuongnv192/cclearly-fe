@@ -1,12 +1,17 @@
-import { useState } from 'react'
-import { useProducts, useCreateProduct, useUpdateProduct, useDeleteProduct } from '@/hooks/useProduct'
-import { Glasses, Scan, Plus, Search, Edit2, Trash2 } from 'lucide-react'
-import Pagination from '@/components/ui/Pagination'
-import ConfirmModal from '@/components/ui/ConfirmModal'
+import { Glasses, Scan, Plus, Search, Edit2, Trash2 } from 'lucide-react';
+import { useState } from 'react';
+import ProductModal from '@/components/admin/product/ProductModal';
+import ConfirmModal from '@/components/ui/ConfirmModal';
+import Pagination from '@/components/ui/Pagination';
+import {
+  useProducts,
+  useCreateProduct,
+  useUpdateProduct,
+  useDeleteProduct,
+} from '@/hooks/useProduct';
 
 // Import data và component mới tách
-import { PAGE_SIZES } from '@/mocks/data'
-import ProductModal from '@/components/admin/product/ProductModal'
+import { PAGE_SIZES } from '@/mocks/data';
 
 const AdminProductsPage = () => {
   const [filters, setFilters] = useState({
@@ -14,19 +19,19 @@ const AdminProductsPage = () => {
     limit: 20,
     type: '',
     search: '',
-  })
+  });
 
-  const [showModal, setShowModal] = useState(false)
-  const [editingProduct, setEditingProduct] = useState(null)
+  const [showModal, setShowModal] = useState(false);
+  const [editingProduct, setEditingProduct] = useState(null);
   const [confirmModal, setConfirmModal] = useState({
     isOpen: false,
-    productId: null
-  })
+    productId: null,
+  });
 
-  const { data, isLoading } = useProducts(filters)
-  const createProduct = useCreateProduct()
-  const updateProduct = useUpdateProduct()
-  const deleteProduct = useDeleteProduct()
+  const { data, isLoading } = useProducts(filters);
+  const createProduct = useCreateProduct();
+  const updateProduct = useUpdateProduct();
+  const deleteProduct = useDeleteProduct();
 
   const [formData, setFormData] = useState({
     name: '',
@@ -49,13 +54,13 @@ const AdminProductsPage = () => {
     diameter: '',
     lensType: '',
     brand: '',
-  })
+  });
 
-  const [variants, setVariants] = useState([])
+  const [variants, setVariants] = useState([]);
 
   const handleOpenModal = (product = null) => {
     if (product) {
-      setEditingProduct(product)
+      setEditingProduct(product);
       setFormData({
         name: product.name,
         type: product.type,
@@ -77,86 +82,119 @@ const AdminProductsPage = () => {
         diameter: product.attributes?.diameter || '',
         lensType: product.attributes?.type || '',
         brand: product.attributes?.brand || '',
-      })
-      setVariants(product.variants || [])
+      });
+      setVariants(product.variants || []);
     } else {
-      setEditingProduct(null)
+      setEditingProduct(null);
       setFormData({
-        name: '', type: 'frame', price: '', description: '',
-        material: '', shape: '', color: '', bridgeWidth: '', templeLength: '',
-        lensWidth: '', frameWidth: '', origin: '', warranty: '',
-        index: '', lensMaterial: '', technology: '', coating: '',
-        diameter: '', lensType: '', brand: '',
-      })
-      setVariants([])
+        name: '',
+        type: 'frame',
+        price: '',
+        description: '',
+        material: '',
+        shape: '',
+        color: '',
+        bridgeWidth: '',
+        templeLength: '',
+        lensWidth: '',
+        frameWidth: '',
+        origin: '',
+        warranty: '',
+        index: '',
+        lensMaterial: '',
+        technology: '',
+        coating: '',
+        diameter: '',
+        lensType: '',
+        brand: '',
+      });
+      setVariants([]);
     }
-    setShowModal(true)
-  }
+    setShowModal(true);
+  };
 
   const handleCloseModal = () => {
-    setShowModal(false)
-    setEditingProduct(null)
-  }
+    setShowModal(false);
+    setEditingProduct(null);
+  };
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
+    e.preventDefault();
     try {
-      const attributes = formData.type === 'frame' ? {
-        material: formData.material,
-        shape: formData.shape,
-        color: formData.color,
-        bridgeWidth: formData.bridgeWidth,
-        templeLength: formData.templeLength,
-        lensWidth: formData.lensWidth,
-        frameWidth: formData.frameWidth,
-        origin: formData.origin,
-        warranty: formData.warranty,
-      } : {
-        index: formData.index,
-        material: formData.lensMaterial,
-        technology: formData.technology,
-        coating: formData.coating,
-        diameter: formData.diameter,
-        type: formData.lensType,
-        brand: formData.brand,
-      }
+      const attributes =
+        formData.type === 'frame'
+          ? {
+              material: formData.material,
+              shape: formData.shape,
+              color: formData.color,
+              bridgeWidth: formData.bridgeWidth,
+              templeLength: formData.templeLength,
+              lensWidth: formData.lensWidth,
+              frameWidth: formData.frameWidth,
+              origin: formData.origin,
+              warranty: formData.warranty,
+            }
+          : {
+              index: formData.index,
+              material: formData.lensMaterial,
+              technology: formData.technology,
+              coating: formData.coating,
+              diameter: formData.diameter,
+              type: formData.lensType,
+              brand: formData.brand,
+            };
 
       const productData = {
         ...formData,
         attributes,
         variants: variants.length > 0 ? variants : undefined,
-      }
+      };
 
       if (editingProduct) {
-        await updateProduct.mutateAsync({ id: editingProduct.id, data: productData })
+        await updateProduct.mutateAsync({
+          id: editingProduct.id,
+          data: productData,
+        });
       } else {
-        await createProduct.mutateAsync(productData)
+        await createProduct.mutateAsync(productData);
       }
-      handleCloseModal()
+      handleCloseModal();
     } catch (err) {
-      console.error(err)
+      console.error(err);
     }
-  }
+  };
 
   const handleAddVariant = () => {
-    const newVariant = formData.type === 'frame'
-      ? { id: 'v' + Date.now(), color: '', colorCode: '#000000', sku: '', price: formData.price }
-      : { id: 'lv' + Date.now(), technology: '', sku: '', price: formData.price }
-    setVariants([...variants, newVariant])
-  }
+    const newVariant =
+      formData.type === 'frame'
+        ? {
+            id: 'v' + Date.now(),
+            color: '',
+            colorCode: '#000000',
+            sku: '',
+            price: formData.price,
+          }
+        : {
+            id: 'lv' + Date.now(),
+            technology: '',
+            sku: '',
+            price: formData.price,
+          };
+    setVariants([...variants, newVariant]);
+  };
 
   const handleVariantChange = (index, field, value) => {
-    const newVariants = [...variants]
-    newVariants[index] = { ...newVariants[index], [field]: value }
-    setVariants(newVariants)
-  }
+    const newVariants = [...variants];
+    newVariants[index] = { ...newVariants[index], [field]: value };
+    setVariants(newVariants);
+  };
 
   const handleDeleteVariant = (index) => {
-    setVariants(variants.filter((_, i) => i !== index))
-  }
+    setVariants(variants.filter((_, i) => i !== index));
+  };
 
-  const products = data?.items || []
-  const totalPages = data?.meta?.totalPages || 1
+  const products = data?.items || [];
+  const totalPages = data?.meta?.totalPages || 1;
 
   return (
     <div>
@@ -184,13 +222,17 @@ const AdminProductsPage = () => {
               type="text"
               placeholder="Tìm kiếm sản phẩm..."
               value={filters.search}
-              onChange={(e) => setFilters({ ...filters, search: e.target.value, page: 1 })}
+              onChange={(e) =>
+                setFilters({ ...filters, search: e.target.value, page: 1 })
+              }
               className="w-full pl-12 pr-5 py-3 border border-[#e0e0e0] rounded-full focus:outline-none focus:border-[#0f5dd9] bg-[#f9f9f9]"
             />
           </div>
           <select
             value={filters.type}
-            onChange={(e) => setFilters({ ...filters, type: e.target.value, page: 1 })}
+            onChange={(e) =>
+              setFilters({ ...filters, type: e.target.value, page: 1 })
+            }
             className="px-5 py-3 border border-[#e0e0e0] rounded-full focus:outline-none focus:border-[#0f5dd9] bg-white min-w-[180px]"
           >
             <option value="">Tất cả loại</option>
@@ -205,33 +247,62 @@ const AdminProductsPage = () => {
         {isLoading ? (
           <div className="p-8 text-center text-[#4f5562]">Đang tải...</div>
         ) : products.length === 0 ? (
-          <div className="p-8 text-center text-[#4f5562]">Không có sản phẩm nào</div>
+          <div className="p-8 text-center text-[#4f5562]">
+            Không có sản phẩm nào
+          </div>
         ) : (
           <>
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-[#f3f3f3]">
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Sản phẩm</th>
-                    <th className="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Loại</th>
-                    <th className="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Giá</th>
-                    <th className="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider text-center">Tồn</th>
-                    <th className="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Trạng thái</th>
-                    <th className="px-4 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Thao tác</th>
+                    <th className="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
+                      Sản phẩm
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
+                      Loại
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
+                      Giá
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider text-center">
+                      Tồn
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
+                      Trạng thái
+                    </th>
+                    <th className="px-4 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">
+                      Thao tác
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#ececec]">
                   {products.map((product) => (
-                    <tr key={product.id} className="hover:bg-gray-50 transition-colors group">
+                    <tr
+                      key={product.id}
+                      className="hover:bg-gray-50 transition-colors group"
+                    >
                       <td className="px-4 py-2.5">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center shrink-0 border border-gray-100">
-                            {product.type === 'frame' ? <Glasses className="w-5 h-5 text-gray-400" /> : <Scan className="w-5 h-5 text-gray-400" />}
+                            {product.type === 'frame' ? (
+                              <Glasses className="w-5 h-5 text-gray-400" />
+                            ) : (
+                              <Scan className="w-5 h-5 text-gray-400" />
+                            )}
                           </div>
                           <div className="min-w-0">
-                            <p className="text-sm font-semibold text-[#222] truncate group-hover:text-[#0f5dd9] transition-colors">{product.name}</p>
-                            <p className="text-[10px] text-gray-400 font-medium uppercase tracking-tighter">{product.sku}</p>
-                            {product.variants?.length > 0 && <p className="text-[10px] text-blue-500">{product.variants.length} biến thể</p>}
+                            <p className="text-sm font-semibold text-[#222] truncate group-hover:text-[#0f5dd9] transition-colors">
+                              {product.name}
+                            </p>
+                            <p className="text-[10px] text-gray-400 font-medium uppercase tracking-tighter">
+                              {product.sku}
+                            </p>
+                            {product.variants?.length > 0 && (
+                              <p className="text-[10px] text-blue-500">
+                                {product.variants.length} biến thể
+                              </p>
+                            )}
                           </div>
                         </div>
                       </td>
@@ -241,18 +312,40 @@ const AdminProductsPage = () => {
                         </span>
                       </td>
                       <td className="px-4 py-2.5 text-sm font-bold text-[#222]">
-                        {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(product.price)}
+                        {new Intl.NumberFormat('vi-VN', {
+                          style: 'currency',
+                          currency: 'VND',
+                        }).format(product.price)}
                       </td>
-                      <td className="px-4 py-2.5 text-sm text-center font-medium text-gray-600">{product.stock}</td>
+                      <td className="px-4 py-2.5 text-sm text-center font-medium text-gray-600">
+                        {product.stock}
+                      </td>
                       <td className="px-4 py-2.5">
-                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${product.isActive ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'}`}>
+                        <span
+                          className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${product.isActive ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'}`}
+                        >
                           {product.isActive ? 'BẬT' : 'TẮT'}
                         </span>
                       </td>
                       <td className="px-4 py-2.5 text-right">
                         <div className="flex justify-end gap-1.5">
-                          <button onClick={() => handleOpenModal(product)} className="p-2 text-gray-400 hover:text-[#0f5dd9] hover:bg-blue-50 rounded-lg transition"><Edit2 className="w-4 h-4" /></button>
-                          <button onClick={() => setConfirmModal({ isOpen: true, productId: product.id })} className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition"><Trash2 className="w-4 h-4" /></button>
+                          <button
+                            onClick={() => handleOpenModal(product)}
+                            className="p-2 text-gray-400 hover:text-[#0f5dd9] hover:bg-blue-50 rounded-lg transition"
+                          >
+                            <Edit2 className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() =>
+                              setConfirmModal({
+                                isOpen: true,
+                                productId: product.id,
+                              })
+                            }
+                            className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
                         </div>
                       </td>
                     </tr>
@@ -265,14 +358,28 @@ const AdminProductsPage = () => {
                 <span className="text-sm text-[#4f5562]">Hiển thị:</span>
                 <select
                   value={filters.limit}
-                  onChange={(e) => setFilters({ ...filters, limit: Number(e.target.value), page: 1 })}
+                  onChange={(e) =>
+                    setFilters({
+                      ...filters,
+                      limit: Number(e.target.value),
+                      page: 1,
+                    })
+                  }
                   className="px-3 py-1.5 border border-[#e0e0e0] rounded-lg text-sm focus:outline-none focus:border-[#0f5dd9] bg-white cursor-pointer"
                 >
-                  {PAGE_SIZES.map(size => <option key={size} value={size}>{size}</option>)}
+                  {PAGE_SIZES.map((size) => (
+                    <option key={size} value={size}>
+                      {size}
+                    </option>
+                  ))}
                 </select>
                 <span className="text-sm text-[#4f5562]">sản phẩm</span>
               </div>
-              <Pagination currentPage={filters.page} totalPages={totalPages} onPageChange={(page) => setFilters({ ...filters, page })} />
+              <Pagination
+                currentPage={filters.page}
+                totalPages={totalPages}
+                onPageChange={(page) => setFilters({ ...filters, page })}
+              />
             </div>
           </>
         )}
@@ -294,14 +401,17 @@ const AdminProductsPage = () => {
       <ConfirmModal
         isOpen={confirmModal.isOpen}
         onClose={() => setConfirmModal({ ...confirmModal, isOpen: false })}
-        onConfirm={async () => { await deleteProduct.mutateAsync(confirmModal.productId); setConfirmModal({ ...confirmModal, isOpen: false }); }}
+        onConfirm={async () => {
+          await deleteProduct.mutateAsync(confirmModal.productId);
+          setConfirmModal({ ...confirmModal, isOpen: false });
+        }}
         title="Xác nhận xóa"
         message="Bạn có chắc chắn muốn xóa sản phẩm này? Hành động này không thể hoàn tác."
         confirmText="Xóa sản phẩm"
         type="danger"
       />
     </div>
-  )
-}
+  );
+};
 
-export default AdminProductsPage
+export default AdminProductsPage;

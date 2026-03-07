@@ -1,69 +1,75 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import { MainLayout } from './components/layout/MainLayout'
-import { AuthLayout } from './components/layout/AuthLayout'
-import { AdminLayout } from './components/layout/AdminLayout'
-import { ProtectedRoute, AdminRoute, SalesRoute, OperationsRoute, ManagerRoute } from './components/ProtectedRoute'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AdminLayout } from './components/layout/AdminLayout';
+import { AuthLayout } from './components/layout/AuthLayout';
+import { MainLayout } from './components/layout/MainLayout';
+import {
+  ProtectedRoute,
+  AdminRoute,
+  SalesRoute,
+  OperationsRoute,
+  ManagerRoute,
+} from './components/ProtectedRoute';
 
 // Customer Pages
-import HomePage from './pages/customer/HomePage'
-import ProductListPage from './pages/customer/ProductListPage'
-import ProductDetailPage from './pages/customer/ProductDetailPage'
-import PrescriptionFormPage from './pages/customer/PrescriptionFormPage'
-import CartPage from './pages/customer/CartPage'
-import CheckoutPage from './pages/customer/CheckoutPage'
-import OrderHistoryPage from './pages/customer/OrderHistoryPage'
-import ProfilePage from './pages/customer/ProfilePage'
-import WishlistPage from './pages/customer/WishlistPage'
-import ReturnPage from './pages/customer/ReturnPage'
-import NotificationPage from './pages/customer/NotificationPage'
-import BestSellerPage from './pages/customer/BestSellerPage'
-import StoresPage from './pages/customer/StoresPage'
-import BlogPage from './pages/customer/BlogPage'
+import NotificationPage from './pages/customer/NotificationPage';
+import BestSellerPage from './pages/customer/BestSellerPage';
+import StoresPage from './pages/customer/StoresPage';
+import BlogPage from './pages/customer/BlogPage';
 
 // Auth Pages
-import LoginPage from './pages/auth/LoginPage'
-import RegisterPage from './pages/auth/RegisterPage'
-import ForgotPasswordPage from './pages/auth/ForgotPasswordPage'
-import VerifyEmailPage from './pages/auth/VerifyEmailPage'
-import ResetPasswordPage from './pages/auth/ResetPasswordPage'
+import LoginPage from './pages/auth/LoginPage';
+import RegisterPage from './pages/auth/RegisterPage';
+import ForgotPasswordPage from './pages/auth/ForgotPasswordPage';
+import VerifyEmailPage from './pages/auth/VerifyEmailPage';
+import ResetPasswordPage from './pages/auth/ResetPasswordPage';
 
 // Admin/System Admin Pages
-import AdminDashboard from './pages/admin/AdminDashboard'
-import AdminOrdersPage from './pages/admin/AdminOrdersPage'
-import AdminProductsPage from './pages/admin/AdminProductsPage'
-import AdminSettingsPage from './pages/admin/AdminSettingsPage'
-import AdminReportsPage from './pages/admin/AdminReportsPage'
-import RolePermissionPage from './pages/admin/RolePermissionPage'
-import AdminPolicyPage from './pages/admin/PolicyPage'
-import IntegrationPage from './pages/admin/IntegrationPage'
-import SystemLogsPage from './pages/admin/SystemLogsPage'
-import BannerPage from './pages/admin/BannerPage'
+import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminOrdersPage from './pages/admin/AdminOrdersPage';
+import AdminProductsPage from './pages/admin/AdminProductsPage';
+import AdminSettingsPage from './pages/admin/AdminSettingsPage';
+import AdminReportsPage from './pages/admin/AdminReportsPage';
+import RolePermissionPage from './pages/admin/RolePermissionPage';
+import AdminPolicyPage from './pages/admin/PolicyPage';
+import IntegrationPage from './pages/admin/IntegrationPage';
+import SystemLogsPage from './pages/admin/SystemLogsPage';
+import BannerPage from './pages/admin/BannerPage';
 
 // Sales Pages
-import SalesDashboardPage from './pages/sales/SalesDashboardPage'
-import SalesOrdersPage from './pages/sales/SalesOrdersPage'
-import SalesReturnsPage from './pages/sales/SalesReturnsPage'
-import SalesCustomersPage from './pages/sales/SalesCustomersPage'
+import SalesDashboardPage from './pages/sales/SalesDashboardPage';
+import SalesOrdersPage from './pages/sales/SalesOrdersPage';
+import SalesReturnsPage from './pages/sales/SalesReturnsPage';
+import SalesCustomersPage from './pages/sales/SalesCustomersPage';
 
 // Manager Pages
-import ManagerDashboardPage from './pages/manager/ManagerDashboardPage'
-import ManagerOrdersPage from './pages/manager/ManagerOrdersPage'
-import ManagerProductsPage from './pages/manager/ManagerProductsPage'
-import LensManagementPage from './pages/manager/LensManagementPage'
-import ManagerPolicyPage from './pages/admin/PolicyPage'
-import PromotionPage from './pages/manager/PromotionPage'
-import StaffPage from './pages/manager/StaffPage'
-import ManagerReportsPage from './pages/manager/ManagerReportsPage'
-import ManagerInventoryPage from './pages/manager/InventoryPage'
+import ManagerDashboardPage from './pages/manager/ManagerDashboardPage';
+import ManagerOrdersPage from './pages/manager/ManagerOrdersPage';
+import ManagerProductsPage from './pages/manager/ManagerProductsPage';
+import LensManagementPage from './pages/manager/LensManagementPage';
+import ManagerPolicyPage from './pages/admin/PolicyPage';
+import CartPage from './pages/customer/CartPage';
+import CheckoutPage from './pages/customer/CheckoutPage';
+import HomePage from './pages/customer/HomePage';
+import OrderHistoryPage from './pages/customer/OrderHistoryPage';
+import PrescriptionFormPage from './pages/customer/PrescriptionFormPage';
+import ProductDetailPage from './pages/customer/ProductDetailPage';
+import ProductListPage from './pages/customer/ProductListPage';
+import ProfilePage from './pages/customer/ProfilePage';
+import ReturnPage from './pages/customer/ReturnPage';
+import WishlistPage from './pages/customer/WishlistPage';
+import ManagerInventoryPage from './pages/manager/InventoryPage';
+import ManagerReportsPage from './pages/manager/ManagerReportsPage';
+import PromotionPage from './pages/manager/PromotionPage';
+import StaffPage from './pages/manager/StaffPage';
 
 // Operations Pages
-import OperationsDashboardPage from './pages/operations/OperationsDashboardPage'
-import OperationsBoardPage from './pages/operations/OperationsBoardPage'
-import OperationsOrdersPage from './pages/operations/OperationsOrdersPage'
-import OperationsLensLabPage from './pages/operations/OperationsLensLabPage'
-import OperationsShippingPage from './pages/operations/OperationsShippingPage'
-import PreorderReceivePage from './pages/operations/PreorderReceivePage'
-import InventoryPage from './pages/operations/InventoryPage'
+import InventoryPage from './pages/operations/InventoryPage';
+import OperationsBoardPage from './pages/operations/OperationsBoardPage';
+import OperationsDashboardPage from './pages/operations/OperationsDashboardPage';
+import OperationsLensLabPage from './pages/operations/OperationsLensLabPage';
+import OperationsOrdersPage from './pages/operations/OperationsOrdersPage';
+import OperationsShippingPage from './pages/operations/OperationsShippingPage';
+import PreorderReceivePage from './pages/operations/PreorderReceivePage';
 
 function App() {
   return (
@@ -78,7 +84,10 @@ function App() {
           <Route path="/frames" element={<ProductListPage type="frame" />} />
           <Route path="/lenses" element={<ProductListPage type="lens" />} />
           <Route path="/best-sellers" element={<BestSellerPage />} />
-          <Route path="/accessories" element={<ProductListPage type="accessory" />} />
+          <Route
+            path="/accessories"
+            element={<ProductListPage type="accessory" />}
+          />
           <Route path="/stores" element={<StoresPage />} />
           <Route path="/blog" element={<BlogPage />} />
           <Route path="/faq" element={<BlogPage />} />
@@ -170,15 +179,21 @@ function App() {
           <Route path="/operations/board" element={<OperationsBoardPage />} />
           <Route path="/operations/orders" element={<OperationsOrdersPage />} />
           <Route path="/operations/inventory" element={<InventoryPage />} />
-          <Route path="/operations/lens-lab" element={<OperationsLensLabPage />} />
-          <Route path="/operations/shipping" element={<OperationsShippingPage />} />
+          <Route
+            path="/operations/lens-lab"
+            element={<OperationsLensLabPage />}
+          />
+          <Route
+            path="/operations/shipping"
+            element={<OperationsShippingPage />}
+          />
         </Route>
 
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
-  )
+  );
 }
 
-export default App
+export default App;

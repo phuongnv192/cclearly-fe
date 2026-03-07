@@ -1,114 +1,128 @@
-import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { useCart, useClearCart } from '@/hooks/useCart'
-import { useCreateOrder } from '@/hooks/useOrder'
-import { useAuth } from '@/contexts/AuthContext'
-import { Glasses, Tag, FileText, Check } from 'lucide-react'
-import { toast } from 'react-toastify'
+import { Glasses, Tag, FileText, Check } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import { useAuth } from '@/contexts/AuthContext';
+import { useCart, useClearCart } from '@/hooks/useCart';
+import { useCreateOrder } from '@/hooks/useOrder';
 
 const CheckoutPage = () => {
-  const navigate = useNavigate()
-  const { isAuthenticated } = useAuth()
-  const { data: cartData } = useCart()
-  const createOrder = useCreateOrder()
-  const clearCart = useClearCart()
+  const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
+  const { data: cartData } = useCart();
+  const createOrder = useCreateOrder();
+  const clearCart = useClearCart();
 
-  const cart = cartData?.data || cartData
-  const items = cart?.items || []
-  const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
-  const shippingFee = subtotal > 500000 ? 0 : 30000
+  const cart = cartData?.data || cartData;
+  const items = cart?.items || [];
+  const subtotal = items.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0
+  );
+  const shippingFee = subtotal > 500000 ? 0 : 30000;
 
   // Get prescriptions from sessionStorage (passed from CartPage)
-  const [prescriptions, setPrescriptions] = useState({})
+  const [prescriptions, setPrescriptions] = useState({});
 
   useEffect(() => {
-    const savedPrescriptions = sessionStorage.getItem('cartPrescriptions')
+    const savedPrescriptions = sessionStorage.getItem('cartPrescriptions');
     if (savedPrescriptions) {
       try {
-        setPrescriptions(JSON.parse(savedPrescriptions))
+        setPrescriptions(JSON.parse(savedPrescriptions));
       } catch (e) {
-        console.error('Failed to parse prescriptions', e)
+        console.error('Failed to parse prescriptions', e);
       }
     }
-  }, [])
+  }, []);
 
   // Check if all lens products have prescription
-  const hasLensProduct = items.some(item => item.type === 'lens')
-  const lensItemsWithoutPrescription = items.filter(item =>
-    item.type === 'lens' && !prescriptions[item.id]
-  )
-  const canCheckout = !hasLensProduct || lensItemsWithoutPrescription.length === 0
+  const hasLensProduct = items.some((item) => item.type === 'lens');
+  const lensItemsWithoutPrescription = items.filter(
+    (item) => item.type === 'lens' && !prescriptions[item.id]
+  );
+  const canCheckout =
+    !hasLensProduct || lensItemsWithoutPrescription.length === 0;
 
-  const [voucherCode, setVoucherCode] = useState('')
-  const [discount, setDiscount] = useState(0)
+  const [voucherCode, setVoucherCode] = useState('');
+  const [discount, setDiscount] = useState(0);
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
     address: '',
     city: '',
     notes: '',
-    paymentMethod: 'cod'
-  })
+    paymentMethod: 'cod',
+  });
 
   const handleApplyVoucher = () => {
     const validVouchers = {
-      'WELCOME10': 0.1,
-      'CCLEARLY50': 50000,
-      'FREESHIP': 'freeship'
-    }
+      WELCOME10: 0.1,
+      CCLEARLY50: 50000,
+      FREESHIP: 'freeship',
+    };
 
-    const code = voucherCode.toUpperCase()
+    const code = voucherCode.toUpperCase();
     if (validVouchers[code]) {
       if (code === 'FREESHIP') {
-        setDiscount(shippingFee)
-        toast.success('Đã áp dụng mã miễn phí vận chuyển')
+        setDiscount(shippingFee);
+        toast.success('Đã áp dụng mã miễn phí vận chuyển');
       } else if (validVouchers[code] < 1) {
-        setDiscount(Math.round(subtotal * validVouchers[code]))
-        toast.success(`Đã áp dụng mã giảm giá ${validVouchers[code] * 100}%`)
+        setDiscount(Math.round(subtotal * validVouchers[code]));
+        toast.success(`Đã áp dụng mã giảm giá ${validVouchers[code] * 100}%`);
       } else {
-        setDiscount(validVouchers[code])
-        toast.success(`Đã áp dụng mã giảm giá ${formatCurrency(validVouchers[code])}`)
+        setDiscount(validVouchers[code]);
+        toast.success(
+          `Đã áp dụng mã giảm giá ${formatCurrency(validVouchers[code])}`
+        );
       }
     } else {
-      toast.error('Mã giảm giá không hợp lệ')
-      setDiscount(0)
+      toast.error('Mã giảm giá không hợp lệ');
+      setDiscount(0);
     }
-  }
+  };
 
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount || 0)
-  }
+    return new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND',
+    }).format(amount || 0);
+  };
 
-  const finalShippingFee = discount === shippingFee && voucherCode.toUpperCase() === 'FREESHIP' ? 0 : shippingFee
-  const totalAmount = subtotal + finalShippingFee - (discount !== shippingFee ? discount : 0)
+  const finalShippingFee =
+    discount === shippingFee && voucherCode.toUpperCase() === 'FREESHIP'
+      ? 0
+      : shippingFee;
+  const totalAmount =
+    subtotal + finalShippingFee - (discount !== shippingFee ? discount : 0);
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value })
-  }
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
+    e.preventDefault();
 
     if (!isAuthenticated) {
-      navigate('/login', { state: { from: '/checkout' } })
-      return
+      navigate('/login', { state: { from: '/checkout' } });
+      return;
     }
 
     if (!canCheckout) {
-      toast.error('Vui lòng tải lên đơn thuốc cho các sản phẩm tròng kính')
-      return
+      toast.error('Vui lòng tải lên đơn thuốc cho các sản phẩm tròng kính');
+      return;
     }
 
     try {
-      const orderItems = items.map(item => ({
+      const orderItems = items.map((item) => ({
         productId: item.productId,
         name: item.name,
         price: item.price,
         quantity: item.quantity,
-        ...(item.type === 'lens' && prescriptions[item.id] && {
-          prescriptionImage: prescriptions[item.id].name
-        })
-      }))
+        ...(item.type === 'lens' &&
+          prescriptions[item.id] && {
+            prescriptionImage: prescriptions[item.id].name,
+          }),
+      }));
 
       await createOrder.mutateAsync({
         items: orderItems,
@@ -123,35 +137,42 @@ const CheckoutPage = () => {
         },
         notes: formData.notes,
         paymentMethod: formData.paymentMethod,
-        voucherCode: discount > 0 ? voucherCode : null
-      })
+        voucherCode: discount > 0 ? voucherCode : null,
+      });
 
-      sessionStorage.removeItem('cartPrescriptions')
-      await clearCart.mutateAsync()
-      navigate('/orders')
+      sessionStorage.removeItem('cartPrescriptions');
+      await clearCart.mutateAsync();
+      navigate('/orders');
     } catch (error) {
       // Error handled by hook
     }
-  }
+  };
 
   if (items.length === 0) {
     return (
       <div className="bg-[#ececec] min-h-screen py-10">
         <div className="max-w-[1180px] mx-auto px-4 sm:px-6 text-center py-20">
-          <h2 className="text-3xl font-bold text-[#222] mb-4">Giỏ hàng trống</h2>
-          <button onClick={() => navigate('/products')} className="text-[#0f5dd9] hover:underline font-medium">
+          <h2 className="text-3xl font-bold text-[#222] mb-4">
+            Giỏ hàng trống
+          </h2>
+          <button
+            onClick={() => navigate('/products')}
+            className="text-[#0f5dd9] hover:underline font-medium"
+          >
             Tiếp tục mua sắm
           </button>
         </div>
       </div>
-    )
+    );
   }
 
   return (
     <div className="bg-[#ececec] min-h-screen py-10">
       <div className="max-w-[1180px] mx-auto px-4 sm:px-6">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-[#222] tracking-[-0.02em]">Thanh toán</h1>
+          <h1 className="text-4xl font-bold text-[#222] tracking-[-0.02em]">
+            Thanh toán
+          </h1>
           <p className="text-[#4f5562] mt-2">Hoàn tất đơn hàng của bạn</p>
         </div>
 
@@ -165,21 +186,31 @@ const CheckoutPage = () => {
                   <Check size={14} /> Đã tải đủ
                 </span>
               ) : (
-                <span className="text-orange-600 text-sm ml-auto">Chưa tải đủ</span>
+                <span className="text-orange-600 text-sm ml-auto">
+                  Chưa tải đủ
+                </span>
               )}
             </div>
             <div className="flex flex-wrap gap-2">
-              {items.filter(item => item.type === 'lens').map(item => (
-                <div
-                  key={item.id}
-                  className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm ${
-                    prescriptions[item.id] ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'
-                  }`}
-                >
-                  {prescriptions[item.id] ? <Check size={12} /> : <FileText size={12} />}
-                  {item.name.substring(0, 20)}...
-                </div>
-              ))}
+              {items
+                .filter((item) => item.type === 'lens')
+                .map((item) => (
+                  <div
+                    key={item.id}
+                    className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm ${
+                      prescriptions[item.id]
+                        ? 'bg-green-100 text-green-700'
+                        : 'bg-orange-100 text-orange-700'
+                    }`}
+                  >
+                    {prescriptions[item.id] ? (
+                      <Check size={12} />
+                    ) : (
+                      <FileText size={12} />
+                    )}
+                    {item.name.substring(0, 20)}...
+                  </div>
+                ))}
             </div>
           </div>
         )}
@@ -188,10 +219,14 @@ const CheckoutPage = () => {
           <div className="bg-white rounded-2xl shadow-[0_10px_30px_rgba(13,22,39,0.06)] p-6">
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
-                <h3 className="font-semibold text-[#222] mb-4">Thông tin liên hệ</h3>
+                <h3 className="font-semibold text-[#222] mb-4">
+                  Thông tin liên hệ
+                </h3>
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-[#222] mb-2">Họ tên *</label>
+                    <label className="block text-sm font-medium text-[#222] mb-2">
+                      Họ tên *
+                    </label>
                     <input
                       type="text"
                       name="name"
@@ -203,7 +238,9 @@ const CheckoutPage = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-[#222] mb-2">Số điện thoại *</label>
+                    <label className="block text-sm font-medium text-[#222] mb-2">
+                      Số điện thoại *
+                    </label>
                     <input
                       type="tel"
                       name="phone"
@@ -218,10 +255,14 @@ const CheckoutPage = () => {
               </div>
 
               <div>
-                <h3 className="font-semibold text-[#222] mb-4">Địa chỉ giao hàng</h3>
+                <h3 className="font-semibold text-[#222] mb-4">
+                  Địa chỉ giao hàng
+                </h3>
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-[#222] mb-2">Địa chỉ *</label>
+                    <label className="block text-sm font-medium text-[#222] mb-2">
+                      Địa chỉ *
+                    </label>
                     <input
                       type="text"
                       name="address"
@@ -233,7 +274,9 @@ const CheckoutPage = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-[#222] mb-2">Tỉnh/TP *</label>
+                    <label className="block text-sm font-medium text-[#222] mb-2">
+                      Tỉnh/TP *
+                    </label>
                     <input
                       type="text"
                       name="city"
@@ -245,7 +288,9 @@ const CheckoutPage = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-[#222] mb-2">Ghi chú</label>
+                    <label className="block text-sm font-medium text-[#222] mb-2">
+                      Ghi chú
+                    </label>
                     <textarea
                       name="notes"
                       value={formData.notes}
@@ -259,27 +304,66 @@ const CheckoutPage = () => {
               </div>
 
               <div>
-                <h3 className="font-semibold text-[#222] mb-4">Phương thức thanh toán</h3>
+                <h3 className="font-semibold text-[#222] mb-4">
+                  Phương thức thanh toán
+                </h3>
                 <div className="space-y-3">
-                  <label className={`flex items-center gap-4 p-4 border-2 rounded-2xl cursor-pointer transition ${formData.paymentMethod === 'cod' ? 'border-[#0f5dd9] bg-[#f0f7ff]' : 'border-[#e0e0e0] hover:border-[#bbb]'}`}>
-                    <input type="radio" name="paymentMethod" value="cod" checked={formData.paymentMethod === 'cod'} onChange={handleChange} className="w-5 h-5 text-[#0f5dd9]" />
+                  <label
+                    className={`flex items-center gap-4 p-4 border-2 rounded-2xl cursor-pointer transition ${formData.paymentMethod === 'cod' ? 'border-[#0f5dd9] bg-[#f0f7ff]' : 'border-[#e0e0e0] hover:border-[#bbb]'}`}
+                  >
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      value="cod"
+                      checked={formData.paymentMethod === 'cod'}
+                      onChange={handleChange}
+                      className="w-5 h-5 text-[#0f5dd9]"
+                    />
                     <div>
-                      <span className="font-medium text-[#222]">Thanh toán khi nhận hàng (COD)</span>
-                      <p className="text-sm text-[#4f5562]">Trả tiền mặt khi nhận được hàng</p>
+                      <span className="font-medium text-[#222]">
+                        Thanh toán khi nhận hàng (COD)
+                      </span>
+                      <p className="text-sm text-[#4f5562]">
+                        Trả tiền mặt khi nhận được hàng
+                      </p>
                     </div>
                   </label>
-                  <label className={`flex items-center gap-4 p-4 border-2 rounded-2xl cursor-pointer transition ${formData.paymentMethod === 'banking' ? 'border-[#0f5dd9] bg-[#f0f7ff]' : 'border-[#e0e0e0] hover:border-[#bbb]'}`}>
-                    <input type="radio" name="paymentMethod" value="banking" checked={formData.paymentMethod === 'banking'} onChange={handleChange} className="w-5 h-5 text-[#0f5dd9]" />
+                  <label
+                    className={`flex items-center gap-4 p-4 border-2 rounded-2xl cursor-pointer transition ${formData.paymentMethod === 'banking' ? 'border-[#0f5dd9] bg-[#f0f7ff]' : 'border-[#e0e0e0] hover:border-[#bbb]'}`}
+                  >
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      value="banking"
+                      checked={formData.paymentMethod === 'banking'}
+                      onChange={handleChange}
+                      className="w-5 h-5 text-[#0f5dd9]"
+                    />
                     <div>
-                      <span className="font-medium text-[#222]">Chuyển khoản ngân hàng</span>
-                      <p className="text-sm text-[#4f5562]">Chuyển khoản trước qua QR Code</p>
+                      <span className="font-medium text-[#222]">
+                        Chuyển khoản ngân hàng
+                      </span>
+                      <p className="text-sm text-[#4f5562]">
+                        Chuyển khoản trước qua QR Code
+                      </p>
                     </div>
                   </label>
-                  <label className={`flex items-center gap-4 p-4 border-2 rounded-2xl cursor-pointer transition ${formData.paymentMethod === 'momo' ? 'border-[#0f5dd9] bg-[#f0f7ff]' : 'border-[#e0e0e0] hover:border-[#bbb]'}`}>
-                    <input type="radio" name="paymentMethod" value="momo" checked={formData.paymentMethod === 'momo'} onChange={handleChange} className="w-5 h-5 text-[#0f5dd9]" />
+                  <label
+                    className={`flex items-center gap-4 p-4 border-2 rounded-2xl cursor-pointer transition ${formData.paymentMethod === 'momo' ? 'border-[#0f5dd9] bg-[#f0f7ff]' : 'border-[#e0e0e0] hover:border-[#bbb]'}`}
+                  >
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      value="momo"
+                      checked={formData.paymentMethod === 'momo'}
+                      onChange={handleChange}
+                      className="w-5 h-5 text-[#0f5dd9]"
+                    />
                     <div>
                       <span className="font-medium text-[#222]">Ví MoMo</span>
-                      <p className="text-sm text-[#4f5562]">Thanh toán qua ví điện tử MoMo</p>
+                      <p className="text-sm text-[#4f5562]">
+                        Thanh toán qua ví điện tử MoMo
+                      </p>
                     </div>
                   </label>
                 </div>
@@ -290,14 +374,20 @@ const CheckoutPage = () => {
                 disabled={createOrder.isPending || !canCheckout}
                 className="w-full py-4 rounded-full font-medium transition disabled:bg-gray-300 disabled:text-gray-500 bg-[#141f36] text-white hover:bg-[#0d1322]"
               >
-                {createOrder.isPending ? 'Đang xử lý...' : !canCheckout ? 'Cần tải lên đơn thuốc' : 'Đặt hàng'}
+                {createOrder.isPending
+                  ? 'Đang xử lý...'
+                  : !canCheckout
+                    ? 'Cần tải lên đơn thuốc'
+                    : 'Đặt hàng'}
               </button>
             </form>
           </div>
 
           <div>
             <div className="bg-white rounded-2xl shadow-[0_10px_30px_rgba(13,22,39,0.06)] p-6 sticky top-4">
-              <h2 className="text-xl font-bold text-[#222] mb-6">Đơn hàng ({items.length} sản phẩm)</h2>
+              <h2 className="text-xl font-bold text-[#222] mb-6">
+                Đơn hàng ({items.length} sản phẩm)
+              </h2>
 
               <div className="space-y-4 mb-6 max-h-[300px] overflow-y-auto">
                 {items.map((item) => (
@@ -306,7 +396,9 @@ const CheckoutPage = () => {
                       <Glasses className="w-8 h-8 text-gray-400" />
                     </div>
                     <div className="flex-1">
-                      <p className="font-medium text-[#222] text-sm line-clamp-1">{item.name}</p>
+                      <p className="font-medium text-[#222] text-sm line-clamp-1">
+                        {item.name}
+                      </p>
                       <p className="text-xs text-[#4f5562]">x{item.quantity}</p>
                       {item.type === 'lens' && prescriptions[item.id] && (
                         <p className="text-xs text-green-600 flex items-center gap-1 mt-1">
@@ -315,7 +407,10 @@ const CheckoutPage = () => {
                       )}
                     </div>
                     <p className="font-medium text-[#222] text-sm">
-                      {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item.price * item.quantity)}
+                      {new Intl.NumberFormat('vi-VN', {
+                        style: 'currency',
+                        currency: 'VND',
+                      }).format(item.price * item.quantity)}
                     </p>
                   </div>
                 ))}
@@ -350,8 +445,14 @@ const CheckoutPage = () => {
                 </div>
                 <div className="flex justify-between text-[#4f5562] text-sm">
                   <span>Phí vận chuyển:</span>
-                  <span className={finalShippingFee === 0 ? 'text-green-600 font-medium' : ''}>
-                    {finalShippingFee === 0 ? 'Miễn phí' : formatCurrency(finalShippingFee)}
+                  <span
+                    className={
+                      finalShippingFee === 0 ? 'text-green-600 font-medium' : ''
+                    }
+                  >
+                    {finalShippingFee === 0
+                      ? 'Miễn phí'
+                      : formatCurrency(finalShippingFee)}
                   </span>
                 </div>
                 {discount > 0 && voucherCode.toUpperCase() !== 'FREESHIP' && (
@@ -372,7 +473,7 @@ const CheckoutPage = () => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default CheckoutPage
+export default CheckoutPage;

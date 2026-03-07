@@ -56,6 +56,20 @@ export const ENDPOINT = {
   PROMOTIONS: '/promotions',
   PROMOTION_DETAIL: (id) => `/promotions/${id}`,
   PROMOTION_TOGGLE: (id) => `/promotions/${id}/toggle`,
+
+  // Inventory
+  INVENTORY: '/inventory',
+  INVENTORY_IMPORT: '/inventory/import',
+
+  // Returns
+  RETURNS: '/returns',
+  RETURN_DETAIL: (id) => `/returns/${id}`,
+  RETURN_APPROVE: (id) => `/returns/${id}/approve`,
+  RETURN_REJECT: (id) => `/returns/${id}/reject`,
+  RETURN_COMPLETE: (id) => `/returns/${id}/complete`,
+
+  // Order Prescription
+  ORDER_PRESCRIPTION: (orderId) => `/orders/${orderId}/prescription`,
 };
 
 // Query Keys for React Query
@@ -89,4 +103,11 @@ export const QUERY_KEYS = {
 
   // Promotions
   PROMOTIONS: ['promotions'],
+
+  // Inventory
+  INVENTORY: ['inventory'],
+
+  // Returns
+  RETURNS: ['returns'],
+  RETURN_DETAIL: (id) => ['returns', id],
 };

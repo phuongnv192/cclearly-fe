@@ -1,27 +1,58 @@
 // Sales Customers Page - Quản lý khách hàng
-import { useState } from 'react'
-import { useAuth } from '@/contexts/AuthContext'
-import { customers, orders } from '@/mocks/data'
-import { Search, User, Phone, Mail, ShoppingBag, DollarSign, MessageCircle } from 'lucide-react'
+import {
+  Search,
+  User,
+  Phone,
+  Mail,
+  ShoppingBag,
+  DollarSign,
+  MessageCircle,
+} from 'lucide-react';
+import { useState } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
+import { useAdminUsers } from '@/hooks/useAdmin';
+import { useAdminOrders } from '@/hooks/useOrder';
 
 const SalesCustomersPage = () => {
-  const { user } = useAuth()
-  const [searchTerm, setSearchTerm] = useState('')
-  const [selectedCustomer, setSelectedCustomer] = useState(null)
+  const { user } = useAuth();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCustomer, setSelectedCustomer] = useState(null);
 
-  const filteredCustomers = customers.filter(cust => {
-    return cust.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      cust.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      cust.phone.includes(searchTerm)
-  })
+  const { data: allUsers = [] } = useAdminUsers();
+  const { data: ordersData } = useAdminOrders({ size: 1000 });
+  const allOrders = ordersData?.items || ordersData || [];
+
+  const customers = allUsers
+    .filter((u) => u.role === 'CUSTOMER' || u.role === 'customer')
+    .map((u) => {
+      const custOrders = allOrders.filter((o) => o.userId === u.id || o.userId === u.userId);
+      return {
+        ...u,
+        totalOrders: u.totalOrders || custOrders.length,
+        totalSpent: u.totalSpent || custOrders.reduce((sum, o) => sum + (o.finalAmount || o.totalAmount || 0), 0),
+        joinDate: u.joinDate || u.createdAt,
+        status: u.status || 'active',
+      };
+    });
+
+  const filteredCustomers = customers.filter((cust) => {
+    return (
+      (cust.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (cust.email || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (cust.phone || '').includes(searchTerm)
+    );
+  });
 
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount)
-  }
+    return new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND',
+    }).format(amount);
+  };
 
   const getCustomerOrders = (customerId) => {
-    return orders.filter(o => o.userId === customerId)
-  }
+    return allOrders.filter((o) => o.userId === customerId);
+  };
 
   return (
     <div className="space-y-6">
@@ -54,7 +85,9 @@ const SalesCustomersPage = () => {
               key={cust.id}
               onClick={() => setSelectedCustomer(cust)}
               className={`bg-white rounded-xl p-6 shadow-sm cursor-pointer transition ${
-                selectedCustomer?.id === cust.id ? 'ring-2 ring-[#0f5dd9]' : 'hover:shadow-md'
+                selectedCustomer?.id === cust.id
+                  ? 'ring-2 ring-[#0f5dd9]'
+                  : 'hover:shadow-md'
               }`}
             >
               <div className="flex items-start gap-4">
@@ -64,10 +97,16 @@ const SalesCustomersPage = () => {
                 <div className="flex-1">
                   <div className="flex items-center justify-between">
                     <h3 className="font-bold text-[#222]">{cust.name}</h3>
-                    <span className={`px-2 py-1 rounded-full text-xs ${
-                      cust.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-                    }`}>
-                      {cust.status === 'active' ? 'Hoạt động' : 'Không hoạt động'}
+                    <span
+                      className={`px-2 py-1 rounded-full text-xs ${
+                        cust.status === 'active'
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-gray-100 text-gray-800'
+                      }`}
+                    >
+                      {cust.status === 'active'
+                        ? 'Hoạt động'
+                        : 'Không hoạt động'}
                     </span>
                   </div>
                   <p className="text-sm text-[#4f5562] flex items-center gap-2 mt-1">
@@ -81,16 +120,22 @@ const SalesCustomersPage = () => {
 
               <div className="grid grid-cols-3 gap-4 mt-4 pt-4 border-t">
                 <div className="text-center">
-                  <p className="text-xl font-bold text-[#222]">{cust.totalOrders}</p>
+                  <p className="text-xl font-bold text-[#222]">
+                    {cust.totalOrders}
+                  </p>
                   <p className="text-xs text-[#4f5562]">Đơn hàng</p>
                 </div>
                 <div className="text-center">
-                  <p className="text-xl font-bold text-[#222]">{formatCurrency(cust.totalSpent)}</p>
+                  <p className="text-xl font-bold text-[#222]">
+                    {formatCurrency(cust.totalSpent)}
+                  </p>
                   <p className="text-xs text-[#4f5562]">Tổng chi tiêu</p>
                 </div>
                 <div className="text-center">
                   <p className="text-xl font-bold text-[#222]">
-                    {cust.totalOrders > 0 ? formatCurrency(cust.totalSpent / cust.totalOrders) : 0}
+                    {cust.totalOrders > 0
+                      ? formatCurrency(cust.totalSpent / cust.totalOrders)
+                      : 0}
                   </p>
                   <p className="text-xs text-[#4f5562]">Giá trị TB</p>
                 </div>
@@ -114,8 +159,15 @@ const SalesCustomersPage = () => {
                   {selectedCustomer.name.charAt(0)}
                 </div>
                 <div>
-                  <h3 className="font-bold text-xl text-[#222]">{selectedCustomer.name}</h3>
-                  <p className="text-sm text-[#4f5562]">Khách hàng từ {new Date(selectedCustomer.joinDate).toLocaleDateString('vi-VN')}</p>
+                  <h3 className="font-bold text-xl text-[#222]">
+                    {selectedCustomer.name}
+                  </h3>
+                  <p className="text-sm text-[#4f5562]">
+                    Khách hàng từ{' '}
+                    {new Date(selectedCustomer.joinDate).toLocaleDateString(
+                      'vi-VN'
+                    )}
+                  </p>
                 </div>
               </div>
 
@@ -133,12 +185,16 @@ const SalesCustomersPage = () => {
               <div className="grid grid-cols-2 gap-4 mb-6">
                 <div className="bg-gray-50 rounded-xl p-4 text-center">
                   <ShoppingBag className="w-6 h-6 mx-auto text-[#0f5dd9] mb-2" />
-                  <p className="text-xl font-bold text-[#222]">{selectedCustomer.totalOrders}</p>
+                  <p className="text-xl font-bold text-[#222]">
+                    {selectedCustomer.totalOrders}
+                  </p>
                   <p className="text-xs text-[#4f5562]">Đơn hàng</p>
                 </div>
                 <div className="bg-gray-50 rounded-xl p-4 text-center">
                   <DollarSign className="w-6 h-6 mx-auto text-[#0f5dd9] mb-2" />
-                  <p className="text-xl font-bold text-[#222]">{formatCurrency(selectedCustomer.totalSpent)}</p>
+                  <p className="text-xl font-bold text-[#222]">
+                    {formatCurrency(selectedCustomer.totalSpent)}
+                  </p>
                   <p className="text-xs text-[#4f5562]">Tổng chi tiêu</p>
                 </div>
               </div>
@@ -146,14 +202,21 @@ const SalesCustomersPage = () => {
               <div className="border-t pt-4">
                 <h4 className="font-bold text-[#222] mb-3">Lịch sử đơn hàng</h4>
                 <div className="space-y-2">
-                  {getCustomerOrders(selectedCustomer.id).map((order) => (
-                    <div key={order.id} className="flex justify-between text-sm p-2 bg-gray-50 rounded-lg">
-                      <span className="font-medium">{order.id}</span>
-                      <span className="text-[#4f5562]">{formatCurrency(order.totalAmount)}</span>
+                  {getCustomerOrders(selectedCustomer.id || selectedCustomer.userId).map((order) => (
+                    <div
+                      key={order.orderId || order.id}
+                      className="flex justify-between text-sm p-2 bg-gray-50 rounded-lg"
+                    >
+                      <span className="font-medium">{order.code || order.orderId || order.id}</span>
+                      <span className="text-[#4f5562]">
+                        {formatCurrency(order.finalAmount || order.totalAmount)}
+                      </span>
                     </div>
                   ))}
-                  {getCustomerOrders(selectedCustomer.id).length === 0 && (
-                    <p className="text-sm text-[#4f5562] text-center py-4">Chưa có đơn hàng</p>
+                  {getCustomerOrders(selectedCustomer.id || selectedCustomer.userId).length === 0 && (
+                    <p className="text-sm text-[#4f5562] text-center py-4">
+                      Chưa có đơn hàng
+                    </p>
                   )}
                 </div>
               </div>
@@ -171,7 +234,7 @@ const SalesCustomersPage = () => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default SalesCustomersPage
+export default SalesCustomersPage;

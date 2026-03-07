@@ -1,10 +1,4 @@
-const Select = ({
-  label,
-  error,
-  options = [],
-  className = '',
-  ...props
-}) => {
+const Select = ({ label, error, options = [], className = '', ...props }) => {
   return (
     <div className={className}>
       {label && (
@@ -25,11 +19,9 @@ const Select = ({
           </option>
         ))}
       </select>
-      {error && (
-        <p className="mt-1 text-sm text-red-500">{error}</p>
-      )}
+      {error && <p className="mt-1 text-sm text-red-500">{error}</p>}
     </div>
-  )
-}
+  );
+};
 
-export default Select
+export default Select;

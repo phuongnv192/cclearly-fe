@@ -1,9 +1,4 @@
-const Input = ({
-  label,
-  error,
-  className = '',
-  ...props
-}) => {
+const Input = ({ label, error, className = '', ...props }) => {
   return (
     <div className={className}>
       {label && (
@@ -18,11 +13,9 @@ const Input = ({
         `}
         {...props}
       />
-      {error && (
-        <p className="mt-1 text-sm text-red-500">{error}</p>
-      )}
+      {error && <p className="mt-1 text-sm text-red-500">{error}</p>}
     </div>
-  )
-}
+  );
+};
 
-export default Input
+export default Input;

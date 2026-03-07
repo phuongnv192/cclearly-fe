@@ -1,29 +1,45 @@
 // Sales Returns Page - Xử lý đổi trả & khiếu nại
-import { useState } from 'react'
-import { useAuth } from '@/contexts/AuthContext'
-import { returns as initialReturns } from '@/mocks/data'
-import { Search, Eye, CheckCircle, XCircle, RotateCcw } from 'lucide-react'
-import ConfirmModal from '@/components/ui/ConfirmModal'
-import { toast } from 'react-toastify'
+import { Search, Eye, CheckCircle, XCircle, RotateCcw } from 'lucide-react';
+import { useState } from 'react';
+import { toast } from 'react-toastify';
+import ConfirmModal from '@/components/ui/ConfirmModal';
+import { useAuth } from '@/contexts/AuthContext';
+import { useReturns, useApproveReturn, useRejectReturn, useCompleteReturn } from '@/hooks/useReturn';
 
 const SalesReturnsPage = () => {
-  const { user } = useAuth()
-  const [returns, setReturns] = useState(initialReturns)
-  const [searchTerm, setSearchTerm] = useState('')
-  const [statusFilter, setStatusFilter] = useState('all')
-  const [confirmModal, setConfirmModal] = useState({ isOpen: false, type: 'warning', title: '', message: '', onConfirm: null, itemId: null })
+  const { user } = useAuth();
+  const { data: returns = [] } = useReturns();
+  const approveReturnMutation = useApproveReturn();
+  const rejectReturnMutation = useRejectReturn();
+  const completeReturnMutation = useCompleteReturn();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [confirmModal, setConfirmModal] = useState({
+    isOpen: false,
+    type: 'warning',
+    title: '',
+    message: '',
+    onConfirm: null,
+    itemId: null,
+  });
 
-  const filteredReturns = returns.filter(ret => {
-    const matchesSearch = ret.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      ret.orderId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      ret.customerName?.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesStatus = statusFilter === 'all' || ret.status === statusFilter
-    return matchesSearch && matchesStatus
-  })
+  const filteredReturns = returns.filter((ret) => {
+    const retId = String(ret.refundId || ret.id || '');
+    const orderId = String(ret.orderCode || ret.orderId || '');
+    const matchesSearch =
+      retId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      orderId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      ret.customerName?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = statusFilter === 'all' || ret.status?.toLowerCase() === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
 
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount)
-  }
+    return new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND',
+    }).format(amount);
+  };
 
   const getStatusBadge = (status) => {
     const map = {
@@ -31,15 +47,15 @@ const SalesReturnsPage = () => {
       approved: { label: 'Đã duyệt', class: 'bg-blue-100 text-blue-800' },
       completed: { label: 'Hoàn thành', class: 'bg-green-100 text-green-800' },
       rejected: { label: 'Từ chối', class: 'bg-red-100 text-red-800' },
-    }
-    return map[status] || { label: status, class: 'bg-gray-100 text-gray-800' }
-  }
+    };
+    return map[status] || { label: status, class: 'bg-gray-100 text-gray-800' };
+  };
 
   const getTypeBadge = (type) => {
     return type === 'return'
       ? { label: 'Hoàn tiền', class: 'bg-orange-100 text-orange-800' }
-      : { label: 'Đổi hàng', class: 'bg-purple-100 text-purple-800' }
-  }
+      : { label: 'Đổi hàng', class: 'bg-purple-100 text-purple-800' };
+  };
 
   const handleApprove = (id) => {
     setConfirmModal({
@@ -49,11 +65,10 @@ const SalesReturnsPage = () => {
       message: `Bạn có muốn duyệt yêu cầu ${id} không?`,
       itemId: id,
       onConfirm: () => {
-        setReturns(prev => prev.map(r => r.id === id ? { ...r, status: 'approved', processedDate: new Date().toISOString() } : r))
-        toast.success(`Đã duyệt yêu cầu ${id}`)
-      }
-    })
-  }
+        approveReturnMutation.mutate(id);
+      },
+    });
+  };
 
   const handleReject = (id) => {
     setConfirmModal({
@@ -63,11 +78,10 @@ const SalesReturnsPage = () => {
       message: `Bạn có chắc chắn muốn từ chối yêu cầu ${id}?`,
       itemId: id,
       onConfirm: () => {
-        setReturns(prev => prev.map(r => r.id === id ? { ...r, status: 'rejected', processedDate: new Date().toISOString() } : r))
-        toast.error(`Đã từ chối yêu cầu ${id}`)
-      }
-    })
-  }
+        rejectReturnMutation.mutate({ id, reason: 'Từ chối bởi nhân viên' });
+      },
+    });
+  };
 
   const handleComplete = (id) => {
     setConfirmModal({
@@ -77,11 +91,10 @@ const SalesReturnsPage = () => {
       message: `Đánh dấu yêu cầu ${id} đã hoàn thành?`,
       itemId: id,
       onConfirm: () => {
-        setReturns(prev => prev.map(r => r.id === id ? { ...r, status: 'completed', processedDate: new Date().toISOString() } : r))
-        toast.success(`Đã hoàn thành xử lý yêu cầu ${id}`)
-      }
-    })
-  }
+        completeReturnMutation.mutate(id);
+      },
+    });
+  };
 
   return (
     <div className="space-y-6">
@@ -92,15 +105,21 @@ const SalesReturnsPage = () => {
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="bg-white rounded-xl p-4 shadow-sm">
-          <p className="text-2xl font-bold text-[#222]">{returns.filter(r => r.status === 'pending').length}</p>
+          <p className="text-2xl font-bold text-[#222]">
+            {returns.filter((r) => r.status === 'pending').length}
+          </p>
           <p className="text-sm text-[#4f5562]">Chờ xử lý</p>
         </div>
         <div className="bg-white rounded-xl p-4 shadow-sm">
-          <p className="text-2xl font-bold text-[#222]">{returns.filter(r => r.status === 'approved').length}</p>
+          <p className="text-2xl font-bold text-[#222]">
+            {returns.filter((r) => r.status === 'approved').length}
+          </p>
           <p className="text-sm text-[#4f5562]">Đã duyệt</p>
         </div>
         <div className="bg-white rounded-xl p-4 shadow-sm">
-          <p className="text-2xl font-bold text-[#222]">{returns.filter(r => r.status === 'completed').length}</p>
+          <p className="text-2xl font-bold text-[#222]">
+            {returns.filter((r) => r.status === 'completed').length}
+          </p>
           <p className="text-sm text-[#4f5562]">Hoàn thành</p>
         </div>
         <div className="bg-white rounded-xl p-4 shadow-sm">
@@ -137,10 +156,10 @@ const SalesReturnsPage = () => {
 
       <div className="space-y-4">
         {filteredReturns.map((ret) => {
-          const statusBadge = getStatusBadge(ret.status)
-          const typeBadge = getTypeBadge(ret.type)
+          const statusBadge = getStatusBadge(ret.status);
+          const typeBadge = getTypeBadge(ret.type);
           return (
-            <div key={ret.id} className="bg-white rounded-xl p-6 shadow-sm">
+            <div key={ret.refundId || ret.id} className="bg-white rounded-xl p-6 shadow-sm">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
@@ -148,15 +167,27 @@ const SalesReturnsPage = () => {
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="font-bold text-[#222]">{ret.id}</span>
-                      <span className={`px-2 py-0.5 rounded-full text-xs ${typeBadge.class}`}>{typeBadge.label}</span>
-                      <span className={`px-2 py-0.5 rounded-full text-xs ${statusBadge.class}`}>{statusBadge.label}</span>
+                      <span className="font-bold text-[#222]">{ret.refundId || ret.id}</span>
+                      <span
+                        className={`px-2 py-0.5 rounded-full text-xs ${typeBadge.class}`}
+                      >
+                        {typeBadge.label}
+                      </span>
+                      <span
+                        className={`px-2 py-0.5 rounded-full text-xs ${statusBadge.class}`}
+                      >
+                        {statusBadge.label}
+                      </span>
                     </div>
-                    <p className="text-sm text-[#4f5562]">Order: {ret.orderId}</p>
+                    <p className="text-sm text-[#4f5562]">
+                      Order: {ret.orderCode || ret.orderId}
+                    </p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="font-bold text-[#222]">{formatCurrency(ret.refundAmount)}</p>
+                  <p className="font-bold text-[#222]">
+                    {formatCurrency(Number(ret.refundAmount))}
+                  </p>
                   <p className="text-xs text-[#4f5562]">
                     {new Date(ret.requestDate).toLocaleDateString('vi-VN')}
                   </p>
@@ -165,7 +196,9 @@ const SalesReturnsPage = () => {
 
               <div className="grid md:grid-cols-2 gap-4 mb-4">
                 <div>
-                  <p className="text-sm font-medium text-[#222]">Thông tin khách hàng</p>
+                  <p className="text-sm font-medium text-[#222]">
+                    Thông tin khách hàng
+                  </p>
                   <p className="text-sm text-[#4f5562]">{ret.customerName}</p>
                   <p className="text-sm text-[#4f5562]">{ret.customerPhone}</p>
                 </div>
@@ -179,8 +212,12 @@ const SalesReturnsPage = () => {
                 <p className="text-sm font-medium text-[#222] mb-2">Sản phẩm</p>
                 {ret.items.map((item, idx) => (
                   <div key={idx} className="flex justify-between text-sm py-1">
-                    <span className="text-[#4f5562]">{item.name} x{item.quantity}</span>
-                    <span className="font-medium">{formatCurrency(item.price * item.quantity)}</span>
+                    <span className="text-[#4f5562]">
+                      {item.name} x{item.quantity}
+                    </span>
+                    <span className="font-medium">
+                      {formatCurrency(item.price * item.quantity)}
+                    </span>
                   </div>
                 ))}
               </div>
@@ -188,13 +225,13 @@ const SalesReturnsPage = () => {
               {ret.status === 'pending' && (
                 <div className="flex gap-2 mt-4 pt-4 border-t">
                   <button
-                    onClick={() => handleApprove(ret.id)}
+                    onClick={() => handleApprove(ret.refundId || ret.id)}
                     className="flex-1 bg-green-500 text-white py-2 rounded-xl font-medium hover:bg-green-600 flex items-center justify-center gap-2"
                   >
                     <CheckCircle className="w-4 h-4" /> Duyệt
                   </button>
                   <button
-                    onClick={() => handleReject(ret.id)}
+                    onClick={() => handleReject(ret.refundId || ret.id)}
                     className="flex-1 bg-red-500 text-white py-2 rounded-xl font-medium hover:bg-red-600 flex items-center justify-center gap-2"
                   >
                     <XCircle className="w-4 h-4" /> Từ chối
@@ -204,7 +241,7 @@ const SalesReturnsPage = () => {
               {ret.status === 'approved' && (
                 <div className="mt-4 pt-4 border-t">
                   <button
-                    onClick={() => handleComplete(ret.id)}
+                    onClick={() => handleComplete(ret.refundId || ret.id)}
                     className="w-full bg-[#0f5dd9] text-white py-2 rounded-xl font-medium hover:bg-[#0b4fc0]"
                   >
                     Hoàn thành xử lý
@@ -212,7 +249,7 @@ const SalesReturnsPage = () => {
                 </div>
               )}
             </div>
-          )
+          );
         })}
 
         {filteredReturns.length === 0 && (
@@ -232,7 +269,7 @@ const SalesReturnsPage = () => {
         confirmText={confirmModal.type === 'danger' ? 'Từ chối' : 'Xác nhận'}
       />
     </div>
-  )
-}
+  );
+};
 
-export default SalesReturnsPage
+export default SalesReturnsPage;

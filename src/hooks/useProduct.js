@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'react-toastify';
 import { productRequest } from '@/api/product';
 import { handleErrorApi } from '@/lib/errors/handleError';
-import { toast } from 'react-toastify';
 import { QUERY_KEYS } from '@/utils/endpoints';
 
 // Get products list with filters
@@ -95,7 +95,9 @@ export const useUpdateProduct = () => {
     onSuccess: (_, variables) => {
       toast.success('Cập nhật sản phẩm thành công!');
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PRODUCTS });
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PRODUCT_DETAIL(variables.id) });
+      queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.PRODUCT_DETAIL(variables.id),
+      });
     },
     onError: (error) => {
       handleErrorApi({ error });

@@ -1,116 +1,127 @@
-import { useState, useRef, useEffect } from 'react'
-import { Link, useNavigate, useLocation } from 'react-router-dom'
-import { useVerifyEmail, useResendVerification } from '@/hooks/useAuth'
+import { useState, useRef, useEffect } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useVerifyEmail, useResendVerification } from '@/hooks/useAuth';
 
 const VerifyEmailPage = () => {
-  const navigate = useNavigate()
-  const location = useLocation()
-  const verifyEmail = useVerifyEmail()
-  const resendVerification = useResendVerification()
+  const navigate = useNavigate();
+  const location = useLocation();
+  const verifyEmail = useVerifyEmail();
+  const resendVerification = useResendVerification();
 
   // Get email from navigation state (passed from RegisterPage)
-  const email = location.state?.email || ''
+  const email = location.state?.email || '';
 
-  const [otp, setOtp] = useState(['', '', '', '', '', ''])
-  const [error, setError] = useState('')
-  const [countdown, setCountdown] = useState(60)
-  const [canResend, setCanResend] = useState(false)
-  const inputRefs = useRef([])
+  const [otp, setOtp] = useState(['', '', '', '', '', '']);
+  const [error, setError] = useState('');
+  const [countdown, setCountdown] = useState(60);
+  const [canResend, setCanResend] = useState(false);
+  const inputRefs = useRef([]);
 
   // Countdown timer for resend
   useEffect(() => {
     if (countdown <= 0) {
-      setCanResend(true)
-      return
+      setCanResend(true);
+      return;
     }
-    const timer = setTimeout(() => setCountdown(countdown - 1), 1000)
-    return () => clearTimeout(timer)
-  }, [countdown])
+    const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [countdown]);
 
   // Auto-focus first input
   useEffect(() => {
-    inputRefs.current[0]?.focus()
-  }, [])
+    inputRefs.current[0]?.focus();
+  }, []);
 
   // Redirect if no email
   useEffect(() => {
     if (!email) {
-      navigate('/register', { replace: true })
+      navigate('/register', { replace: true });
     }
-  }, [email, navigate])
+  }, [email, navigate]);
 
   const handleChange = (index, value) => {
-    if (!/^\d*$/.test(value)) return // Only allow digits
+    if (!/^\d*$/.test(value)) return; // Only allow digits
 
-    const newOtp = [...otp]
-    newOtp[index] = value.slice(-1) // Only take last digit
-    setOtp(newOtp)
-    setError('')
+    const newOtp = [...otp];
+    newOtp[index] = value.slice(-1); // Only take last digit
+    setOtp(newOtp);
+    setError('');
 
     // Auto-focus next input
     if (value && index < 5) {
-      inputRefs.current[index + 1]?.focus()
+      inputRefs.current[index + 1]?.focus();
     }
-  }
+  };
 
   const handleKeyDown = (index, e) => {
     // Move to previous input on Backspace if current is empty
     if (e.key === 'Backspace' && !otp[index] && index > 0) {
-      inputRefs.current[index - 1]?.focus()
+      inputRefs.current[index - 1]?.focus();
     }
-  }
+  };
 
   const handlePaste = (e) => {
-    e.preventDefault()
-    const pastedData = e.clipboardData.getData('text').trim()
-    if (!/^\d{6}$/.test(pastedData)) return
+    e.preventDefault();
+    const pastedData = e.clipboardData.getData('text').trim();
+    if (!/^\d{6}$/.test(pastedData)) return;
 
-    const digits = pastedData.split('')
-    setOtp(digits)
-    inputRefs.current[5]?.focus()
-  }
+    const digits = pastedData.split('');
+    setOtp(digits);
+    inputRefs.current[5]?.focus();
+  };
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    setError('')
+    e.preventDefault();
+    setError('');
 
-    const otpCode = otp.join('')
+    const otpCode = otp.join('');
     if (otpCode.length !== 6) {
-      setError('Vui lòng nhập đủ 6 chữ số')
-      return
+      setError('Vui lòng nhập đủ 6 chữ số');
+      return;
     }
 
     try {
-      await verifyEmail.mutateAsync({ email, otpCode })
-      navigate('/login', { 
+      await verifyEmail.mutateAsync({ email, otpCode });
+      navigate('/login', {
         replace: true,
-        state: { message: 'Email đã được xác thực thành công! Vui lòng đăng nhập.' }
-      })
+        state: {
+          message: 'Email đã được xác thực thành công! Vui lòng đăng nhập.',
+        },
+      });
     } catch {
-      setError('Mã OTP không hợp lệ hoặc đã hết hạn')
+      setError('Mã OTP không hợp lệ hoặc đã hết hạn');
     }
-  }
+  };
 
   const handleResend = async () => {
-    if (!canResend) return
+    if (!canResend) return;
     try {
-      await resendVerification.mutateAsync(email)
-      setCanResend(false)
-      setCountdown(60)
-      setOtp(['', '', '', '', '', ''])
-      inputRefs.current[0]?.focus()
+      await resendVerification.mutateAsync(email);
+      setCanResend(false);
+      setCountdown(60);
+      setOtp(['', '', '', '', '', '']);
+      inputRefs.current[0]?.focus();
     } catch {
       // Error handled by hook
     }
-  }
+  };
 
-  if (!email) return null
+  if (!email) return null;
 
   return (
     <div>
       {/* Logo */}
-      <Link to="/" className="hidden lg:flex items-center justify-center gap-2 mb-8 hover:opacity-80 transition-opacity">
-        <svg viewBox="0 0 120 40" className="h-10 w-24" fill="none" stroke="#222" strokeWidth="2">
+      <Link
+        to="/"
+        className="hidden lg:flex items-center justify-center gap-2 mb-8 hover:opacity-80 transition-opacity"
+      >
+        <svg
+          viewBox="0 0 120 40"
+          className="h-10 w-24"
+          fill="none"
+          stroke="#222"
+          strokeWidth="2"
+        >
           <circle cx="34" cy="20" r="12" />
           <circle cx="66" cy="20" r="12" />
           <path d="M46 20h8" strokeLinecap="round" />
@@ -119,8 +130,18 @@ const VerifyEmailPage = () => {
 
       <div className="text-center">
         <div className="w-16 h-16 bg-[#ececec] rounded-full flex items-center justify-center mx-auto mb-5">
-          <svg className="w-8 h-8 text-[#0f5dd9]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+          <svg
+            className="w-8 h-8 text-[#0f5dd9]"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+            />
           </svg>
         </div>
 
@@ -180,20 +201,21 @@ const VerifyEmailPage = () => {
               {resendVerification.isPending ? 'Đang gửi...' : 'Gửi lại mã'}
             </button>
           ) : (
-            <span className="text-[#7b8494]">
-              Gửi lại sau {countdown}s
-            </span>
+            <span className="text-[#7b8494]">Gửi lại sau {countdown}s</span>
           )}
         </p>
       </div>
 
       <p className="mt-8 text-center text-[#4f5562]">
-        <Link to="/login" className="text-[#0f5dd9] hover:underline font-medium">
+        <Link
+          to="/login"
+          className="text-[#0f5dd9] hover:underline font-medium"
+        >
           ← Quay lại đăng nhập
         </Link>
       </p>
     </div>
-  )
-}
+  );
+};
 
-export default VerifyEmailPage
+export default VerifyEmailPage;

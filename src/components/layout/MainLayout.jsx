@@ -1,41 +1,62 @@
-import { useState, useRef, useEffect } from 'react'
-import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom'
-import { useAuth, ROLES } from '@/contexts/AuthContext'
-import { useCart } from '@/hooks/useCart'
-import { Search, ShoppingBag, User, Heart, ChevronDown, Menu, X, LayoutDashboard, LogOut, Settings } from 'lucide-react'
-import SupportChat from '../common/SupportChat'
+import {
+  Search,
+  ShoppingBag,
+  User,
+  Heart,
+  ChevronDown,
+  Menu,
+  X,
+  LayoutDashboard,
+  LogOut,
+  Settings,
+} from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { useAuth, ROLES } from '@/contexts/AuthContext';
+import { useCart } from '@/hooks/useCart';
+import SupportChat from '../common/SupportChat';
 
 const navItems = [
   { to: '/best-sellers', label: 'Best seller' },
   { to: '/stores', label: 'Hệ thống cửa hàng' },
   { to: '/blog', label: 'Góc CClearly' },
-]
+];
 
 const productLinks = [
   { to: '/frames', label: 'Gọng kính' },
   { to: '/lenses', label: 'Tròng kính' },
   { to: '/accessories', label: 'Phụ kiện' },
-]
+];
 
 const getDashboardLink = (role) => {
   switch (role) {
-    case ROLES.ADMIN: return '/admin'
-    case ROLES.MANAGER: return '/manager'
-    case ROLES.SALES: return '/sales'
-    case ROLES.OPERATIONS: return '/operations'
-    default: return '/profile'
+    case ROLES.ADMIN:
+      return '/admin';
+    case ROLES.MANAGER:
+      return '/manager';
+    case ROLES.SALES:
+      return '/sales';
+    case ROLES.OPERATIONS:
+      return '/operations';
+    default:
+      return '/profile';
   }
-}
+};
 
 const getDashboardLabel = (role) => {
   switch (role) {
-    case ROLES.ADMIN: return 'Admin Dashboard'
-    case ROLES.MANAGER: return 'Manager Dashboard'
-    case ROLES.SALES: return 'Sales Dashboard'
-    case ROLES.OPERATIONS: return 'Operations Dashboard'
-    default: return 'My Dashboard'
+    case ROLES.ADMIN:
+      return 'Admin Dashboard';
+    case ROLES.MANAGER:
+      return 'Manager Dashboard';
+    case ROLES.SALES:
+      return 'Sales Dashboard';
+    case ROLES.OPERATIONS:
+      return 'Operations Dashboard';
+    default:
+      return 'My Dashboard';
   }
-}
+};
 
 const footerColumns = [
   {
@@ -62,48 +83,53 @@ const footerColumns = [
       { to: '/careers', label: 'Tuyển dụng' },
     ],
   },
-]
+];
 
 const socialLinks = [
   { label: 'Facebook' },
   { label: 'X' },
   { label: 'Instagram' },
-]
+];
 
 const MainLayout = () => {
-  const { isAuthenticated, user, logout } = useAuth()
-  const { data: cartData } = useCart()
-  const navigate = useNavigate()
-  const [isProductsOpen, setIsProductsOpen] = useState(false)
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const [isMobileProductsOpen, setIsMobileProductsOpen] = useState(false)
-  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false)
-  const profileDropdownRef = useRef(null)
+  const { isAuthenticated, user, logout } = useAuth();
+  const { data: cartData } = useCart();
+  const navigate = useNavigate();
+  const [isProductsOpen, setIsProductsOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMobileProductsOpen, setIsMobileProductsOpen] = useState(false);
+  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+  const profileDropdownRef = useRef(null);
 
-  const cartItemCount = cartData?.items?.length || 0
-  const wishlistCount = 0 // Demo - can be connected to wishlist hook later
+  const cartItemCount = cartData?.items?.length || 0;
+  const wishlistCount = 0; // Demo - can be connected to wishlist hook later
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (profileDropdownRef.current && !profileDropdownRef.current.contains(event.target)) {
-        setIsProfileDropdownOpen(false)
+      if (
+        profileDropdownRef.current &&
+        !profileDropdownRef.current.contains(event.target)
+      ) {
+        setIsProfileDropdownOpen(false);
       }
-    }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const handleLogout = async () => {
-    await logout()
-    navigate('/')
-    setIsProfileDropdownOpen(false)
-  }
+    await logout();
+    navigate('/');
+    setIsProfileDropdownOpen(false);
+  };
 
   const navClass = ({ isActive }) =>
-    `text-[13px] font-medium transition ${isActive ? 'text-[#101010]' : 'text-[#666] hover:text-[#101010]'}`
+    `text-[13px] font-medium transition ${isActive ? 'text-[#101010]' : 'text-[#666] hover:text-[#101010]'}`;
 
-  const dashboardLink = isAuthenticated ? getDashboardLink(user?.role) : '#'
-  const dashboardLabel = isAuthenticated ? getDashboardLabel(user?.role) : 'Dashboard'
+  const dashboardLink = isAuthenticated ? getDashboardLink(user?.role) : '#';
+  const dashboardLabel = isAuthenticated
+    ? getDashboardLabel(user?.role)
+    : 'Dashboard';
 
   return (
     <div className="min-h-screen bg-white text-[#131313]">
@@ -114,11 +140,25 @@ const MainLayout = () => {
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             className="lg:hidden h-10 w-10 flex items-center justify-center rounded-xl border border-[#e0e0e0] text-[#666]"
           >
-            {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            {isMobileMenuOpen ? (
+              <X className="h-5 w-5" />
+            ) : (
+              <Menu className="h-5 w-5" />
+            )}
           </button>
 
-          <Link to="/" className="shrink-0 flex items-center gap-2" aria-label="CClearly home">
-            <svg viewBox="0 0 120 40" className="h-8 w-12" fill="none" stroke="currentColor" strokeWidth="2">
+          <Link
+            to="/"
+            className="shrink-0 flex items-center gap-2"
+            aria-label="CClearly home"
+          >
+            <svg
+              viewBox="0 0 120 40"
+              className="h-8 w-12"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
               <circle cx="34" cy="20" r="12" />
               <circle cx="66" cy="20" r="12" />
               <path d="M46 20h8" strokeLinecap="round" />
@@ -134,7 +174,9 @@ const MainLayout = () => {
             >
               <button className="flex items-center gap-1 px-2 py-2 text-[13px] font-semibold text-[#666] hover:text-[#0f5dd9]">
                 Sản phẩm
-                <ChevronDown className={`h-4 w-4 transition ${isProductsOpen ? 'rotate-180' : ''}`} />
+                <ChevronDown
+                  className={`h-4 w-4 transition ${isProductsOpen ? 'rotate-180' : ''}`}
+                />
               </button>
               <div
                 className={`absolute left-0 top-full mt-1 w-56 rounded-2xl border border-[#e0e0e0] bg-white p-2 shadow-xl transition-all ${isProductsOpen ? 'visible translate-y-0 opacity-100' : 'invisible -translate-y-2 opacity-0'}`}
@@ -161,7 +203,11 @@ const MainLayout = () => {
           </nav>
 
           <div className="flex items-center gap-3 text-[#171717] sm:gap-4">
-            <Link to="/products" className="rounded-full p-1.5 hover:bg-[#f3f3f3]" aria-label="Search products">
+            <Link
+              to="/products"
+              className="rounded-full p-1.5 hover:bg-[#f3f3f3]"
+              aria-label="Search products"
+            >
               <Search className="h-5 w-5" />
             </Link>
 
@@ -171,12 +217,16 @@ const MainLayout = () => {
                 // Logged in - show user icon with dropdown
                 <>
                   <button
-                    onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
+                    onClick={() =>
+                      setIsProfileDropdownOpen(!isProfileDropdownOpen)
+                    }
                     className="flex items-center gap-2 rounded-full p-1.5 hover:bg-[#f3f3f3]"
                     aria-label="Profile"
                   >
                     <User className="h-5 w-5" />
-                    <ChevronDown className={`h-4 w-4 transition ${isProfileDropdownOpen ? 'rotate-180' : ''}`} />
+                    <ChevronDown
+                      className={`h-4 w-4 transition ${isProfileDropdownOpen ? 'rotate-180' : ''}`}
+                    />
                   </button>
 
                   {isProfileDropdownOpen && (
@@ -200,7 +250,9 @@ const MainLayout = () => {
                           <span className="text-sm">Yêu thích</span>
                         </div>
                         {wishlistCount > 0 && (
-                          <span className="bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full">{wishlistCount}</span>
+                          <span className="bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full">
+                            {wishlistCount}
+                          </span>
                         )}
                       </Link>
 
@@ -214,7 +266,9 @@ const MainLayout = () => {
                           <span className="text-sm">Giỏ hàng</span>
                         </div>
                         {cartItemCount > 0 && (
-                          <span className="bg-[#0f5dd9] text-white text-xs px-1.5 py-0.5 rounded-full">{cartItemCount}</span>
+                          <span className="bg-[#0f5dd9] text-white text-xs px-1.5 py-0.5 rounded-full">
+                            {cartItemCount}
+                          </span>
                         )}
                       </Link>
 
@@ -237,9 +291,14 @@ const MainLayout = () => {
                           <span className="text-sm">Thông tin tài khoản</span>
                         </Link>
 
-                        {(user?.role === ROLES.ADMIN || user?.role === ROLES.MANAGER) && (
+                        {(user?.role === ROLES.ADMIN ||
+                          user?.role === ROLES.MANAGER) && (
                           <Link
-                            to={user?.role === ROLES.ADMIN ? '/admin/settings' : '/manager/settings'}
+                            to={
+                              user?.role === ROLES.ADMIN
+                                ? '/admin/settings'
+                                : '/manager/settings'
+                            }
                             onClick={() => setIsProfileDropdownOpen(false)}
                             className="flex items-center gap-3 px-4 py-2.5 text-[#666] hover:bg-[#f3f3f3] hover:text-[#0f5dd9]"
                           >
@@ -285,7 +344,9 @@ const MainLayout = () => {
               className="flex w-full items-center justify-between rounded-xl px-4 py-3 text-sm font-semibold text-[#666] hover:bg-[#f3f3f3]"
             >
               <span>Sản phẩm</span>
-              <ChevronDown className={`h-4 w-4 transition ${isMobileProductsOpen ? 'rotate-180' : ''}`} />
+              <ChevronDown
+                className={`h-4 w-4 transition ${isMobileProductsOpen ? 'rotate-180' : ''}`}
+              />
             </button>
 
             {isMobileProductsOpen && (
@@ -368,11 +429,16 @@ const MainLayout = () => {
           <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
             {footerColumns.map((column) => (
               <div key={column.title}>
-                <h3 className="text-lg font-semibold text-white">{column.title}</h3>
+                <h3 className="text-lg font-semibold text-white">
+                  {column.title}
+                </h3>
                 <ul className="mt-4 space-y-2.5 text-sm text-[#b7b7b7]">
                   {column.links.map((link) => (
                     <li key={link.label}>
-                      <Link to={link.to} className="transition hover:text-white">
+                      <Link
+                        to={link.to}
+                        className="transition hover:text-white"
+                      >
                         {link.label}
                       </Link>
                     </li>
@@ -395,18 +461,22 @@ const MainLayout = () => {
                   </a>
                 ))}
               </div>
-              <p className="mt-4 text-sm text-[#b7b7b7]">support@cclearly.com</p>
+              <p className="mt-4 text-sm text-[#b7b7b7]">
+                support@cclearly.com
+              </p>
               <p className="text-sm text-[#b7b7b7]">+1 (800) 123-4567</p>
             </div>
           </div>
 
-          <p className="mt-12 text-center text-xs text-[#7a7a7a]">© 1996-2024</p>
+          <p className="mt-12 text-center text-xs text-[#7a7a7a]">
+            © 1996-2024
+          </p>
         </div>
       </footer>
 
       <SupportChat />
     </div>
-  )
-}
+  );
+};
 
-export { MainLayout }
+export { MainLayout };

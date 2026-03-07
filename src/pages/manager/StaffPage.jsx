@@ -1,8 +1,9 @@
 // Staff Management Page
-import { users } from '@/mocks/data'
+import { useAdminUsers } from '@/hooks/useAdmin';
 
 const StaffPage = () => {
-  const staff = users.filter(u => u.role !== 'customer')
+  const { data: allUsers = [] } = useAdminUsers();
+  const staff = allUsers.filter((u) => u.role !== 'customer' && u.role !== 'CUSTOMER');
 
   return (
     <div className="space-y-6">
@@ -20,12 +21,24 @@ const StaffPage = () => {
         <table className="w-full">
           <thead className="bg-[#f9f9f9]">
             <tr>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-[#222]">Nhân viên</th>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-[#222]">Email</th>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-[#222]">Vai trò</th>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-[#222]">Số điện thoại</th>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-[#222]">Trạng thái</th>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-[#222]">Hành động</th>
+              <th className="px-6 py-4 text-left text-sm font-semibold text-[#222]">
+                Nhân viên
+              </th>
+              <th className="px-6 py-4 text-left text-sm font-semibold text-[#222]">
+                Email
+              </th>
+              <th className="px-6 py-4 text-left text-sm font-semibold text-[#222]">
+                Vai trò
+              </th>
+              <th className="px-6 py-4 text-left text-sm font-semibold text-[#222]">
+                Số điện thoại
+              </th>
+              <th className="px-6 py-4 text-left text-sm font-semibold text-[#222]">
+                Trạng thái
+              </th>
+              <th className="px-6 py-4 text-left text-sm font-semibold text-[#222]">
+                Hành động
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-[#ececec]">
@@ -47,11 +60,17 @@ const StaffPage = () => {
                 </td>
                 <td className="px-6 py-4 text-[#4f5562]">{user.phone}</td>
                 <td className="px-6 py-4">
-                  <span className="px-3 py-1 rounded-full text-xs bg-green-100 text-green-800">Hoạt động</span>
+                  <span className="px-3 py-1 rounded-full text-xs bg-green-100 text-green-800">
+                    Hoạt động
+                  </span>
                 </td>
                 <td className="px-6 py-4">
-                  <button className="text-[#0f5dd9] hover:underline text-sm mr-3">Sửa</button>
-                  <button className="text-red-500 hover:underline text-sm">Xóa</button>
+                  <button className="text-[#0f5dd9] hover:underline text-sm mr-3">
+                    Sửa
+                  </button>
+                  <button className="text-red-500 hover:underline text-sm">
+                    Xóa
+                  </button>
                 </td>
               </tr>
             ))}
@@ -59,7 +78,7 @@ const StaffPage = () => {
         </table>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default StaffPage
+export default StaffPage;

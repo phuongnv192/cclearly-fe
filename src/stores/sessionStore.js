@@ -71,6 +71,11 @@ export const ROLE_PERMISSIONS = {
   [ROLES.CUSTOMER]: ['view_products', 'create_order', 'manage_profile'],
   [ROLES.SALES]: ['view_orders', 'process_orders', 'handle_complaints'],
   [ROLES.OPERATIONS]: ['view_orders', 'update_order_status', 'manage_shipping'],
-  [ROLES.MANAGER]: ['manage_products', 'manage_pricing', 'manage_users', 'view_revenue'],
+  [ROLES.MANAGER]: [
+    'manage_products',
+    'manage_pricing',
+    'manage_users',
+    'view_revenue',
+  ],
   [ROLES.ADMIN]: ['manage_system', 'manage_users', 'view_all'],
 };

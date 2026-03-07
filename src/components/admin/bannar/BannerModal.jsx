@@ -1,7 +1,14 @@
 import { X, Image as ImageIcon, Upload, Save } from 'lucide-react';
 import { POSITIONS } from '@/mocks/data';
 
-const BannerModal = ({ show, onClose, onSave, editingBanner, formData, setFormData }) => {
+const BannerModal = ({
+  show,
+  onClose,
+  onSave,
+  editingBanner,
+  formData,
+  setFormData,
+}) => {
   if (!show) return null;
 
   const handleFileChange = (e) => {
@@ -22,18 +29,25 @@ const BannerModal = ({ show, onClose, onSave, editingBanner, formData, setFormDa
           <h3 className="text-lg font-bold text-[#222]">
             {editingBanner ? 'Sửa banner' : 'Thêm banner mới'}
           </h3>
-          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg">
+          <button
+            onClick={onClose}
+            className="p-2 hover:bg-gray-100 rounded-lg"
+          >
             <X className="w-5 h-5 text-gray-500" />
           </button>
         </div>
 
         <form onSubmit={onSave} className="p-5 space-y-4">
           <div>
-            <label className="block text-sm font-medium text-[#222] mb-1 text-left">Tiêu đề banner</label>
+            <label className="block text-sm font-medium text-[#222] mb-1 text-left">
+              Tiêu đề banner
+            </label>
             <input
               type="text"
               value={formData.title}
-              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, title: e.target.value })
+              }
               required
               className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0f5dd9]/20 outline-none"
               placeholder="Ví dụ: Khuyến mãi mùa hè"
@@ -41,7 +55,9 @@ const BannerModal = ({ show, onClose, onSave, editingBanner, formData, setFormDa
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-[#222] mb-2 text-left">Hình ảnh banner</label>
+            <label className="block text-sm font-medium text-[#222] mb-2 text-left">
+              Hình ảnh banner
+            </label>
             <div className="relative group cursor-pointer border-2 border-dashed border-gray-200 rounded-2xl p-4 hover:bg-gray-50 transition-all">
               <input
                 type="file"
@@ -51,7 +67,11 @@ const BannerModal = ({ show, onClose, onSave, editingBanner, formData, setFormDa
               />
               {formData.image ? (
                 <div className="relative h-32 w-full rounded-lg overflow-hidden">
-                  <img src={formData.image} alt="Preview" className="w-full h-full object-cover" />
+                  <img
+                    src={formData.image}
+                    alt="Preview"
+                    className="w-full h-full object-cover"
+                  />
                   <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                     <Upload className="text-white w-6 h-6" />
                   </div>
@@ -61,7 +81,9 @@ const BannerModal = ({ show, onClose, onSave, editingBanner, formData, setFormDa
                   <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center mb-2">
                     <ImageIcon className="w-6 h-6 text-[#0f5dd9]" />
                   </div>
-                  <p className="text-sm text-gray-500">Nhấn để chọn ảnh từ máy tính</p>
+                  <p className="text-sm text-gray-500">
+                    Nhấn để chọn ảnh từ máy tính
+                  </p>
                 </div>
               )}
             </div>
@@ -69,21 +91,33 @@ const BannerModal = ({ show, onClose, onSave, editingBanner, formData, setFormDa
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-[#222] mb-1 text-left">Vị trí</label>
+              <label className="block text-sm font-medium text-[#222] mb-1 text-left">
+                Vị trí
+              </label>
               <select
                 value={formData.position}
-                onChange={(e) => setFormData({ ...formData, position: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, position: e.target.value })
+                }
                 className="w-full px-4 py-2 border border-gray-200 rounded-xl outline-none bg-white"
               >
-                {POSITIONS.map(pos => <option key={pos.value} value={pos.value}>{pos.label}</option>)}
+                {POSITIONS.map((pos) => (
+                  <option key={pos.value} value={pos.value}>
+                    {pos.label}
+                  </option>
+                ))}
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-[#222] mb-1 text-left">Thứ tự</label>
+              <label className="block text-sm font-medium text-[#222] mb-1 text-left">
+                Thứ tự
+              </label>
               <input
                 type="number"
                 value={formData.order}
-                onChange={(e) => setFormData({ ...formData, order: Number(e.target.value) })}
+                onChange={(e) =>
+                  setFormData({ ...formData, order: Number(e.target.value) })
+                }
                 className="w-full px-4 py-2 border border-gray-200 rounded-xl outline-none"
               />
             </div>
@@ -91,20 +125,28 @@ const BannerModal = ({ show, onClose, onSave, editingBanner, formData, setFormDa
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-[#222] mb-1 text-left">Ngày bắt đầu</label>
+              <label className="block text-sm font-medium text-[#222] mb-1 text-left">
+                Ngày bắt đầu
+              </label>
               <input
                 type="date"
                 value={formData.startDate}
-                onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, startDate: e.target.value })
+                }
                 className="w-full px-4 py-2 border border-gray-200 rounded-xl outline-none"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-[#222] mb-1 text-left">Ngày kết thúc</label>
+              <label className="block text-sm font-medium text-[#222] mb-1 text-left">
+                Ngày kết thúc
+              </label>
               <input
                 type="date"
                 value={formData.endDate}
-                onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, endDate: e.target.value })
+                }
                 className="w-full px-4 py-2 border border-gray-200 rounded-xl outline-none"
               />
             </div>

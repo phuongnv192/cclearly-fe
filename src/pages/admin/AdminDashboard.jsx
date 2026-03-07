@@ -1,7 +1,3 @@
-import { useAuth, ROLES } from "@/contexts/AuthContext"
-import { useAdminDashboard } from "@/hooks/useAdmin"
-import { useOrders } from "@/hooks/useOrder"
-
 import {
   Package,
   CheckCircle,
@@ -9,65 +5,60 @@ import {
   DollarSign,
   AlertTriangle,
   Loader2,
-} from "lucide-react"
-
-import {
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-  XAxis,
-  Tooltip,
-} from "recharts"
+} from 'lucide-react';
+import { ResponsiveContainer, BarChart, Bar, XAxis, Tooltip } from 'recharts';
+import { useAuth, ROLES } from '@/contexts/AuthContext';
+import { useAdminDashboard } from '@/hooks/useAdmin';
+import { useOrders } from '@/hooks/useOrder';
 
 const AdminDashboard = () => {
-  const { user, hasRole } = useAuth()
+  const { user, hasRole } = useAuth();
 
-  const { data: stats, isLoading: loadingStats } = useAdminDashboard()
-  const { data: ordersData, isLoading: loadingOrders } = useOrders({ page: 0, size: 5 })
+  const { data: stats, isLoading: loadingStats } = useAdminDashboard();
+  const { data: ordersData, isLoading: loadingOrders } = useOrders({
+    page: 0,
+    size: 5,
+  });
 
-  const recentOrders = ordersData?.content || ordersData || []
+  const recentOrders = ordersData?.content || ordersData || [];
 
   const formatCurrency = (amount) =>
-    new Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
-    }).format(amount)
+    new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND',
+    }).format(amount);
 
   const getStatusBadge = (status) => {
     const map = {
-      pending: "bg-yellow-100 text-yellow-800",
-      confirmed: "bg-blue-100 text-blue-800",
-      processing: "bg-purple-100 text-purple-800",
-      shipped: "bg-orange-100 text-orange-800",
-      delivered: "bg-green-100 text-green-800",
-      cancelled: "bg-red-100 text-red-800",
-    }
+      pending: 'bg-yellow-100 text-yellow-800',
+      confirmed: 'bg-blue-100 text-blue-800',
+      processing: 'bg-purple-100 text-purple-800',
+      shipped: 'bg-orange-100 text-orange-800',
+      delivered: 'bg-green-100 text-green-800',
+      cancelled: 'bg-red-100 text-red-800',
+    };
 
-    return map[status] || "bg-gray-100 text-gray-800"
-  }
+    return map[status] || 'bg-gray-100 text-gray-800';
+  };
 
   if (loadingStats) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
       </div>
-    )
+    );
   }
 
   return (
     <div className="max-w-[1400px] mx-auto">
-
       {/* HEADER */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-[#222]">Dashboard</h1>
-        <p className="text-[#4f5562] mt-1">
-          Xin chào {user?.name || "Admin"}
-        </p>
+        <p className="text-[#4f5562] mt-1">Xin chào {user?.name || 'Admin'}</p>
       </div>
 
       {/* STATS */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
-
         <StatCard
           icon={<Package className="text-blue-600" />}
           title="Đơn hàng mới"
@@ -91,54 +82,46 @@ const AdminDashboard = () => {
             <StatCard
               icon={<DollarSign className="text-orange-600" />}
               title="Doanh thu"
-              value={(Number(stats?.totalRevenue ?? 0) / 1000000).toFixed(0) + "M"}
+              value={
+                (Number(stats?.totalRevenue ?? 0) / 1000000).toFixed(0) + 'M'
+              }
             />
           </>
         )}
-
       </div>
 
       {/* MAIN GRID */}
       <div className="grid lg:grid-cols-2 gap-6 mb-8">
-
         {/* REVENUE CHART */}
         <div className="bg-white rounded-2xl shadow p-6">
-
-          <h3 className="font-semibold mb-4">
-            Doanh thu theo tháng
-          </h3>
+          <h3 className="font-semibold mb-4">Doanh thu theo tháng</h3>
 
           <ResponsiveContainer width="100%" height={260}>
             <BarChart data={stats?.revenueByMonth || []}>
               <XAxis dataKey="month" />
               <Tooltip formatter={(v) => formatCurrency(v)} />
-              <Bar dataKey="revenue" fill="#0f5dd9" radius={[6,6,0,0]} />
+              <Bar dataKey="revenue" fill="#0f5dd9" radius={[6, 6, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
-
         </div>
 
         {/* TOP PRODUCTS */}
         <div className="bg-white rounded-2xl shadow p-6">
-
           <h3 className="font-semibold flex items-center gap-2 mb-4">
             <AlertTriangle className="w-5 h-5 text-orange-500" />
             Sản phẩm bán chạy
           </h3>
 
           <div className="space-y-3">
-
             {(stats?.topProducts || []).length > 0 ? (
-              stats.topProducts.slice(0,5).map((p, i) => (
+              stats.topProducts.slice(0, 5).map((p, i) => (
                 <div
                   key={i}
                   className="flex justify-between bg-gray-50 p-3 rounded-xl"
                 >
                   <div>
                     <p className="font-medium">{p.name}</p>
-                    <p className="text-xs text-gray-500">
-                      {p.type}
-                    </p>
+                    <p className="text-xs text-gray-500">{p.type}</p>
                   </div>
 
                   <span className="text-blue-600 font-semibold">
@@ -147,90 +130,70 @@ const AdminDashboard = () => {
                 </div>
               ))
             ) : (
-              <p className="text-gray-500 text-sm">
-                Không có dữ liệu
-              </p>
+              <p className="text-gray-500 text-sm">Không có dữ liệu</p>
             )}
-
           </div>
-
         </div>
-
       </div>
 
       {/* RECENT ORDERS */}
       <div className="bg-white rounded-2xl shadow p-6">
-
-        <h3 className="font-semibold mb-4">
-          Đơn hàng gần đây
-        </h3>
+        <h3 className="font-semibold mb-4">Đơn hàng gần đây</h3>
 
         {loadingOrders ? (
           <div className="flex justify-center py-8">
             <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
           </div>
         ) : (
-        <div className="overflow-x-auto">
-
-          <table className="w-full text-sm">
-
-            <thead className="border-b text-left">
-              <tr>
-                <th className="py-2">Order</th>
-                <th>Khách hàng</th>
-                <th>Tổng tiền</th>
-                <th>Trạng thái</th>
-              </tr>
-            </thead>
-
-            <tbody>
-
-              {(Array.isArray(recentOrders) ? recentOrders : []).map((order) => (
-                <tr key={order.orderId || order.id} className="border-b">
-
-                  <td className="py-3 font-medium">
-                    {order.orderId || order.id}
-                  </td>
-
-                  <td>
-                    {order.customerName || order.shippingAddress?.name}
-                  </td>
-
-                  <td>
-                    {formatCurrency(order.totalAmount)}
-                  </td>
-
-                  <td>
-                    <span
-                      className={`px-3 py-1 rounded-full text-xs ${getStatusBadge(order.status)}`}
-                    >
-                      {order.status}
-                    </span>
-                  </td>
-
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="border-b text-left">
+                <tr>
+                  <th className="py-2">Order</th>
+                  <th>Khách hàng</th>
+                  <th>Tổng tiền</th>
+                  <th>Trạng thái</th>
                 </tr>
-              ))}
+              </thead>
 
-            </tbody>
+              <tbody>
+                {(Array.isArray(recentOrders) ? recentOrders : []).map(
+                  (order) => (
+                    <tr key={order.orderId || order.id} className="border-b">
+                      <td className="py-3 font-medium">
+                        {order.orderId || order.id}
+                      </td>
 
-          </table>
+                      <td>
+                        {order.customerName || order.shippingAddress?.name}
+                      </td>
 
-        </div>
+                      <td>{formatCurrency(order.totalAmount)}</td>
+
+                      <td>
+                        <span
+                          className={`px-3 py-1 rounded-full text-xs ${getStatusBadge(order.status)}`}
+                        >
+                          {order.status}
+                        </span>
+                      </td>
+                    </tr>
+                  )
+                )}
+              </tbody>
+            </table>
+          </div>
         )}
-
       </div>
-
     </div>
-  )
-}
+  );
+};
 
-export default AdminDashboard
-
+export default AdminDashboard;
 
 function StatCard({ icon, title, value }) {
   return (
     <div className="bg-white rounded-2xl shadow p-5 flex items-center gap-4">
-
       <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center">
         {icon}
       </div>
@@ -239,7 +202,6 @@ function StatCard({ icon, title, value }) {
         <p className="text-gray-500 text-sm">{title}</p>
         <p className="text-2xl font-bold">{value}</p>
       </div>
-
     </div>
-  )
+  );
 }

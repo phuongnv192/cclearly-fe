@@ -30,37 +30,29 @@ export const ProtectedRoute = ({ children, allowedRoles }) => {
 
 // Helper components for specific role routes
 export const CustomerRoute = ({ children }) => (
-  <ProtectedRoute allowedRoles={[ROLES.CUSTOMER]}>
-    {children}
-  </ProtectedRoute>
+  <ProtectedRoute allowedRoles={[ROLES.CUSTOMER]}>{children}</ProtectedRoute>
 );
 
 export const StaffRoute = ({ children }) => (
-  <ProtectedRoute allowedRoles={[ROLES.SALES, ROLES.OPERATIONS, ROLES.MANAGER, ROLES.ADMIN]}>
+  <ProtectedRoute
+    allowedRoles={[ROLES.SALES, ROLES.OPERATIONS, ROLES.MANAGER, ROLES.ADMIN]}
+  >
     {children}
   </ProtectedRoute>
 );
 
 export const AdminRoute = ({ children }) => (
-  <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
-    {children}
-  </ProtectedRoute>
+  <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>{children}</ProtectedRoute>
 );
 
 export const ManagerRoute = ({ children }) => (
-  <ProtectedRoute allowedRoles={[ROLES.MANAGER]}>
-    {children}
-  </ProtectedRoute>
+  <ProtectedRoute allowedRoles={[ROLES.MANAGER]}>{children}</ProtectedRoute>
 );
 
 export const SalesRoute = ({ children }) => (
-  <ProtectedRoute allowedRoles={[ROLES.SALES]}>
-    {children}
-  </ProtectedRoute>
+  <ProtectedRoute allowedRoles={[ROLES.SALES]}>{children}</ProtectedRoute>
 );
 
 export const OperationsRoute = ({ children }) => (
-  <ProtectedRoute allowedRoles={[ROLES.OPERATIONS]}>
-    {children}
-  </ProtectedRoute>
+  <ProtectedRoute allowedRoles={[ROLES.OPERATIONS]}>{children}</ProtectedRoute>
 );

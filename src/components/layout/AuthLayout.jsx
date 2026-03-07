@@ -1,25 +1,27 @@
-import { Link, Outlet } from 'react-router-dom';
 import { useState, useEffect } from 'react';
+import { Link, Outlet } from 'react-router-dom';
 
 const banners = [
   {
     url: '/assets/auth/banner1.png',
     title: 'CClearly',
     description: 'Hệ thống bán kính mắt trực tuyến',
-    subtext: 'Mua kính thuận tiện tại nhà với đa dạng sản phẩm và dịch vụ chất lượng'
+    subtext:
+      'Mua kính thuận tiện tại nhà với đa dạng sản phẩm và dịch vụ chất lượng',
   },
   {
     url: '/assets/auth/banner2.png',
     title: 'Phong cách & Hiện đại',
     description: 'Bản sắc riêng qua từng gọng kính',
-    subtext: 'Khám phá bộ sưu tập mới nhất với thiết kế dẫn đầu xu hướng'
+    subtext: 'Khám phá bộ sưu tập mới nhất với thiết kế dẫn đầu xu hướng',
   },
   {
     url: '/assets/auth/banner3.png',
     title: 'Tầm nhìn chuyên nghiệp',
     description: 'Sự kết hợp hoàn hảo giữa công nghệ và thời trang',
-    subtext: 'Chúng tôi cam kết mang lại sự hài lòng tuyệt đối cho đôi mắt của bạn'
-  }
+    subtext:
+      'Chúng tôi cam kết mang lại sự hài lòng tuyệt đối cho đôi mắt của bạn',
+  },
 ];
 
 export const AuthLayout = () => {
@@ -40,8 +42,9 @@ export const AuthLayout = () => {
         {banners.map((banner, index) => (
           <div
             key={index}
-            className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${index === currentSlide ? 'opacity-100' : 'opacity-0'
-              }`}
+            className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
+              index === currentSlide ? 'opacity-100' : 'opacity-0'
+            }`}
           >
             <img
               src={banner.url}
@@ -55,8 +58,17 @@ export const AuthLayout = () => {
 
         {/* Content Over Carousel */}
         <div className="relative z-10 text-center text-white">
-          <Link to="/" className="inline-block hover:opacity-80 transition-opacity">
-            <svg viewBox="0 0 120 40" className="h-16 w-32 mx-auto mb-8" fill="none" stroke="currentColor" strokeWidth="2">
+          <Link
+            to="/"
+            className="inline-block hover:opacity-80 transition-opacity"
+          >
+            <svg
+              viewBox="0 0 120 40"
+              className="h-16 w-32 mx-auto mb-8"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
               <circle cx="34" cy="20" r="12" />
               <circle cx="66" cy="20" r="12" />
               <path d="M46 20h8" strokeLinecap="round" />
@@ -78,8 +90,9 @@ export const AuthLayout = () => {
               <button
                 key={index}
                 onClick={() => setCurrentSlide(index)}
-                className={`h-1.5 rounded-full transition-all duration-300 ${index === currentSlide ? 'w-8 bg-white' : 'w-2 bg-white/40'
-                  }`}
+                className={`h-1.5 rounded-full transition-all duration-300 ${
+                  index === currentSlide ? 'w-8 bg-white' : 'w-2 bg-white/40'
+                }`}
               />
             ))}
           </div>
@@ -90,8 +103,17 @@ export const AuthLayout = () => {
       <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-white">
         <div className="w-full max-w-md">
           {/* Mobile Logo */}
-          <Link to="/" className="lg:hidden flex items-center justify-center gap-2 text-2xl font-extrabold text-[#222] text-center block mb-8">
-            <svg viewBox="0 0 120 40" className="h-8 w-20" fill="none" stroke="currentColor" strokeWidth="2">
+          <Link
+            to="/"
+            className="lg:hidden flex items-center justify-center gap-2 text-2xl font-extrabold text-[#222] text-center block mb-8"
+          >
+            <svg
+              viewBox="0 0 120 40"
+              className="h-8 w-20"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
               <circle cx="34" cy="20" r="12" />
               <circle cx="66" cy="20" r="12" />
               <path d="M46 20h8" strokeLinecap="round" />

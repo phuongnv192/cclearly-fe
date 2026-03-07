@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 
 export const SectionHeader = ({ title, description }) => (
   <div className="mb-6 text-left">
@@ -7,7 +7,14 @@ export const SectionHeader = ({ title, description }) => (
   </div>
 );
 
-export const FormField = ({ label, defaultValue, type = "text", placeholder, readOnly, className = "" }) => (
+export const FormField = ({
+  label,
+  defaultValue,
+  type = 'text',
+  placeholder,
+  readOnly,
+  className = '',
+}) => (
   <div className="flex flex-col gap-1.5 w-full text-left">
     <label className="text-sm font-medium text-gray-700">{label}</label>
     <input

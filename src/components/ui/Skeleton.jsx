@@ -4,8 +4,8 @@ const Skeleton = ({ className = '', ...props }) => {
       className={`animate-pulse bg-gray-200 rounded ${className}`}
       {...props}
     />
-  )
-}
+  );
+};
 
 const SkeletonText = ({ lines = 3 }) => {
   return (
@@ -14,8 +14,8 @@ const SkeletonText = ({ lines = 3 }) => {
         <Skeleton key={i} className={i === lines - 1 ? 'w-3/4' : 'w-full'} />
       ))}
     </div>
-  )
-}
+  );
+};
 
 const SkeletonCard = () => {
   return (
@@ -24,8 +24,8 @@ const SkeletonCard = () => {
       <Skeleton className="h-4 w-3/4 mb-2" />
       <Skeleton className="h-3 w-1/2" />
     </div>
-  )
-}
+  );
+};
 
 const SkeletonTable = ({ rows = 5 }) => {
   return (
@@ -43,11 +43,11 @@ const SkeletonTable = ({ rows = 5 }) => {
         </div>
       ))}
     </div>
-  )
-}
+  );
+};
 
-Skeleton.Text = SkeletonText
-Skeleton.Card = SkeletonCard
-Skeleton.Table = SkeletonTable
+Skeleton.Text = SkeletonText;
+Skeleton.Card = SkeletonCard;
+Skeleton.Table = SkeletonTable;
 
-export default Skeleton
+export default Skeleton;

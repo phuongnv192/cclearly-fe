@@ -16,7 +16,9 @@ export const cartRequest = {
 
   // Update cart item quantity
   updateCartItem: async (itemId, quantity) => {
-    const res = await http.patch(ENDPOINT.UPDATE_CART_ITEM(itemId), { quantity });
+    const res = await http.patch(ENDPOINT.UPDATE_CART_ITEM(itemId), {
+      quantity,
+    });
     return res.data;
   },
 

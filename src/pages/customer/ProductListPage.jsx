@@ -1,153 +1,174 @@
-import { useState, useMemo, useEffect } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
-import { products as mockProducts, categories as mockCategories } from '@/mocks/data'
-import Pagination from '@/components/ui/Pagination'
-import { Glasses, Scan, Search, SlidersHorizontal } from 'lucide-react'
+import { Glasses, Scan, Search, SlidersHorizontal } from 'lucide-react';
+import { useState, useMemo, useEffect } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
+import Pagination from '@/components/ui/Pagination';
+import { useProducts } from '@/hooks/useProduct';
+import { useCategories } from '@/hooks/useProduct';
 
-const pageSizeOptions = [4, 8, 12]
-const currencyFormatter = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' })
+const pageSizeOptions = [4, 8, 12];
+const currencyFormatter = new Intl.NumberFormat('vi-VN', {
+  style: 'currency',
+  currency: 'VND',
+});
 
 const ProductListPage = ({ type }) => {
-  const [searchParams, setSearchParams] = useSearchParams()
+  const [searchParams, setSearchParams] = useSearchParams();
   const [filters, setFilters] = useState({
     page: 1,
     limit: 8,
     search: searchParams.get('search') || '',
     type: type || searchParams.get('type') || '',
     categoryId: searchParams.get('categoryId') || '',
-  })
+  });
 
   // Update filters when type prop changes
   useEffect(() => {
     if (type) {
-      setFilters(prev => ({ ...prev, type, page: 1 }))
+      setFilters((prev) => ({ ...prev, type, page: 1 }));
     }
-  }, [type])
+  }, [type]);
 
-  // Use mock data
-  const allProducts = mockProducts
-  const categories = mockCategories
+  // Fetch from API
+  const { data: allProducts = [], isLoading: productsLoading } = useProducts({
+    type: filters.type || undefined,
+    search: filters.search || undefined,
+  });
+  const { data: categories = [] } = useCategories();
 
-  // Filter products based on filters
+  // Filter products based on filters (client side for category)
   const filteredProducts = useMemo(() => {
-    let result = [...allProducts]
-
-    // Filter by type
-    if (filters.type) {
-      result = result.filter(p => p.type === filters.type)
-    }
+    let result = [...allProducts];
 
     // Filter by category
     if (filters.categoryId) {
-      result = result.filter(p => p.categoryId === filters.categoryId)
+      result = result.filter((p) => p.categoryId === filters.categoryId);
     }
 
-    // Filter by search
-    if (filters.search) {
-      const searchLower = filters.search.toLowerCase()
-      result = result.filter(p =>
-        p.name.toLowerCase().includes(searchLower) ||
-        p.description.toLowerCase().includes(searchLower) ||
-        p.sku.toLowerCase().includes(searchLower)
-      )
-    }
-
-    return result
-  }, [allProducts, filters.type, filters.categoryId, filters.search])
+    return result;
+  }, [allProducts, filters.categoryId]);
 
   // Stats
   const summaryStats = useMemo(() => {
     return {
       total: filteredProducts.length,
-      saleCount: filteredProducts.filter(p => p.isSale).length,
-    }
-  }, [filteredProducts])
+      saleCount: filteredProducts.filter((p) => p.isSale).length,
+    };
+  }, [filteredProducts]);
 
   // Category options based on type
   const categoryOptions = useMemo(() => {
-    const baseOptions = [{ value: '', label: 'Tất cả', count: summaryStats.total }]
+    const baseOptions = [
+      { value: '', label: 'Tất cả', count: summaryStats.total },
+    ];
 
     if (filters.type === 'frame') {
-      const frameCategories = categories.filter(c => ['1', '2', '5'].includes(c.id))
-      return baseOptions.concat(frameCategories.map(c => ({
-        value: c.id,
-        label: c.name,
-        count: filteredProducts.filter(p => p.categoryId === c.id).length
-      })))
+      const frameCategories = categories.filter((c) =>
+        ['1', '2', '5'].includes(c.id)
+      );
+      return baseOptions.concat(
+        frameCategories.map((c) => ({
+          value: c.id,
+          label: c.name,
+          count: filteredProducts.filter((p) => p.categoryId === c.id).length,
+        }))
+      );
     }
 
     if (filters.type === 'lens') {
-      const lensCategories = categories.filter(c => ['3', '4'].includes(c.id))
-      return baseOptions.concat(lensCategories.map(c => ({
+      const lensCategories = categories.filter((c) =>
+        ['3', '4'].includes(c.id)
+      );
+      return baseOptions.concat(
+        lensCategories.map((c) => ({
+          value: c.id,
+          label: c.name,
+          count: filteredProducts.filter((p) => p.categoryId === c.id).length,
+        }))
+      );
+    }
+
+    return baseOptions.concat(
+      categories.map((c) => ({
         value: c.id,
         label: c.name,
-        count: filteredProducts.filter(p => p.categoryId === c.id).length
-      })))
-    }
-
-    return baseOptions.concat(categories.map(c => ({
-      value: c.id,
-      label: c.name,
-      count: filteredProducts.filter(p => p.categoryId === c.id).length
-    })))
-  }, [categories, filters.type, filteredProducts, summaryStats.total])
+        count: filteredProducts.filter((p) => p.categoryId === c.id).length,
+      }))
+    );
+  }, [categories, filters.type, filteredProducts, summaryStats.total]);
 
   // Pagination
-  const totalPages = Math.max(1, Math.ceil(filteredProducts.length / filters.limit))
-  const normalizedCurrentPage = Math.min(filters.page, totalPages)
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredProducts.length / filters.limit)
+  );
+  const normalizedCurrentPage = Math.min(filters.page, totalPages);
 
   const paginatedProducts = useMemo(() => {
-    const start = (normalizedCurrentPage - 1) * filters.limit
-    return filteredProducts.slice(start, start + filters.limit)
-  }, [filteredProducts, normalizedCurrentPage, filters.limit])
+    const start = (normalizedCurrentPage - 1) * filters.limit;
+    return filteredProducts.slice(start, start + filters.limit);
+  }, [filteredProducts, normalizedCurrentPage, filters.limit]);
 
-  const shownFrom = filteredProducts.length === 0 ? 0 : (normalizedCurrentPage - 1) * filters.limit + 1
-  const shownTo = Math.min(normalizedCurrentPage * filters.limit, filteredProducts.length)
+  const shownFrom =
+    filteredProducts.length === 0
+      ? 0
+      : (normalizedCurrentPage - 1) * filters.limit + 1;
+  const shownTo = Math.min(
+    normalizedCurrentPage * filters.limit,
+    filteredProducts.length
+  );
 
   const handleFilterChange = (key, value) => {
-    setFilters(prev => ({ ...prev, [key]: value, page: 1 }))
+    setFilters((prev) => ({ ...prev, [key]: value, page: 1 }));
     if (key === 'search') {
-      setSearchParams(prev => {
-        if (value) prev.set('search', value)
-        else prev.delete('search')
-        return prev
-      })
+      setSearchParams((prev) => {
+        if (value) prev.set('search', value);
+        else prev.delete('search');
+        return prev;
+      });
     }
-  }
+  };
 
   const handlePageSizeChange = (event) => {
-    setFilters(prev => ({ ...prev, limit: Number(event.target.value), page: 1 }))
-  }
+    setFilters((prev) => ({
+      ...prev,
+      limit: Number(event.target.value),
+      page: 1,
+    }));
+  };
 
   const handlePageChange = (page) => {
-    const nextPage = Math.min(Math.max(page, 1), totalPages)
-    setFilters(prev => ({ ...prev, page: nextPage }))
-  }
+    const nextPage = Math.min(Math.max(page, 1), totalPages);
+    setFilters((prev) => ({ ...prev, page: nextPage }));
+  };
 
   const getTitle = () => {
-    if (type === 'frame') return 'Gọng kính'
-    if (type === 'lens') return 'Tròng kính'
-    if (type === 'accessory') return 'Phụ kiện'
-    return 'Tất cả sản phẩm'
-  }
+    if (type === 'frame') return 'Gọng kính';
+    if (type === 'lens') return 'Tròng kính';
+    if (type === 'accessory') return 'Phụ kiện';
+    return 'Tất cả sản phẩm';
+  };
 
   const getTypeLabel = (productType) => {
-    if (productType === 'frame') return 'Gọng kính'
-    if (productType === 'lens') return 'Tròng kính'
-    if (productType === 'accessory') return 'Phụ kiện'
-    return productType
-  }
+    if (productType === 'frame') return 'Gọng kính';
+    if (productType === 'lens') return 'Tròng kính';
+    if (productType === 'accessory') return 'Phụ kiện';
+    return productType;
+  };
 
   return (
     <div className="min-h-screen bg-[#f5f8ff]">
       <section className="border-b border-[#dbe4f4] bg-white">
         <div className="mx-auto max-w-[1180px] px-4 py-8">
           <div className="flex items-center gap-2 text-sm text-[#606b7f]">
-            <Link to="/" className="hover:text-[#0f5dd9]">Trang chủ</Link>
+            <Link to="/" className="hover:text-[#0f5dd9]">
+              Trang chủ
+            </Link>
             <span>/</span>
             <span className="font-medium text-[#1d2433]">{getTitle()}</span>
           </div>
-          <h1 className="mt-4 text-3xl font-bold uppercase tracking-tight text-[#1d2433]">{getTitle()}</h1>
+          <h1 className="mt-4 text-3xl font-bold uppercase tracking-tight text-[#1d2433]">
+            {getTitle()}
+          </h1>
           <p className="mt-2 text-[#606b7f]">
             Khám phá bộ sưu tập kính mắt chất lượng cao
           </p>
@@ -192,7 +213,7 @@ const ProductListPage = ({ type }) => {
 
           <div className="flex flex-wrap gap-3">
             {categoryOptions.map((option) => {
-              const isActive = filters.categoryId === option.value
+              const isActive = filters.categoryId === option.value;
               return (
                 <button
                   key={option.value || 'all'}
@@ -204,11 +225,13 @@ const ProductListPage = ({ type }) => {
                   }`}
                 >
                   <span>{option.label}</span>
-                  <span className={`rounded-full px-2 py-0.5 text-xs ${isActive ? 'bg-white/20' : 'bg-[#eff4ff] text-[#0f5dd9]'}`}>
+                  <span
+                    className={`rounded-full px-2 py-0.5 text-xs ${isActive ? 'bg-white/20' : 'bg-[#eff4ff] text-[#0f5dd9]'}`}
+                  >
                     {option.count}
                   </span>
                 </button>
-              )
+              );
             })}
           </div>
         </div>
@@ -218,11 +241,21 @@ const ProductListPage = ({ type }) => {
         <div className="mx-auto max-w-[1180px] px-4">
           {paginatedProducts.length === 0 ? (
             <div className="rounded-3xl border border-dashed border-[#cad7ed] bg-white px-6 py-20 text-center">
-              <p className="text-lg font-semibold text-[#1d2433]">Không tìm thấy sản phẩm phù hợp</p>
-              <p className="mt-2 text-sm text-[#606b7f]">Thử đổi từ khóa hoặc chọn lại danh mục để xem thêm gợi ý.</p>
+              <p className="text-lg font-semibold text-[#1d2433]">
+                Không tìm thấy sản phẩm phù hợp
+              </p>
+              <p className="mt-2 text-sm text-[#606b7f]">
+                Thử đổi từ khóa hoặc chọn lại danh mục để xem thêm gợi ý.
+              </p>
               <button
                 onClick={() => {
-                  setFilters({ page: 1, limit: 8, search: '', type: type || '', categoryId: '' })
+                  setFilters({
+                    page: 1,
+                    limit: 8,
+                    search: '',
+                    type: type || '',
+                    categoryId: '',
+                  });
                 }}
                 className="mt-6 rounded-full bg-[#0f5dd9] px-6 py-2 text-xs font-bold uppercase tracking-[0.14em] text-white transition hover:bg-[#0b4caf]"
               >
@@ -233,10 +266,16 @@ const ProductListPage = ({ type }) => {
             <>
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 {paginatedProducts.map((product) => {
-                  const hasDiscount = product.originalPrice && product.originalPrice > product.price
+                  const hasDiscount =
+                    product.originalPrice &&
+                    product.originalPrice > product.price;
                   const discountPercent = hasDiscount
-                    ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
-                    : 0
+                    ? Math.round(
+                        ((product.originalPrice - product.price) /
+                          product.originalPrice) *
+                          100
+                      )
+                    : 0;
 
                   return (
                     <Link
@@ -278,8 +317,12 @@ const ProductListPage = ({ type }) => {
                         <span className="mb-3 inline-flex rounded-full bg-[#eff4ff] px-3 py-1 text-xs font-semibold text-[#0f5dd9]">
                           {getTypeLabel(product.type)}
                         </span>
-                        <h3 className="line-clamp-1 text-lg font-semibold text-[#1d2433]">{product.name}</h3>
-                        <p className="mt-2 line-clamp-2 text-sm text-[#606b7f]">{product.description}</p>
+                        <h3 className="line-clamp-1 text-lg font-semibold text-[#1d2433]">
+                          {product.name}
+                        </h3>
+                        <p className="mt-2 line-clamp-2 text-sm text-[#606b7f]">
+                          {product.description}
+                        </p>
 
                         <div className="mt-4 flex items-center justify-between">
                           <div className="flex items-center gap-1 text-[#f7b500]">
@@ -293,7 +336,9 @@ const ProductListPage = ({ type }) => {
                               </svg>
                             ))}
                           </div>
-                          <span className="text-xs font-medium text-[#606b7f]">({product.reviewCount || 0} đánh giá)</span>
+                          <span className="text-xs font-medium text-[#606b7f]">
+                            ({product.reviewCount || 0} đánh giá)
+                          </span>
                         </div>
 
                         <div className="mt-4 flex items-center gap-2">
@@ -308,7 +353,7 @@ const ProductListPage = ({ type }) => {
                         </div>
                       </div>
                     </Link>
-                  )
+                  );
                 })}
               </div>
 
@@ -330,7 +375,7 @@ const ProductListPage = ({ type }) => {
         </div>
       </section>
     </div>
-  )
-}
+  );
+};
 
-export default ProductListPage
+export default ProductListPage;

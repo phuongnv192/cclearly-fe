@@ -1,7 +1,12 @@
-import { useState } from 'react';
 import { Plus, Trash2, Edit2, Image as ImageIcon, Loader2 } from 'lucide-react';
-import { useBanners, useCreateBanner, useUpdateBanner, useDeleteBanner } from '@/hooks/useAdmin';
+import { useState } from 'react';
 import BannerModal from '@/components/admin/bannar/BannerModal';
+import {
+  useBanners,
+  useCreateBanner,
+  useUpdateBanner,
+  useDeleteBanner,
+} from '@/hooks/useAdmin';
 
 const POSITIONS = [
   { value: 'header', label: 'Header (Banner trên cùng)' },
@@ -15,7 +20,8 @@ const BannerPage = () => {
   const [showModal, setShowModal] = useState(false);
   const [editingBanner, setEditingBanner] = useState(null);
   const [formData, setFormData] = useState({
-    imageUrl: '', position: 'home_main'
+    imageUrl: '',
+    position: 'home_main',
   });
 
   const { data: bannersData, isLoading } = useBanners();
@@ -28,7 +34,10 @@ const BannerPage = () => {
   const handleOpenModal = (banner = null) => {
     if (banner) {
       setEditingBanner(banner);
-      setFormData({ imageUrl: banner.imageUrl || '', position: banner.position || 'home_main' });
+      setFormData({
+        imageUrl: banner.imageUrl || '',
+        position: banner.position || 'home_main',
+      });
     } else {
       setEditingBanner(null);
       setFormData({ imageUrl: '', position: 'home_main' });
@@ -45,7 +54,7 @@ const BannerPage = () => {
       );
     } else {
       createBannerMutation.mutate(formData, {
-        onSuccess: () => setShowModal(false)
+        onSuccess: () => setShowModal(false),
       });
     }
   };
@@ -69,7 +78,9 @@ const BannerPage = () => {
       <div className="flex justify-between items-end">
         <div>
           <h1 className="text-2xl font-bold text-[#222]">Quản lý Banner</h1>
-          <p className="text-[#4f5562]">Cấu hình hình ảnh quảng cáo hiển thị trên website</p>
+          <p className="text-[#4f5562]">
+            Cấu hình hình ảnh quảng cáo hiển thị trên website
+          </p>
         </div>
         <button
           onClick={() => handleOpenModal()}
@@ -82,13 +93,16 @@ const BannerPage = () => {
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
         {[
           { label: 'Tổng banner', val: banners.length, color: 'text-gray-900' },
-          ...POSITIONS.map(pos => ({
+          ...POSITIONS.map((pos) => ({
             label: pos.label.split(' - ').pop() || pos.label,
-            val: banners.filter(b => b.position === pos.value).length,
-            color: 'text-blue-600'
-          })).filter(s => s.val > 0),
+            val: banners.filter((b) => b.position === pos.value).length,
+            color: 'text-blue-600',
+          })).filter((s) => s.val > 0),
         ].map((stat, i) => (
-          <div key={i} className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+          <div
+            key={i}
+            className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100"
+          >
             <p className={`text-2xl font-bold ${stat.color}`}>{stat.val}</p>
             <p className="text-sm text-gray-500">{stat.label}</p>
           </div>
@@ -96,37 +110,65 @@ const BannerPage = () => {
       </div>
 
       <div className="space-y-4">
-        {POSITIONS.map(pos => {
-          const items = banners.filter(b => b.position === pos.value);
+        {POSITIONS.map((pos) => {
+          const items = banners.filter((b) => b.position === pos.value);
           if (items.length === 0) return null;
 
           return (
-            <div key={pos.value} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div
+              key={pos.value}
+              className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden"
+            >
               <div className="px-6 py-4 bg-gray-50/50 border-b flex justify-between items-center">
                 <h3 className="font-bold text-[#222]">{pos.label}</h3>
-                <span className="text-xs bg-white px-2 py-1 rounded-lg border text-gray-500">{items.length} Banner</span>
+                <span className="text-xs bg-white px-2 py-1 rounded-lg border text-gray-500">
+                  {items.length} Banner
+                </span>
               </div>
               <table className="w-full text-left">
                 <tbody className="divide-y divide-gray-100">
-                  {items.map(banner => (
-                    <tr key={banner.bannerId} className="group hover:bg-gray-50 transition-colors">
+                  {items.map((banner) => (
+                    <tr
+                      key={banner.bannerId}
+                      className="group hover:bg-gray-50 transition-colors"
+                    >
                       <td className="px-4 py-4">
                         <div className="flex items-center gap-4">
                           <div className="w-20 h-12 bg-gray-100 rounded-lg overflow-hidden border border-gray-200">
                             {banner.imageUrl ? (
-                              <img src={banner.imageUrl} className="w-full h-full object-cover" alt="banner" />
+                              <img
+                                src={banner.imageUrl}
+                                className="w-full h-full object-cover"
+                                alt="banner"
+                              />
                             ) : (
-                              <div className="w-full h-full flex items-center justify-center"><ImageIcon className="text-gray-300 w-5 h-5" /></div>
+                              <div className="w-full h-full flex items-center justify-center">
+                                <ImageIcon className="text-gray-300 w-5 h-5" />
+                              </div>
                             )}
                           </div>
-                          <p className="font-semibold text-[#222] text-sm truncate max-w-xs">{banner.imageUrl}</p>
+                          <p className="font-semibold text-[#222] text-sm truncate max-w-xs">
+                            {banner.imageUrl}
+                          </p>
                         </div>
                       </td>
-                      <td className="px-4 py-4 text-sm text-gray-500">{banner.position}</td>
+                      <td className="px-4 py-4 text-sm text-gray-500">
+                        {banner.position}
+                      </td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex justify-end gap-2">
-                          <button onClick={() => handleOpenModal(banner)} className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all"><Edit2 size={16}/></button>
-                          <button onClick={() => handleDelete(banner.bannerId)} className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all"><Trash2 size={16}/></button>
+                          <button
+                            onClick={() => handleOpenModal(banner)}
+                            className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all"
+                          >
+                            <Edit2 size={16} />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(banner.bannerId)}
+                            className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all"
+                          >
+                            <Trash2 size={16} />
+                          </button>
                         </div>
                       </td>
                     </tr>
