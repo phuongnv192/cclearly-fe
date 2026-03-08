@@ -15,11 +15,11 @@ const RolePermissionPage = () => {
   const [editingUser, setEditingUser] = useState(null);
 
   const { data: usersData, isLoading: loadingUsers } = useAdminUsers({
-    page: 0,
+    page: 1,
     size: 50,
   });
   const { data: logsData, isLoading: loadingLogs } = useAdminLogs({
-    page: 0,
+    page: 1,
     size: 20,
   });
   const createUserMutation = useCreateUser();

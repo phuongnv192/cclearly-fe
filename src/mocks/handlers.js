@@ -583,7 +583,7 @@ export const handlers = [
         id: `cart_${Date.now()}`,
         productId,
         name: product.name,
-        price: product.price,
+        price: product.basePrice || product.price,
         image: product.images[0],
         quantity,
         options,

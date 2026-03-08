@@ -105,12 +105,23 @@ const SalesOrdersPage = () => {
     setOrderToEdit(order);
 
     if (order.prescription) {
+      // BE returns flat fields: sphOd, cylOd, axisOd, addOd, sphOs, cylOs, axisOs, addOs, pd
+      const rx = order.prescription;
       setPrescriptionForm({
-        ...order.prescription,
-        rightEye: { ...order.prescription.rightEye },
-        leftEye: { ...order.prescription.leftEye },
-        pd: order.prescription.pd?.toString(),
-        prescriptionImage: order.prescriptionImage,
+        rightEye: {
+          sph: rx.sphOd?.toString() || '',
+          cyl: rx.cylOd?.toString() || '',
+          axis: rx.axisOd?.toString() || '',
+          add: rx.addOd?.toString() || '',
+        },
+        leftEye: {
+          sph: rx.sphOs?.toString() || '',
+          cyl: rx.cylOs?.toString() || '',
+          axis: rx.axisOs?.toString() || '',
+          add: rx.addOs?.toString() || '',
+        },
+        pd: rx.pd?.toString() || '',
+        prescriptionImage: rx.imageUrl || null,
       });
     }
   };
@@ -331,8 +342,21 @@ const SalesOrdersPage = () => {
         onClose={() => setOrderToEdit(null)}
         onSave={() => {
           const orderId = orderToEdit?.orderId || orderToEdit?.id;
+          // Transform nested form to flat BE fields
+          const data = {
+            sphOd: prescriptionForm.rightEye.sph || null,
+            cylOd: prescriptionForm.rightEye.cyl || null,
+            axisOd: prescriptionForm.rightEye.axis ? Number(prescriptionForm.rightEye.axis) : null,
+            addOd: prescriptionForm.rightEye.add || null,
+            sphOs: prescriptionForm.leftEye.sph || null,
+            cylOs: prescriptionForm.leftEye.cyl || null,
+            axisOs: prescriptionForm.leftEye.axis ? Number(prescriptionForm.leftEye.axis) : null,
+            addOs: prescriptionForm.leftEye.add || null,
+            pd: prescriptionForm.pd || null,
+            imageUrl: prescriptionForm.prescriptionImage || null,
+          };
           savePrescriptionMutation.mutate(
-            { orderId, data: prescriptionForm },
+            { orderId, data },
             {
               onSuccess: () => setOrderToEdit(null),
             }

@@ -19,9 +19,8 @@ const SavedPrescriptionsPage = () => {
       id: 'RX12345',
       date: '2026-03-01',
       patientName: 'Nguyễn Văn A',
-      sph: { left: -2.5, right: -2.25 },
-      cyl: { left: -0.5, right: -0.75 },
-      axs: { left: 180, right: 175 },
+      sphOd: -2.25, cylOd: -0.75, axisOd: 175, addOd: null,
+      sphOs: -2.5, cylOs: -0.5, axisOs: 180, addOs: null,
       pd: 64,
       notes: 'Đơn từ bệnh viện Mắt TW',
     },
@@ -29,9 +28,8 @@ const SavedPrescriptionsPage = () => {
       id: 'RX09876',
       date: '2025-08-15',
       patientName: 'Nguyễn Văn A',
-      sph: { left: -2.0, right: -2.0 },
-      cyl: { left: 0, right: 0 },
-      axs: { left: 0, right: 0 },
+      sphOd: -2.0, cylOd: 0, axisOd: 0, addOd: null,
+      sphOs: -2.0, cylOs: 0, axisOs: 0, addOs: null,
       pd: 63,
       notes: 'Đơn cũ năm ngoái',
     },
@@ -104,50 +102,50 @@ const SavedPrescriptionsPage = () => {
                 <div className="grid grid-cols-2 gap-4 mb-6">
                   <div className="bg-[#fcfcfc] p-3 rounded-xl border border-gray-50">
                     <p className="text-[10px] uppercase font-bold text-[#999] tracking-wider mb-2">
-                      Mắt Trái (L)
+                      Mắt Phải (OD)
                     </p>
                     <div className="grid grid-cols-2 gap-2 text-xs">
                       <p className="text-[#4f5562]">
                         SPH:{' '}
                         <span className="text-[#222] font-bold">
-                          {px.sph.left}
+                          {px.sphOd}
                         </span>
                       </p>
                       <p className="text-[#4f5562]">
                         CYL:{' '}
                         <span className="text-[#222] font-bold">
-                          {px.cyl.left}
+                          {px.cylOd}
                         </span>
                       </p>
                       <p className="text-[#4f5562]">
                         AXS:{' '}
                         <span className="text-[#222] font-bold">
-                          {px.axs.left}°
+                          {px.axisOd}°
                         </span>
                       </p>
                     </div>
                   </div>
                   <div className="bg-[#fcfcfc] p-3 rounded-xl border border-gray-50">
                     <p className="text-[10px] uppercase font-bold text-[#999] tracking-wider mb-2">
-                      Mắt Phải (R)
+                      Mắt Trái (OS)
                     </p>
                     <div className="grid grid-cols-2 gap-2 text-xs">
                       <p className="text-[#4f5562]">
                         SPH:{' '}
                         <span className="text-[#222] font-bold">
-                          {px.sph.right}
+                          {px.sphOs}
                         </span>
                       </p>
                       <p className="text-[#4f5562]">
                         CYL:{' '}
                         <span className="text-[#222] font-bold">
-                          {px.cyl.right}
+                          {px.cylOs}
                         </span>
                       </p>
                       <p className="text-[#4f5562]">
                         AXS:{' '}
                         <span className="text-[#222] font-bold">
-                          {px.axs.right}°
+                          {px.axisOs}°
                         </span>
                       </p>
                     </div>

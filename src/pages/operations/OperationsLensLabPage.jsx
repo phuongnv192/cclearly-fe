@@ -160,17 +160,17 @@ const OperationsLensLabPage = () => {
                     <div>
                       <p className="text-[#4f5562]">Mắt phải (OD):</p>
                       <p className="font-medium">
-                        SPH: {order.prescription.rightEye.sph} | CYL:{' '}
-                        {order.prescription.rightEye.cyl} | AXIS:{' '}
-                        {order.prescription.rightEye.axis}
+                        SPH: {order.prescription.sphOd} | CYL:{' '}
+                        {order.prescription.cylOd} | AXIS:{' '}
+                        {order.prescription.axisOd}
                       </p>
                     </div>
                     <div>
                       <p className="text-[#4f5562]">Mắt trái (OS):</p>
                       <p className="font-medium">
-                        SPH: {order.prescription.leftEye.sph} | CYL:{' '}
-                        {order.prescription.leftEye.cyl} | AXIS:{' '}
-                        {order.prescription.leftEye.axis}
+                        SPH: {order.prescription.sphOs} | CYL:{' '}
+                        {order.prescription.cylOs} | AXIS:{' '}
+                        {order.prescription.axisOs}
                       </p>
                     </div>
                     <div>
@@ -179,10 +179,10 @@ const OperationsLensLabPage = () => {
                       </p>
                       <p className="font-medium">{order.prescription.pd}mm</p>
                     </div>
-                    {order.prescription.add && (
+                    {(order.prescription.addOd || order.prescription.addOs) && (
                       <div>
                         <p className="text-[#4f5562]">ADD:</p>
-                        <p className="font-medium">+{order.prescription.add}</p>
+                        <p className="font-medium">OD: +{order.prescription.addOd} | OS: +{order.prescription.addOs}</p>
                       </div>
                     )}
                   </div>

@@ -111,11 +111,11 @@ const ProductDetailPage = () => {
                 {new Intl.NumberFormat('vi-VN', {
                   style: 'currency',
                   currency: 'VND',
-                }).format(product.price)}
+                }).format(product.basePrice)}
               </span>
 
               {product.originalPrice &&
-                product.originalPrice > product.price && (
+                product.originalPrice > product.basePrice && (
                   <span className="text-lg line-through text-gray-400">
                     {new Intl.NumberFormat('vi-VN', {
                       style: 'currency',
@@ -284,9 +284,9 @@ const ProductDetailPage = () => {
             </div>
           )}
 
-          {activeTab === 'specs' && product.attributes && (
+          {activeTab === 'specs' && (product.frame || product.lens) && (
             <div className="border rounded-xl overflow-hidden">
-              {Object.entries(product.attributes).map(([key, value], index) => (
+              {Object.entries(product.frame || product.lens || {}).map(([key, value], index) => (
                 <div
                   key={key}
                   className={`grid grid-cols-2 px-6 py-3 text-sm ${

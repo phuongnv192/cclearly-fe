@@ -1439,22 +1439,27 @@ export const POSITIONS = [
 
 // Frame attributes options
 export const FRAME_MATERIALS = [
-  'Titanium',
+  'Kim loại',
+  'Nhựa',
   'Acetate',
+  'Titanium',
   'TR90',
-  'Steel',
   'Beta Titanium',
-  'Optyl',
 ];
 export const FRAME_SHAPES = [
+  'Phi công',
+  'Vuông',
+  'Chữ nhật',
+  'Tròn',
+  'Mắt mèo',
   'Oval',
-  'Round',
-  'Wayfarer',
-  'Rectangle',
-  'Square',
-  'Cat Eye',
-  'Aviator',
-  'Hexagonal',
+  'Browline',
+  'Đa giác',
+];
+export const FRAME_SUB_CATEGORIES = [
+  { value: 'OPTICAL', label: 'Kính cận' },
+  { value: 'SUNGLASSES', label: 'Kính râm' },
+  { value: 'KIDS', label: 'Kính trẻ em' },
 ];
 export const FRAME_COLORS = [
   'Đen',
@@ -1478,14 +1483,26 @@ export const FRAME_ORIGINS = [
 
 // Lens attributes options
 export const LENS_MATERIALS = [
+  'Nhựa CR-39',
   'Polycarbonate',
-  'CR-39',
-  'High Index',
   'Trivex',
+  'Thủy tinh',
   'MR-8',
+  'MR-7',
+];
+export const LENS_TYPES = [
+  'Đơn tròng',
+  'Đa tròng lũy tiến',
+  'Hai tròng',
+  'Văn phòng',
+];
+export const LENS_SUB_CATEGORIES = [
+  { value: 'PRESCRIPTION', label: 'Tròng cận' },
+  { value: 'SUN', label: 'Tròng râm' },
 ];
 export const LENS_INDEXES = [
   '1.50',
+  '1.53',
   '1.56',
   '1.59',
   '1.60',
@@ -1493,21 +1510,7 @@ export const LENS_INDEXES = [
   '1.74',
   '1.80',
 ];
-export const LENS_TECHNOLOGIES = [
-  'Standard',
-  'Blue Light Filter',
-  'UV Protection',
-  'Anti-fog',
-  'Shock Resistant',
-];
-export const LENS_COATINGS = [
-  'Anti-scratch',
-  'Anti-reflection',
-  'Hydrophobic',
-  'Oleophobic',
-  'UV Protection',
-];
-export const LENS_DIAMETERS = ['65mm', '70mm', '72mm', '75mm', '80mm'];
+// (technologies are managed in Master_Lens_Technologies table)
 export const LENS_BRANDS = [
   'Hoya',
   'Essilor',
@@ -1516,13 +1519,6 @@ export const LENS_BRANDS = [
   'Nikon',
   'Zeiss',
   'Rodenstock',
-];
-export const LENS_TYPES = [
-  'Đơn tròng',
-  'Đa tròng',
-  'Đổi màu',
-  'Cận lão',
-  'Trẻ em',
 ];
 
 export const PAGE_SIZES = [5, 10, 20, 30, 50];

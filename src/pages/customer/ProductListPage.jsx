@@ -268,10 +268,10 @@ const ProductListPage = ({ type }) => {
                 {paginatedProducts.map((product) => {
                   const hasDiscount =
                     product.originalPrice &&
-                    product.originalPrice > product.price;
+                    product.originalPrice > product.basePrice;
                   const discountPercent = hasDiscount
                     ? Math.round(
-                        ((product.originalPrice - product.price) /
+                        ((product.originalPrice - product.basePrice) /
                           product.originalPrice) *
                           100
                       )
@@ -343,7 +343,7 @@ const ProductListPage = ({ type }) => {
 
                         <div className="mt-4 flex items-center gap-2">
                           <span className="text-xl font-bold text-[#1d2433]">
-                            {currencyFormatter.format(product.price)}
+                            {currencyFormatter.format(product.basePrice)}
                           </span>
                           {hasDiscount && (
                             <span className="text-sm text-[#7b8494] line-through">

@@ -165,7 +165,7 @@ const PromotionPage = () => {
     const finalData = {
       ...flashSaleFormData,
       name: product?.name || 'Sản phẩm mới',
-      originalPrice: product?.price || 0,
+      originalPrice: product?.basePrice || 0,
     };
 
     if (editingFlashSale) {

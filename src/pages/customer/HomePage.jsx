@@ -122,7 +122,7 @@ const HomePage = () => {
 
   // Mapping mock products to bestSellingItems UI format
   const bestSellingItems =
-    productData?.items?.map((product) => {
+    productData?.content?.map((product) => {
       // Determine a stroke color based on material or just a random nice blue/grey
       const strokeColors = ['#2E5EA8', '#8C6842', '#2C4F5E', '#7F273A'];
       const randomStroke =
@@ -131,9 +131,9 @@ const HomePage = () => {
       return {
         id: product.id,
         name: product.name,
-        price: new Intl.NumberFormat('vi-VN').format(product.price) + 'đ',
+        price: new Intl.NumberFormat('vi-VN').format(product.basePrice) + 'đ',
         rating: product.rating?.toString() || '0.0',
-        size: product.attributes?.lensWidth >= 52 ? 'L' : 'M',
+        size: product.frame?.lensWidthMm >= 52 ? 'L' : 'M',
         colors: ['#222', '#555', '#999'], // Mocking color swatches as they are not explicitly an array in mock data
         stroke: randomStroke,
       };

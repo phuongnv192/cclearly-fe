@@ -70,6 +70,9 @@ export const ENDPOINT = {
 
   // Order Prescription
   ORDER_PRESCRIPTION: (orderId) => `/orders/${orderId}/prescription`,
+
+  // Upload
+  UPLOAD_IMAGE: '/upload/image',
 };
 
 // Query Keys for React Query

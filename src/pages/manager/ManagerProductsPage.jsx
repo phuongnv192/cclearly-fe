@@ -17,7 +17,7 @@ const ManagerProductsPage = () => {
   const { user } = useAuth();
   const [filters, setFilters] = useState({
     page: 1,
-    limit: 20,
+    size: 20,
     type: '',
     search: '',
   });
@@ -41,20 +41,13 @@ const ManagerProductsPage = () => {
     description: '',
     material: '',
     shape: '',
-    color: '',
     bridgeWidth: '',
     templeLength: '',
     lensWidth: '',
-    frameWidth: '',
-    origin: '',
-    warranty: '',
-    index: '',
     lensMaterial: '',
-    technology: '',
-    coating: '',
-    diameter: '',
     lensType: '',
-    brand: '',
+    subCategory: '',
+    images: [],
   });
 
   const [variants, setVariants] = useState([]);
@@ -65,26 +58,27 @@ const ManagerProductsPage = () => {
       setFormData({
         name: product.name,
         type: product.type,
-        price: product.price,
+        price: product.basePrice,
         description: product.description,
-        material: product.attributes?.material || '',
-        shape: product.attributes?.shape || '',
-        color: product.attributes?.color || '',
-        bridgeWidth: product.attributes?.bridgeWidth || '',
-        templeLength: product.attributes?.templeLength || '',
-        lensWidth: product.attributes?.lensWidth || '',
-        frameWidth: product.attributes?.frameWidth || '',
-        origin: product.attributes?.origin || '',
-        warranty: product.attributes?.warranty || '',
-        index: product.attributes?.index || '',
-        lensMaterial: product.attributes?.material || '',
-        technology: product.attributes?.technology || '',
-        coating: product.attributes?.coating || '',
-        diameter: product.attributes?.diameter || '',
-        lensType: product.attributes?.type || '',
-        brand: product.attributes?.brand || '',
+        material: product.frame?.material || '',
+        shape: product.frame?.shape || '',
+        bridgeWidth: product.frame?.bridgeWidthMm || '',
+        templeLength: product.frame?.templeLengthMm || '',
+        lensWidth: product.frame?.lensWidthMm || '',
+        lensMaterial: product.lens?.material || '',
+        lensType: product.lens?.lensType || '',
+        subCategory: product.subCategory || '',
+        images: product.images?.map((url, idx) => ({ id: idx, url, preview: url })) || [],
       });
-      setVariants(product.variants || []);
+      setVariants(product.variants?.map(v => ({
+        id: v.variantId,
+        sku: v.sku,
+        color: v.colorName || '',
+        colorCode: '#000000',
+        refractiveIndex: v.refractiveIndex || '',
+        variantName: v.colorName || '',
+        price: v.salePrice || product.basePrice,
+      })) || []);
     } else {
       setEditingProduct(null);
       setFormData({
@@ -94,20 +88,13 @@ const ManagerProductsPage = () => {
         description: '',
         material: '',
         shape: '',
-        color: '',
         bridgeWidth: '',
         templeLength: '',
         lensWidth: '',
-        frameWidth: '',
-        origin: '',
-        warranty: '',
-        index: '',
         lensMaterial: '',
-        technology: '',
-        coating: '',
-        diameter: '',
         lensType: '',
-        brand: '',
+        subCategory: '',
+        images: [],
       });
       setVariants([]);
     }
@@ -122,34 +109,40 @@ const ManagerProductsPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const attributes =
-        formData.type === 'frame'
-          ? {
-              material: formData.material,
-              shape: formData.shape,
-              color: formData.color,
-              bridgeWidth: formData.bridgeWidth,
-              templeLength: formData.templeLength,
-              lensWidth: formData.lensWidth,
-              frameWidth: formData.frameWidth,
-              origin: formData.origin,
-              warranty: formData.warranty,
-            }
-          : {
-              index: formData.index,
-              material: formData.lensMaterial,
-              technology: formData.technology,
-              coating: formData.coating,
-              diameter: formData.diameter,
-              type: formData.lensType,
-              brand: formData.brand,
-            };
-
       const productData = {
-        ...formData,
-        attributes,
-        variants: variants.length > 0 ? variants : undefined,
+        name: formData.name,
+        type: formData.type,
+        price: formData.type === 'accessory' ? Number(formData.price) : 0,
+        description: formData.description,
+        subCategory: formData.type === 'accessory' ? null : (formData.subCategory || null),
+        imageUrls: formData.images?.map((img) => img.url).filter(Boolean) || [],
       };
+
+      if (formData.type === 'frame') {
+        productData.frameAttributes = {
+          material: formData.material,
+          shape: formData.shape,
+          lensWidth: formData.lensWidth ? Number(formData.lensWidth) : null,
+          bridgeWidth: formData.bridgeWidth ? Number(formData.bridgeWidth) : null,
+          templeLength: formData.templeLength ? Number(formData.templeLength) : null,
+        };
+      } else if (formData.type === 'lens') {
+        productData.lensAttributes = {
+          material: formData.lensMaterial,
+          type: formData.lensType,
+        };
+      }
+
+      if (variants.length > 0) {
+        productData.variants = variants.map(v => ({
+          variantId: typeof v.id === 'string' && v.id.startsWith('v') || v.id?.toString().startsWith('lv') || v.id?.toString().startsWith('av') ? null : v.id,
+          sku: v.sku,
+          colorName: formData.type === 'accessory' ? (v.variantName || null) : (v.color || null),
+          refractiveIndex: v.refractiveIndex ? Number(v.refractiveIndex) : null,
+          salePrice: v.price ? Number(v.price) : null,
+          isPreorder: false,
+        }));
+      }
 
       if (editingProduct) {
         await updateProduct.mutateAsync({
@@ -166,21 +159,30 @@ const ManagerProductsPage = () => {
   };
 
   const handleAddVariant = () => {
-    const newVariant =
-      formData.type === 'frame'
-        ? {
-            id: 'v' + Date.now(),
-            color: '',
-            colorCode: '#000000',
-            sku: '',
-            price: formData.price,
-          }
-        : {
-            id: 'lv' + Date.now(),
-            technology: '',
-            sku: '',
-            price: formData.price,
-          };
+    let newVariant;
+    if (formData.type === 'frame') {
+      newVariant = {
+        id: 'v' + Date.now(),
+        color: '',
+        colorCode: '#000000',
+        sku: '',
+        price: formData.price,
+      };
+    } else if (formData.type === 'lens') {
+      newVariant = {
+        id: 'lv' + Date.now(),
+        refractiveIndex: '',
+        sku: '',
+        price: formData.price,
+      };
+    } else {
+      newVariant = {
+        id: 'av' + Date.now(),
+        variantName: '',
+        sku: '',
+        price: formData.price,
+      };
+    }
     setVariants([...variants, newVariant]);
   };
 
@@ -194,8 +196,8 @@ const ManagerProductsPage = () => {
     setVariants(variants.filter((_, i) => i !== index));
   };
 
-  const products = data?.items || [];
-  const totalPages = data?.meta?.totalPages || 1;
+  const products = data?.content || [];
+  const totalPages = data?.totalPages || 1;
 
   return (
     <div className="space-y-6">
@@ -228,6 +230,7 @@ const ManagerProductsPage = () => {
           <option value="">Tất cả loại</option>
           <option value="frame">Gọng kính</option>
           <option value="lens">Tròng kính</option>
+          <option value="accessory">Phụ kiện</option>
         </select>
         <button
           onClick={() => handleOpenModal()}
@@ -261,7 +264,7 @@ const ManagerProductsPage = () => {
                       Giá
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider text-center">
-                      Tồn
+                      Biến thể
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
                       Trạng thái
@@ -279,11 +282,19 @@ const ManagerProductsPage = () => {
                     >
                       <td className="px-4 py-2.5">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center shrink-0 border border-gray-100">
-                            {product.type === 'frame' ? (
+                          <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center shrink-0 border border-gray-100 overflow-hidden">
+                            {product.images?.length > 0 ? (
+                              <img
+                                src={product.images[0]}
+                                alt={product.name}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : product.type === 'frame' ? (
                               <Glasses className="w-5 h-5 text-gray-400" />
-                            ) : (
+                            ) : product.type === 'lens' ? (
                               <Scan className="w-5 h-5 text-gray-400" />
+                            ) : (
+                              <span className="text-gray-400 text-xs font-bold">PK</span>
                             )}
                           </div>
                           <div className="min-w-0">
@@ -303,17 +314,20 @@ const ManagerProductsPage = () => {
                       </td>
                       <td className="px-4 py-2.5">
                         <span className="px-2 py-0.5 bg-gray-100 text-gray-600 text-[10px] font-bold rounded-md uppercase">
-                          {product.type === 'frame' ? 'Gọng' : 'Tròng'}
+                          {product.type === 'frame' ? 'Gọng' : product.type === 'lens' ? 'Tròng' : 'Phụ kiện'}
                         </span>
                       </td>
                       <td className="px-4 py-2.5 text-sm font-bold text-[#222]">
+                        {product.variants?.length > 1 && (
+                          <span className="text-xs font-normal text-gray-400 mr-0.5">Từ </span>
+                        )}
                         {new Intl.NumberFormat('vi-VN', {
                           style: 'currency',
                           currency: 'VND',
-                        }).format(product.price)}
+                        }).format(product.basePrice)}
                       </td>
                       <td className="px-4 py-2.5 text-sm text-center font-medium text-gray-600">
-                        {product.stock}
+                        {product.variants?.length || 0}
                       </td>
                       <td className="px-4 py-2.5">
                         <span
@@ -352,11 +366,11 @@ const ManagerProductsPage = () => {
               <div className="flex items-center gap-3">
                 <span className="text-sm text-[#4f5562]">Hiển thị:</span>
                 <select
-                  value={filters.limit}
+                  value={filters.size}
                   onChange={(e) =>
                     setFilters({
                       ...filters,
-                      limit: Number(e.target.value),
+                      size: Number(e.target.value),
                       page: 1,
                     })
                   }
