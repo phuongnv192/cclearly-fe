@@ -104,6 +104,8 @@ const MainLayout = () => {
   const cartItemCount = cartData?.items?.length || 0;
   const wishlistCount = 0; // Demo - can be connected to wishlist hook later
 
+  const isStaffRole = user?.role && user.role !== ROLES.CUSTOMER;
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -239,38 +241,42 @@ const MainLayout = () => {
                         </span>
                       </div>
 
-                      {/* Wishlist & Cart in dropdown */}
-                      <Link
-                        to="/wishlist"
-                        onClick={() => setIsProfileDropdownOpen(false)}
-                        className="flex items-center justify-between px-4 py-2.5 text-[#666] hover:bg-[#f3f3f3] hover:text-[#0f5dd9]"
-                      >
-                        <div className="flex items-center gap-3">
-                          <Heart className="h-4 w-4" />
-                          <span className="text-sm">Yêu thích</span>
-                        </div>
-                        {wishlistCount > 0 && (
-                          <span className="bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full">
-                            {wishlistCount}
-                          </span>
-                        )}
-                      </Link>
+                      {/* Wishlist & Cart in dropdown - only for customers */}
+                      {!isStaffRole && (
+                        <>
+                          <Link
+                            to="/wishlist"
+                            onClick={() => setIsProfileDropdownOpen(false)}
+                            className="flex items-center justify-between px-4 py-2.5 text-[#666] hover:bg-[#f3f3f3] hover:text-[#0f5dd9]"
+                          >
+                            <div className="flex items-center gap-3">
+                              <Heart className="h-4 w-4" />
+                              <span className="text-sm">Yêu thích</span>
+                            </div>
+                            {wishlistCount > 0 && (
+                              <span className="bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full">
+                                {wishlistCount}
+                              </span>
+                            )}
+                          </Link>
 
-                      <Link
-                        to="/cart"
-                        onClick={() => setIsProfileDropdownOpen(false)}
-                        className="flex items-center justify-between px-4 py-2.5 text-[#666] hover:bg-[#f3f3f3] hover:text-[#0f5dd9]"
-                      >
-                        <div className="flex items-center gap-3">
-                          <ShoppingBag className="h-4 w-4" />
-                          <span className="text-sm">Giỏ hàng</span>
-                        </div>
-                        {cartItemCount > 0 && (
-                          <span className="bg-[#0f5dd9] text-white text-xs px-1.5 py-0.5 rounded-full">
-                            {cartItemCount}
-                          </span>
-                        )}
-                      </Link>
+                          <Link
+                            to="/cart"
+                            onClick={() => setIsProfileDropdownOpen(false)}
+                            className="flex items-center justify-between px-4 py-2.5 text-[#666] hover:bg-[#f3f3f3] hover:text-[#0f5dd9]"
+                          >
+                            <div className="flex items-center gap-3">
+                              <ShoppingBag className="h-4 w-4" />
+                              <span className="text-sm">Giỏ hàng</span>
+                            </div>
+                            {cartItemCount > 0 && (
+                              <span className="bg-[#0f5dd9] text-white text-xs px-1.5 py-0.5 rounded-full">
+                                {cartItemCount}
+                              </span>
+                            )}
+                          </Link>
+                        </>
+                      )}
 
                       <div className="border-t border-[#efefef] mt-2 pt-2">
                         <Link
