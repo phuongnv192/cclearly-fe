@@ -18,7 +18,7 @@ const OperationsOrdersPage = () => {
 
   const { data: ordersData } = useAdminOrders({
     status: status !== 'all' ? status : undefined,
-    page: page - 1,
+    page: page,
     size: pageSize,
   });
   const orders = ordersData?.items || ordersData || [];

@@ -20,6 +20,12 @@ export const userRequest = {
     return res.data;
   },
 
+  // Get customers list (for sales staff)
+  getCustomers: async () => {
+    const res = await http.get(ENDPOINT.CUSTOMERS);
+    return res.data;
+  },
+
   // Request return/refund for an order
   requestReturn: async (orderId, data) => {
     const res = await http.post(ENDPOINT.REQUEST_RETURN(orderId), data);

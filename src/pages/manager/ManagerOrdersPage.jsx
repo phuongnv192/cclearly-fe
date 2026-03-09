@@ -16,7 +16,7 @@ const ManagerOrdersPage = () => {
 
   const { data: ordersData } = useAdminOrders({
     status: statusFilter !== 'all' ? statusFilter : undefined,
-    page: currentPage - 1,
+    page: currentPage,
     size: pageSize,
   });
 

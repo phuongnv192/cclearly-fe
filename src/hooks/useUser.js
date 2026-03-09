@@ -13,6 +13,15 @@ export const useUserProfile = () => {
   });
 };
 
+// Get customers list (for sales staff)
+export const useCustomers = () => {
+  return useQuery({
+    queryKey: QUERY_KEYS.CUSTOMERS,
+    queryFn: () => userRequest.getCustomers(),
+    staleTime: 2 * 60 * 1000,
+  });
+};
+
 // Update user profile
 export const useUpdateProfile = () => {
   const queryClient = useQueryClient();

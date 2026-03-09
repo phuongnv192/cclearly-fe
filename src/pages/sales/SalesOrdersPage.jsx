@@ -2,18 +2,23 @@ import {
   Search,
   Eye,
   Edit2,
-  Mail,
   Package,
   CheckCircle,
   TrendingUp,
   Filter,
+  Truck,
+  XCircle,
+  Clock,
 } from 'lucide-react';
 import { useState } from 'react';
-import { toast } from 'react-toastify';
 import { ConfirmModal } from '@/components/ui';
 import Pagination from '@/components/ui/Pagination';
 import { useAuth } from '@/contexts/AuthContext';
-import { useAdminOrders, useSavePrescription } from '@/hooks/useOrder';
+import {
+  useAdminOrders,
+  useSavePrescription,
+  useUpdateOrderStatus,
+} from '@/hooks/useOrder';
 import OrderDetailModal from '../../components/sale/OrderDetailModal';
 import PrescriptionModal from '../../components/sale/PrescriptionModal';
 
@@ -29,7 +34,7 @@ const SalesOrdersPage = () => {
 
   const { data: ordersData } = useAdminOrders({
     status: statusFilter !== 'all' ? statusFilter : undefined,
-    page: currentPage - 1,
+    page: currentPage,
     size: pageSize,
   });
   const orders = ordersData?.items || ordersData || [];
@@ -37,6 +42,7 @@ const SalesOrdersPage = () => {
   const totalPages = ordersData?.meta?.totalPages || Math.ceil(totalItems / pageSize);
 
   const savePrescriptionMutation = useSavePrescription();
+  const updateStatusMutation = useUpdateOrderStatus();
 
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [orderToEdit, setOrderToEdit] = useState(null);
@@ -83,23 +89,23 @@ const SalesOrdersPage = () => {
       currency: 'VND',
     }).format(amount || 0);
 
-  const getStatusBadge = (status) => {
-    const map = {
-      pending: 'bg-yellow-100 text-yellow-700',
-      confirmed: 'bg-blue-100 text-blue-700',
-      delivered: 'bg-green-100 text-green-700',
-      cancelled: 'bg-red-100 text-red-700',
-    };
-    return map[status] || 'bg-gray-100 text-gray-700';
+  const STATUS_MAP = {
+    PENDING: { label: 'Chờ xác nhận', css: 'bg-yellow-100 text-yellow-700' },
+    CONFIRMED: { label: 'Đã xác nhận', css: 'bg-blue-100 text-blue-700' },
+    SHIPPED: { label: 'Đang giao hàng', css: 'bg-purple-100 text-purple-700' },
+    DELIVERED: { label: 'Đã giao', css: 'bg-green-100 text-green-700' },
+    CANCELLED: { label: 'Đã hủy', css: 'bg-red-100 text-red-700' },
+    RETURN_REQUESTED: { label: 'Yêu cầu trả hàng', css: 'bg-orange-100 text-orange-700' },
+    RETURNED: { label: 'Đã trả hàng', css: 'bg-gray-100 text-gray-700' },
   };
 
-  const getTypeBadge = (type) => {
-    const map = {
-      regular: 'bg-green-100 text-green-700',
-      prescription: 'bg-blue-100 text-blue-700',
-    };
-    return map[type] || 'bg-gray-100 text-gray-700';
+  const TYPE_MAP = {
+    standard: { label: 'Thường', css: 'bg-green-100 text-green-700' },
+    prescription: { label: 'Có toa', css: 'bg-blue-100 text-blue-700' },
   };
+
+  const getStatusBadge = (status) => STATUS_MAP[status] || { label: status, css: 'bg-gray-100 text-gray-700' };
+  const getTypeBadge = (type) => TYPE_MAP[type] || { label: type || 'Thường', css: 'bg-gray-100 text-gray-700' };
 
   const handleEditPrescription = (order) => {
     setOrderToEdit(order);
@@ -126,6 +132,40 @@ const SalesOrdersPage = () => {
     }
   };
 
+  const handleConfirmOrder = (order) => {
+    setConfirmModal({
+      isOpen: true,
+      title: 'Xác nhận đơn hàng',
+      message: `Xác nhận đơn hàng #${order.code || order.orderId}?`,
+      onConfirm: () => {
+        updateStatusMutation.mutate(
+          { id: order.orderId, status: 'CONFIRMED' },
+          {
+            onSettled: () =>
+              setConfirmModal((prev) => ({ ...prev, isOpen: false })),
+          },
+        );
+      },
+    });
+  };
+
+  const handleCancelOrder = (order) => {
+    setConfirmModal({
+      isOpen: true,
+      title: 'Hủy đơn hàng',
+      message: `Bạn có chắc chắn muốn hủy đơn hàng #${order.code || order.orderId}?`,
+      onConfirm: () => {
+        updateStatusMutation.mutate(
+          { id: order.orderId, status: 'CANCELLED' },
+          {
+            onSettled: () =>
+              setConfirmModal((prev) => ({ ...prev, isOpen: false })),
+          },
+        );
+      },
+    });
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -134,38 +174,45 @@ const SalesOrdersPage = () => {
           Quản lý đơn hàng
         </h1>
         <p className="text-gray-500 text-sm">
-          Xin chào, {user?.name || 'Sales User'}
+          Xin chào, {user?.fullName || user?.name || 'Sales User'}
         </p>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         {[
           {
             label: 'Chờ xác nhận',
-            val: orders.filter((o) => o.status === 'pending').length,
-            icon: Package,
+            val: orders.filter((o) => o.status === 'PENDING').length,
+            icon: Clock,
             color: 'text-yellow-600',
             bg: 'bg-yellow-50',
           },
           {
             label: 'Đã xác nhận',
-            val: orders.filter((o) => o.status === 'confirmed').length,
+            val: orders.filter((o) => o.status === 'CONFIRMED').length,
             icon: CheckCircle,
             color: 'text-blue-600',
             bg: 'bg-blue-50',
           },
           {
-            label: 'Hoàn thành',
-            val: orders.filter((o) => o.status === 'delivered').length,
+            label: 'Đang giao',
+            val: orders.filter((o) => o.status === 'SHIPPED').length,
+            icon: Truck,
+            color: 'text-purple-600',
+            bg: 'bg-purple-50',
+          },
+          {
+            label: 'Đã giao',
+            val: orders.filter((o) => o.status === 'DELIVERED').length,
             icon: TrendingUp,
             color: 'text-green-600',
             bg: 'bg-green-50',
           },
           {
             label: 'Tổng đơn',
-            val: orders.length,
-            icon: Search,
+            val: totalItems,
+            icon: Package,
             color: 'text-gray-600',
             bg: 'bg-gray-50',
           },
@@ -216,9 +263,12 @@ const SalesOrdersPage = () => {
             className="outline-none bg-transparent"
           >
             <option value="all">Tất cả</option>
-            <option value="pending">Chờ xác nhận</option>
-            <option value="confirmed">Đã xác nhận</option>
-            <option value="delivered">Hoàn thành</option>
+            <option value="PENDING">Chờ xác nhận</option>
+            <option value="CONFIRMED">Đã xác nhận</option>
+            <option value="SHIPPED">Đang giao hàng</option>
+            <option value="DELIVERED">Đã giao</option>
+            <option value="CANCELLED">Đã hủy</option>
+            <option value="RETURN_REQUESTED">Yêu cầu trả hàng</option>
           </select>
         </div>
       </div>
@@ -228,72 +278,111 @@ const SalesOrdersPage = () => {
         <table className="w-full text-sm">
           <thead className="bg-gray-50 text-gray-500">
             <tr>
-              <th className="px-6 py-3 text-left">Mã đơn</th>
-              <th className="px-6 py-3 text-left">Khách hàng</th>
-              <th className="px-6 py-3 text-left">Loại</th>
-              <th className="px-6 py-3 text-center">Trạng thái</th>
-              <th className="px-6 py-3 text-right">Tổng tiền</th>
-              <th className="px-6 py-3 text-right">Thao tác</th>
+              <th className="px-5 py-3 text-left">Mã đơn</th>
+              <th className="px-5 py-3 text-left">Khách hàng</th>
+              <th className="px-5 py-3 text-left">Loại</th>
+              <th className="px-5 py-3 text-center">Trạng thái</th>
+              <th className="px-5 py-3 text-right">Tổng tiền</th>
+              <th className="px-5 py-3 text-center">Ngày đặt</th>
+              <th className="px-5 py-3 text-right">Thao tác</th>
             </tr>
           </thead>
 
           <tbody className="divide-y">
+            {paginatedOrders.length === 0 && (
+              <tr>
+                <td colSpan={7} className="text-center py-12 text-gray-400">
+                  <Package className="w-10 h-10 mx-auto mb-2 text-gray-300" />
+                  Không tìm thấy đơn hàng
+                </td>
+              </tr>
+            )}
             {paginatedOrders.map((order) => (
-              <tr key={order.orderId || order.id} className="hover:bg-gray-50">
-                <td className="px-6 py-3 text-blue-600 font-medium">
+              <tr
+                key={order.orderId || order.id}
+                className="hover:bg-gray-50 cursor-pointer"
+                onClick={() => setSelectedOrder(order)}
+              >
+                <td className="px-5 py-3 text-[#0f5dd9] font-medium">
                   #{order.code || order.orderId || order.id}
                 </td>
 
-                <td className="px-6 py-3">
+                <td className="px-5 py-3">
                   <p className="font-medium text-gray-800">
-                    {order.recipientName || order.shippingAddress?.name}
+                    {order.recipientName || '—'}
                   </p>
-                  <p className="text-xs text-gray-500">
-                    {order.shippingPhone || order.shippingAddress?.phone}
+                  <p className="text-xs text-gray-400">
+                    {order.shippingPhone || ''}
                   </p>
                 </td>
 
-                <td className="px-6 py-3">
+                <td className="px-5 py-3">
                   <span
-                    className={`px-2 py-1 rounded text-xs ${getTypeBadge(order.type)}`}
+                    className={`px-2 py-1 rounded-full text-xs font-medium ${getTypeBadge(order.type).css}`}
                   >
-                    {order.type}
+                    {getTypeBadge(order.type).label}
                   </span>
                 </td>
 
-                <td className="px-6 py-3 text-center">
+                <td className="px-5 py-3 text-center">
                   <span
-                    className={`px-2 py-1 rounded text-xs ${getStatusBadge(order.status)}`}
+                    className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusBadge(order.status).css}`}
                   >
-                    {order.status}
+                    {getStatusBadge(order.status).label}
                   </span>
                 </td>
 
-                <td className="px-6 py-3 text-right font-medium">
-                  {formatCurrency(order.finalAmount || order.totalAmount)}
+                <td className="px-5 py-3 text-right font-medium">
+                  {formatCurrency(order.finalAmount)}
                 </td>
 
-                <td className="px-6 py-3 text-right">
-                  <div className="flex justify-end gap-2">
+                <td className="px-5 py-3 text-center text-xs text-gray-500">
+                  {order.createdAt
+                    ? new Date(order.createdAt).toLocaleDateString('vi-VN')
+                    : '—'}
+                </td>
+
+                <td className="px-5 py-3 text-right">
+                  <div
+                    className="flex justify-end gap-1"
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     <button
                       onClick={() => setSelectedOrder(order)}
-                      className="p-2 bg-blue-50 text-blue-600 rounded-lg"
+                      className="p-1.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors"
+                      title="Xem chi tiết"
                     >
-                      <Eye size={16} />
+                      <Eye size={15} />
                     </button>
+
+                    {order.status === 'PENDING' && (
+                      <>
+                        <button
+                          onClick={() => handleConfirmOrder(order)}
+                          className="p-1.5 bg-green-50 text-green-600 rounded-lg hover:bg-green-100 transition-colors"
+                          title="Xác nhận"
+                        >
+                          <CheckCircle size={15} />
+                        </button>
+                        <button
+                          onClick={() => handleCancelOrder(order)}
+                          className="p-1.5 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors"
+                          title="Hủy đơn"
+                        >
+                          <XCircle size={15} />
+                        </button>
+                      </>
+                    )}
 
                     {order.type === 'prescription' && (
                       <button
                         onClick={() => handleEditPrescription(order)}
-                        className="p-2 bg-green-50 text-green-600 rounded-lg"
+                        className="p-1.5 bg-amber-50 text-amber-600 rounded-lg hover:bg-amber-100 transition-colors"
+                        title="Sửa toa kính"
                       >
-                        <Edit2 size={16} />
+                        <Edit2 size={15} />
                       </button>
                     )}
-
-                    <button className="p-2 bg-gray-100 text-gray-500 rounded-lg">
-                      <Mail size={16} />
-                    </button>
                   </div>
                 </td>
               </tr>
@@ -331,9 +420,18 @@ const SalesOrdersPage = () => {
       <OrderDetailModal
         order={selectedOrder}
         onClose={() => setSelectedOrder(null)}
-        getTypeBadge={getTypeBadge}
-        getStatusBadge={getStatusBadge}
-        formatCurrency={formatCurrency}
+        onConfirm={(orderId) => {
+          updateStatusMutation.mutate(
+            { id: orderId, status: 'CONFIRMED' },
+            { onSettled: () => setSelectedOrder(null) },
+          );
+        }}
+        onCancel={(orderId) => {
+          updateStatusMutation.mutate(
+            { id: orderId, status: 'CANCELLED' },
+            { onSettled: () => setSelectedOrder(null) },
+          );
+        }}
       />
 
       <PrescriptionModal

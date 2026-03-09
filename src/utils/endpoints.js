@@ -38,6 +38,7 @@ export const ENDPOINT = {
   // User
   USER_PROFILE: '/users/profile',
   USER_ORDERS: '/users/orders',
+  CUSTOMERS: '/users/customers',
   REQUEST_RETURN: (orderId) => `/users/orders/${orderId}/return`,
 
   // Addresses
@@ -120,6 +121,9 @@ export const QUERY_KEYS = {
   // Returns
   RETURNS: ['returns'],
   RETURN_DETAIL: (id) => ['returns', id],
+
+  // Customers
+  CUSTOMERS: ['customers'],
 
   // Addresses
   ADDRESSES: ['addresses'],
