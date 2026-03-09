@@ -49,4 +49,11 @@ export const productRequest = {
     const res = await http.delete(ENDPOINT.PRODUCT_DETAIL(id));
     return res.data;
   },
+
+  // Get active banners (public)
+  getActiveBanners: async (position) => {
+    const params = position ? { position } : {};
+    const res = await http.get(ENDPOINT.BANNERS_ACTIVE, { query: params });
+    return res.data;
+  },
 };

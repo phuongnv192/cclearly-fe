@@ -11,15 +11,65 @@ import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAdminLogs } from '@/hooks/useAdmin';
 
+const ACTION_OPTIONS = [
+  { value: '', label: 'Tất cả' },
+  { value: 'IMPORT_STOCK', label: 'Nhập kho' },
+  { value: 'ADD_PRODUCT', label: 'Thêm sản phẩm' },
+  { value: 'UPDATE_PRODUCT', label: 'Cập nhật sản phẩm' },
+  { value: 'DELETE_PRODUCT', label: 'Xóa sản phẩm' },
+  { value: 'ADD_VOUCHER', label: 'Thêm voucher' },
+  { value: 'UPDATE_VOUCHER', label: 'Cập nhật voucher' },
+  { value: 'DELETE_VOUCHER', label: 'Xóa voucher' },
+  { value: 'CHANGE_BANNER', label: 'Đổi banner' },
+  { value: 'CREATE_USER', label: 'Cấp tài khoản' },
+  { value: 'UPDATE_USER', label: 'Cập nhật tài khoản' },
+  { value: 'BAN_ACCOUNT', label: 'Ban tài khoản' },
+  { value: 'UPDATE_SETTINGS', label: 'Cập nhật cấu hình' },
+  { value: 'LOGIN', label: 'Đăng nhập' },
+];
+
+const ACTION_LABELS = {
+  IMPORT_STOCK: 'Nhập kho',
+  ADD_PRODUCT: 'Thêm sản phẩm',
+  UPDATE_PRODUCT: 'Cập nhật SP',
+  DELETE_PRODUCT: 'Xóa sản phẩm',
+  ADD_VOUCHER: 'Thêm voucher',
+  UPDATE_VOUCHER: 'Cập nhật voucher',
+  DELETE_VOUCHER: 'Xóa voucher',
+  CHANGE_BANNER: 'Đổi banner',
+  CHANGE_EMAIL_TEMPLATE: 'Đổi email template',
+  CREATE_USER: 'Cấp tài khoản',
+  UPDATE_USER: 'Cập nhật TK',
+  BAN_ACCOUNT: 'Ban tài khoản',
+  RESET_PASSWORD: 'Reset mật khẩu',
+  UPDATE_SETTINGS: 'Cập nhật cấu hình',
+  LOGIN: 'Đăng nhập',
+};
+
+const formatDateTime = (isoString) => {
+  if (!isoString) return '—';
+  const d = new Date(isoString);
+  const hh = String(d.getHours()).padStart(2, '0');
+  const mm = String(d.getMinutes()).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  const mo = String(d.getMonth() + 1).padStart(2, '0');
+  const yy = d.getFullYear();
+  return `${hh}:${mm} ${dd}/${mo}/${yy}`;
+};
+
 const SystemLogsPage = () => {
   const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [actionFilter, setActionFilter] = useState('');
+  const [fromDate, setFromDate] = useState('');
+  const [toDate, setToDate] = useState('');
   const [page, setPage] = useState(0);
   const [selectedLog, setSelectedLog] = useState(null);
 
   const { data: logsData, isLoading } = useAdminLogs({
     action: actionFilter || undefined,
+    fromDate: fromDate || undefined,
+    toDate: toDate || undefined,
     page,
     size: 20,
   });
@@ -27,7 +77,7 @@ const SystemLogsPage = () => {
   const logs = logsData?.items || [];
   const meta = logsData?.meta || {};
 
-  // Client-side search filter (the API may not support text search)
+  // Client-side search filter
   const filteredLogs = searchTerm
     ? logs.filter(
         (log) =>
@@ -40,18 +90,21 @@ const SystemLogsPage = () => {
 
   const getActionBadge = (action) => {
     const badges = {
-      import_stock: 'bg-blue-100 text-blue-700',
-      add_product: 'bg-green-100 text-green-700',
-      add_voucher: 'bg-purple-100 text-purple-700',
-      change_banner: 'bg-orange-100 text-orange-700',
-      change_email_template: 'bg-cyan-100 text-cyan-700',
-      ban_account: 'bg-red-100 text-red-700',
-      create_account: 'bg-emerald-100 text-emerald-700',
-      reset_password: 'bg-amber-100 text-amber-700',
-      CREATE: 'bg-green-100 text-green-700',
-      UPDATE: 'bg-blue-100 text-blue-700',
-      DELETE: 'bg-red-100 text-red-700',
-      LOGIN: 'bg-purple-100 text-purple-700',
+      IMPORT_STOCK: 'bg-blue-100 text-blue-700',
+      ADD_PRODUCT: 'bg-green-100 text-green-700',
+      UPDATE_PRODUCT: 'bg-blue-100 text-blue-700',
+      DELETE_PRODUCT: 'bg-red-100 text-red-700',
+      ADD_VOUCHER: 'bg-purple-100 text-purple-700',
+      UPDATE_VOUCHER: 'bg-purple-100 text-purple-700',
+      DELETE_VOUCHER: 'bg-red-100 text-red-700',
+      CHANGE_BANNER: 'bg-orange-100 text-orange-700',
+      CHANGE_EMAIL_TEMPLATE: 'bg-cyan-100 text-cyan-700',
+      BAN_ACCOUNT: 'bg-red-100 text-red-700',
+      CREATE_USER: 'bg-emerald-100 text-emerald-700',
+      UPDATE_USER: 'bg-blue-100 text-blue-700',
+      RESET_PASSWORD: 'bg-amber-100 text-amber-700',
+      UPDATE_SETTINGS: 'bg-teal-100 text-teal-700',
+      LOGIN: 'bg-violet-100 text-violet-700',
     };
     return badges[action] || 'bg-gray-100 text-gray-700';
   };
@@ -74,7 +127,7 @@ const SystemLogsPage = () => {
 
       {/* Filters */}
       <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
-        <div className="flex flex-wrap gap-4">
+        <div className="flex flex-wrap gap-4 items-center">
           <div className="flex-1 min-w-[250px] relative">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
             <input
@@ -93,12 +146,39 @@ const SystemLogsPage = () => {
             }}
             className="px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0f5dd9]/20 focus:border-[#0f5dd9] bg-white cursor-pointer"
           >
-            <option value="">Tất cả</option>
-            <option value="CREATE">Tạo mới</option>
-            <option value="UPDATE">Cập nhật</option>
-            <option value="DELETE">Xóa</option>
-            <option value="LOGIN">Đăng nhập</option>
+            {ACTION_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
           </select>
+          <div className="flex items-center gap-2">
+            <div className="relative">
+              <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+              <input
+                type="date"
+                value={fromDate}
+                onChange={(e) => {
+                  setFromDate(e.target.value);
+                  setPage(0);
+                }}
+                className="pl-9 pr-3 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0f5dd9]/20 focus:border-[#0f5dd9] bg-white text-sm"
+              />
+            </div>
+            <span className="text-gray-400">-</span>
+            <div className="relative">
+              <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+              <input
+                type="date"
+                value={toDate}
+                onChange={(e) => {
+                  setToDate(e.target.value);
+                  setPage(0);
+                }}
+                className="pl-9 pr-3 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0f5dd9]/20 focus:border-[#0f5dd9] bg-white text-sm"
+              />
+            </div>
+          </div>
         </div>
       </div>
 
@@ -114,6 +194,9 @@ const SystemLogsPage = () => {
               <thead className="bg-gray-50 border-b border-gray-100">
                 <tr>
                   <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                    Thời gian
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
                     Người thực hiện
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
@@ -121,6 +204,9 @@ const SystemLogsPage = () => {
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
                     Chi tiết
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                    IP
                   </th>
                   <th className="px-6 py-4 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">
                     Thao tác
@@ -133,6 +219,9 @@ const SystemLogsPage = () => {
                     key={log.logId}
                     className="hover:bg-gray-50 transition-colors"
                   >
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-[#4f5562]">
+                      {formatDateTime(log.createdAt)}
+                    </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
                         <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
@@ -147,11 +236,14 @@ const SystemLogsPage = () => {
                       <span
                         className={`px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider ${getActionBadge(log.action)}`}
                       >
-                        {log.action}
+                        {ACTION_LABELS[log.action] || log.action}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-sm text-[#4f5562] max-w-xs truncate">
                       {log.details}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-[#4f5562] font-mono">
+                      {log.ipAddress || '—'}
                     </td>
                     <td className="px-6 py-4 text-right">
                       <button
@@ -226,12 +318,30 @@ const SystemLogsPage = () => {
               <div className="grid grid-cols-2 gap-6">
                 <div>
                   <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1">
+                    Thời gian
+                  </p>
+                  <p className="font-medium text-[#222]">
+                    {formatDateTime(selectedLog.createdAt)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1">
+                    IP Address
+                  </p>
+                  <p className="font-mono text-[#222]">
+                    {selectedLog.ipAddress || '—'}
+                  </p>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-6">
+                <div>
+                  <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1">
                     Hành động
                   </p>
                   <span
                     className={`inline-block px-2 py-1 rounded-full text-xs font-bold ${getActionBadge(selectedLog.action)}`}
                   >
-                    {selectedLog.action}
+                    {ACTION_LABELS[selectedLog.action] || selectedLog.action}
                   </span>
                 </div>
                 <div>

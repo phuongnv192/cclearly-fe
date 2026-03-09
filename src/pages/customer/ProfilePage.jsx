@@ -1,40 +1,60 @@
-import { Lock, User, LogOut, ShoppingBag, Edit2, MapPin } from 'lucide-react';
-import { useState } from 'react';
+import {
+  Lock,
+  User,
+  LogOut,
+  ShoppingBag,
+  Edit2,
+  MapPin,
+  Loader2,
+} from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
-import { userRequest } from '@/api/user';
 import { useAuth } from '@/contexts/AuthContext';
+import {
+  useUserProfile,
+  useUpdateProfile,
+  useAddresses,
+  useCreateAddress,
+  useUpdateAddress,
+  useDeleteAddress,
+  useSetDefaultAddress,
+} from '@/hooks/useUser';
 
 const ProfilePage = () => {
   const navigate = useNavigate();
-  const { isAuthenticated, user, logout } = useAuth();
+  const { isAuthenticated, user: jwtUser, logout } = useAuth();
 
   const [activeTab, setActiveTab] = useState('info');
   const [isEditing, setIsEditing] = useState(false);
+
+  // ── Profile API ──
+  const { data: profileData, isLoading: profileLoading } = useUserProfile();
+  const updateProfileMutation = useUpdateProfile();
+  const profile = profileData; // { userId, email, fullName, phoneNumber, isEmailVerified, role }
+
   const [formData, setFormData] = useState({
-    name: user?.name || '',
-    phone: user?.phone || '',
-    address: '',
+    fullName: '',
+    phoneNumber: '',
   });
 
-  /* Address Management State */
-  const [addresses, setAddresses] = useState([
-    {
-      id: 1,
-      name: 'Nhà riêng',
-      phone: '0912345682',
-      address: '123 Đường ABC, Phường 4, Quận 10, TP. Hồ Chí Minh',
-      isDefault: true,
-    },
-    {
-      id: 2,
-      name: 'Công ty',
-      phone: '0912345682',
-      address:
-        'Tòa nhà Bitexco, Số 2 Hải Triều, Bến Nghé, Quận 1, TP. Hồ Chí Minh',
-      isDefault: false,
-    },
-  ]);
+  // Sync form when profile loads
+  useEffect(() => {
+    if (profile) {
+      setFormData({
+        fullName: profile.fullName || '',
+        phoneNumber: profile.phoneNumber || '',
+      });
+    }
+  }, [profile]);
+
+  // ── Address API ──
+  const { data: addressesData, isLoading: addressesLoading } = useAddresses();
+  const addresses = addressesData || [];
+  const createAddressMutation = useCreateAddress();
+  const updateAddressMutation = useUpdateAddress();
+  const deleteAddressMutation = useDeleteAddress();
+  const setDefaultMutation = useSetDefaultAddress();
+
   const [showAddressForm, setShowAddressForm] = useState(false);
   const [editingAddress, setEditingAddress] = useState(null);
   const [addressFormData, setAddressFormData] = useState({
@@ -66,19 +86,16 @@ const ProfilePage = () => {
     );
   }
 
+  // ── Handlers ──
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      await userRequest.updateProfile(formData);
-      toast.success('Cập nhật thông tin thành công');
-      setIsEditing(false);
-    } catch (error) {
-      toast.error('Cập nhật thất bại');
-    }
+    updateProfileMutation.mutate(formData, {
+      onSuccess: () => setIsEditing(false),
+    });
   };
 
   const handleLogout = async () => {
@@ -89,54 +106,68 @@ const ProfilePage = () => {
   const handleAddressSubmit = (e) => {
     e.preventDefault();
     if (editingAddress) {
-      setAddresses((prev) =>
-        prev.map((a) =>
-          a.id === editingAddress.id ? { ...addressFormData, id: a.id } : a
-        )
+      updateAddressMutation.mutate(
+        { addressId: editingAddress.addressId, data: addressFormData },
+        {
+          onSuccess: () => {
+            setShowAddressForm(false);
+            setEditingAddress(null);
+            resetAddressForm();
+          },
+        }
       );
-      toast.success('Đã cập nhật địa chỉ');
     } else {
-      const newAddress = { ...addressFormData, id: Date.now() };
-      if (newAddress.isDefault) {
-        setAddresses((prev) =>
-          prev.map((a) => ({ ...a, isDefault: false })).concat(newAddress)
-        );
-      } else {
-        setAddresses((prev) => [...prev, newAddress]);
-      }
-      toast.success('Đã thêm địa chỉ mới');
+      createAddressMutation.mutate(addressFormData, {
+        onSuccess: () => {
+          setShowAddressForm(false);
+          resetAddressForm();
+        },
+      });
     }
-    setShowAddressForm(false);
-    setEditingAddress(null);
-    setAddressFormData({ name: '', phone: '', address: '', isDefault: false });
   };
 
-  const handleDeleteAddress = (id) => {
-    setAddresses((prev) => prev.filter((a) => a.id !== id));
-    toast.info('Đã xóa địa chỉ');
+  const handleDeleteAddress = (addressId) => {
+    deleteAddressMutation.mutate(addressId);
   };
 
-  const handleSetDefault = (id) => {
-    setAddresses((prev) => prev.map((a) => ({ ...a, isDefault: a.id === id })));
-    toast.success('Đã đặt làm mặc định');
+  const handleSetDefault = (addressId) => {
+    setDefaultMutation.mutate(addressId);
   };
 
   const openEditAddress = (addr) => {
     setEditingAddress(addr);
-    setAddressFormData({ ...addr });
+    setAddressFormData({
+      name: addr.name || '',
+      phone: addr.phone || '',
+      address: addr.address || '',
+      isDefault: addr.isDefault || false,
+    });
     setShowAddressForm(true);
+  };
+
+  const resetAddressForm = () => {
+    setAddressFormData({
+      name: '',
+      phone: '',
+      address: '',
+      isDefault: false,
+    });
   };
 
   const getRoleLabel = (role) => {
     const labels = {
-      customer: 'Khách hàng',
-      sales: 'Nhân viên bán hàng',
-      operations: 'Nhân viên vận hành',
-      manager: 'Quản lý',
-      admin: 'Quản trị viên',
+      CUSTOMER: 'Khách hàng',
+      SALES_STAFF: 'Nhân viên bán hàng',
+      OPERATION_STAFF: 'Nhân viên vận hành',
+      MANAGER: 'Quản lý',
+      ADMIN: 'Quản trị viên',
     };
     return labels[role] || role;
   };
+
+  const displayName = profile?.fullName || jwtUser?.sub || 'User';
+  const displayEmail = profile?.email || jwtUser?.sub || '';
+  const displayRole = profile?.role || jwtUser?.role || '';
 
   return (
     <div className="bg-[#ececec] min-h-screen py-10">
@@ -155,14 +186,14 @@ const ProfilePage = () => {
             <div className="bg-white rounded-2xl shadow-[0_10px_30px_rgba(13,22,39,0.06)] p-6 sticky top-4">
               <div className="text-center mb-6">
                 <div className="w-24 h-24 bg-[#0f5dd9] rounded-full flex items-center justify-center text-white text-4xl font-bold mx-auto mb-4">
-                  {user?.name?.charAt(0) || 'U'}
+                  {displayName.charAt(0).toUpperCase()}
                 </div>
                 <h2 className="text-xl font-bold text-[#222]">
-                  {user?.name || 'User'}
+                  {displayName}
                 </h2>
-                <p className="text-[#4f5562]">{user?.email}</p>
+                <p className="text-[#4f5562]">{displayEmail}</p>
                 <span className="inline-block mt-2 text-xs bg-[#ececec] px-3 py-1 rounded-full text-[#222]">
-                  {getRoleLabel(user?.role)}
+                  {getRoleLabel(displayRole)}
                 </span>
               </div>
               <nav className="space-y-2">
@@ -215,7 +246,11 @@ const ProfilePage = () => {
                   </button>
                 </div>
 
-                {isEditing ? (
+                {profileLoading ? (
+                  <div className="flex justify-center py-10">
+                    <Loader2 className="w-8 h-8 animate-spin text-[#0f5dd9]" />
+                  </div>
+                ) : isEditing ? (
                   <form onSubmit={handleSubmit} className="space-y-5">
                     <div>
                       <label className="block text-sm font-medium text-[#222] mb-2">
@@ -223,8 +258,8 @@ const ProfilePage = () => {
                       </label>
                       <input
                         type="text"
-                        name="name"
-                        value={formData.name}
+                        name="fullName"
+                        value={formData.fullName}
                         onChange={handleChange}
                         className="w-full px-5 py-3 border border-[#e0e0e0] rounded-full focus:outline-none focus:border-[#0f5dd9] bg-[#f9f9f9]"
                       />
@@ -235,16 +270,20 @@ const ProfilePage = () => {
                       </label>
                       <input
                         type="tel"
-                        name="phone"
-                        value={formData.phone}
+                        name="phoneNumber"
+                        value={formData.phoneNumber}
                         onChange={handleChange}
                         className="w-full px-5 py-3 border border-[#e0e0e0] rounded-full focus:outline-none focus:border-[#0f5dd9] bg-[#f9f9f9]"
                       />
                     </div>
                     <button
                       type="submit"
-                      className="bg-[#141f36] text-white px-8 py-3 rounded-full hover:bg-[#0d1322] transition font-medium"
+                      disabled={updateProfileMutation.isPending}
+                      className="bg-[#141f36] text-white px-8 py-3 rounded-full hover:bg-[#0d1322] transition font-medium disabled:opacity-50 flex items-center gap-2"
                     >
+                      {updateProfileMutation.isPending && (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      )}
                       Lưu thay đổi
                     </button>
                   </form>
@@ -254,13 +293,13 @@ const ProfilePage = () => {
                       <div className="bg-[#f3f3f3] p-4 rounded-xl">
                         <p className="text-sm text-[#4f5562] mb-1">Họ tên</p>
                         <p className="font-semibold text-[#222]">
-                          {user?.name || 'Chưa cập nhật'}
+                          {profile?.fullName || 'Chưa cập nhật'}
                         </p>
                       </div>
                       <div className="bg-[#f3f3f3] p-4 rounded-xl">
                         <p className="text-sm text-[#4f5562] mb-1">Email</p>
                         <p className="font-semibold text-[#222]">
-                          {user?.email}
+                          {profile?.email || displayEmail}
                         </p>
                       </div>
                       <div className="bg-[#f3f3f3] p-4 rounded-xl">
@@ -268,13 +307,13 @@ const ProfilePage = () => {
                           Số điện thoại
                         </p>
                         <p className="font-semibold text-[#222]">
-                          {user?.phone || 'Chưa cập nhật'}
+                          {profile?.phoneNumber || 'Chưa cập nhật'}
                         </p>
                       </div>
                       <div className="bg-[#f3f3f3] p-4 rounded-xl">
                         <p className="text-sm text-[#4f5562] mb-1">Vai trò</p>
                         <p className="font-semibold text-[#222]">
-                          {getRoleLabel(user?.role)}
+                          {getRoleLabel(displayRole)}
                         </p>
                       </div>
                     </div>
@@ -289,12 +328,7 @@ const ProfilePage = () => {
                     <button
                       onClick={() => {
                         setEditingAddress(null);
-                        setAddressFormData({
-                          name: '',
-                          phone: '',
-                          address: '',
-                          isDefault: false,
-                        });
+                        resetAddressForm();
                         setShowAddressForm(true);
                       }}
                       className="text-sm font-bold bg-[#141f36] text-white px-6 py-2 rounded-full hover:bg-[#0d1322] transition"
@@ -304,7 +338,11 @@ const ProfilePage = () => {
                   )}
                 </div>
 
-                {showAddressForm ? (
+                {addressesLoading ? (
+                  <div className="flex justify-center py-10">
+                    <Loader2 className="w-8 h-8 animate-spin text-[#0f5dd9]" />
+                  </div>
+                ) : showAddressForm ? (
                   <form
                     onSubmit={handleAddressSubmit}
                     className="bg-[#f9f9f9] p-6 rounded-2xl border border-[#e0e0e0] mb-8 space-y-4"
@@ -387,13 +425,24 @@ const ProfilePage = () => {
                     <div className="flex gap-3 pt-2">
                       <button
                         type="submit"
-                        className="bg-[#0f5dd9] text-white px-6 py-2 rounded-full text-sm font-bold hover:bg-[#0d4fb8] transition"
+                        disabled={
+                          createAddressMutation.isPending ||
+                          updateAddressMutation.isPending
+                        }
+                        className="bg-[#0f5dd9] text-white px-6 py-2 rounded-full text-sm font-bold hover:bg-[#0d4fb8] transition disabled:opacity-50 flex items-center gap-2"
                       >
+                        {(createAddressMutation.isPending ||
+                          updateAddressMutation.isPending) && (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        )}
                         {editingAddress ? 'Cập nhật' : 'Thêm mới'}
                       </button>
                       <button
                         type="button"
-                        onClick={() => setShowAddressForm(false)}
+                        onClick={() => {
+                          setShowAddressForm(false);
+                          setEditingAddress(null);
+                        }}
                         className="bg-gray-200 text-[#222] px-6 py-2 rounded-full text-sm font-bold hover:bg-gray-300 transition"
                       >
                         Hủy
@@ -404,7 +453,7 @@ const ProfilePage = () => {
                   <div className="space-y-4">
                     {addresses.map((addr) => (
                       <div
-                        key={addr.id}
+                        key={addr.addressId}
                         className="border border-[#e0e0e0] rounded-2xl p-6 relative hover:border-[#0f5dd9] transition-colors group"
                       >
                         <div className="flex justify-between items-start mb-2">
@@ -421,8 +470,11 @@ const ProfilePage = () => {
                           <div className="flex gap-4">
                             {!addr.isDefault && (
                               <button
-                                onClick={() => handleSetDefault(addr.id)}
-                                className="text-xs text-[#4f5562] font-medium hover:text-[#0f5dd9]"
+                                onClick={() =>
+                                  handleSetDefault(addr.addressId)
+                                }
+                                disabled={setDefaultMutation.isPending}
+                                className="text-xs text-[#4f5562] font-medium hover:text-[#0f5dd9] disabled:opacity-50"
                               >
                                 Thiết lập mặc định
                               </button>
@@ -435,8 +487,11 @@ const ProfilePage = () => {
                             </button>
                             {!addr.isDefault && (
                               <button
-                                onClick={() => handleDeleteAddress(addr.id)}
-                                className="text-xs text-red-500 font-medium hover:underline"
+                                onClick={() =>
+                                  handleDeleteAddress(addr.addressId)
+                                }
+                                disabled={deleteAddressMutation.isPending}
+                                className="text-xs text-red-500 font-medium hover:underline disabled:opacity-50"
                               >
                                 Xóa
                               </button>

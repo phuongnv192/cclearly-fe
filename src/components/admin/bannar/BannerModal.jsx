@@ -1,5 +1,12 @@
-import { X, Image as ImageIcon, Upload, Save } from 'lucide-react';
-import { POSITIONS } from '@/mocks/data';
+import { X, Image as ImageIcon, Upload, Save, Loader2 } from 'lucide-react';
+import { useState } from 'react';
+import { uploadRequest } from '@/api/upload';
+
+const POSITIONS = [
+  { value: 'HEADER', label: 'Header (Banner trên cùng)' },
+  { value: 'HOME_MAIN', label: 'Trang chủ - Banner chính' },
+  { value: 'HOME_PROMO', label: 'Trang chủ - Khuyến mãi' },
+];
 
 const BannerModal = ({
   show,
@@ -8,19 +15,41 @@ const BannerModal = ({
   editingBanner,
   formData,
   setFormData,
+  isSaving,
 }) => {
+  const [uploading, setUploading] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState('');
+
   if (!show) return null;
 
-  const handleFileChange = (e) => {
+  const handleFileChange = async (e) => {
     const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setFormData({ ...formData, image: reader.result });
-      };
-      reader.readAsDataURL(file);
+    if (!file) return;
+
+    // Show local preview immediately
+    const localPreview = URL.createObjectURL(file);
+    setPreviewUrl(localPreview);
+
+    // Upload to Cloudinary
+    setUploading(true);
+    try {
+      const url = await uploadRequest.uploadImage(file, 'banners');
+      setFormData({ ...formData, imageUrl: url });
+    } catch (err) {
+      console.error('Upload failed:', err);
+      setPreviewUrl('');
+    } finally {
+      setUploading(false);
     }
   };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!formData.imageUrl && !uploading) return;
+    onSave(formData);
+  };
+
+  const displayImage = previewUrl || formData.imageUrl;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
@@ -37,7 +66,7 @@ const BannerModal = ({
           </button>
         </div>
 
-        <form onSubmit={onSave} className="p-5 space-y-4">
+        <form onSubmit={handleSubmit} className="p-5 space-y-4">
           <div>
             <label className="block text-sm font-medium text-[#222] mb-1 text-left">
               Tiêu đề banner
@@ -65,10 +94,15 @@ const BannerModal = ({
                 onChange={handleFileChange}
                 className="absolute inset-0 opacity-0 cursor-pointer"
               />
-              {formData.image ? (
+              {uploading ? (
+                <div className="flex flex-col items-center py-6">
+                  <Loader2 className="w-8 h-8 animate-spin text-[#0f5dd9] mb-2" />
+                  <p className="text-sm text-gray-500">Đang tải ảnh lên Cloudinary...</p>
+                </div>
+              ) : displayImage ? (
                 <div className="relative h-32 w-full rounded-lg overflow-hidden">
                   <img
-                    src={formData.image}
+                    src={displayImage}
                     alt="Preview"
                     className="w-full h-full object-cover"
                   />
@@ -82,11 +116,14 @@ const BannerModal = ({
                     <ImageIcon className="w-6 h-6 text-[#0f5dd9]" />
                   </div>
                   <p className="text-sm text-gray-500">
-                    Nhấn để chọn ảnh từ máy tính
+                    Nhấn để chọn ảnh từ máy tính (tự động upload lên Cloudinary)
                   </p>
                 </div>
               )}
             </div>
+            {formData.imageUrl && (
+              <p className="mt-1.5 text-xs text-gray-400 truncate">{formData.imageUrl}</p>
+            )}
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -114,42 +151,31 @@ const BannerModal = ({
               </label>
               <input
                 type="number"
-                value={formData.order}
+                min={1}
+                value={formData.displayOrder}
                 onChange={(e) =>
-                  setFormData({ ...formData, order: Number(e.target.value) })
+                  setFormData({ ...formData, displayOrder: Number(e.target.value) })
                 }
                 className="w-full px-4 py-2 border border-gray-200 rounded-xl outline-none"
               />
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-[#222] mb-1 text-left">
-                Ngày bắt đầu
-              </label>
+          <div className="flex items-center gap-3">
+            <label className="relative inline-flex items-center cursor-pointer">
               <input
-                type="date"
-                value={formData.startDate}
+                type="checkbox"
+                checked={formData.isActive}
                 onChange={(e) =>
-                  setFormData({ ...formData, startDate: e.target.value })
+                  setFormData({ ...formData, isActive: e.target.checked })
                 }
-                className="w-full px-4 py-2 border border-gray-200 rounded-xl outline-none"
+                className="sr-only peer"
               />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-[#222] mb-1 text-left">
-                Ngày kết thúc
-              </label>
-              <input
-                type="date"
-                value={formData.endDate}
-                onChange={(e) =>
-                  setFormData({ ...formData, endDate: e.target.value })
-                }
-                className="w-full px-4 py-2 border border-gray-200 rounded-xl outline-none"
-              />
-            </div>
+              <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#0f5dd9]"></div>
+            </label>
+            <span className="text-sm font-medium text-[#222]">
+              {formData.isActive ? 'Đang hiển thị' : 'Đã ẩn'}
+            </span>
           </div>
 
           <div className="p-5 border-t flex gap-3 -mx-5 -mb-5 bg-gray-50">
@@ -162,9 +188,14 @@ const BannerModal = ({
             </button>
             <button
               type="submit"
-              className="flex-1 px-5 py-2.5 bg-[#0f5dd9] text-white rounded-xl font-medium hover:bg-[#0b4fc0] flex items-center justify-center gap-2"
+              disabled={uploading || isSaving || !formData.imageUrl}
+              className="flex-1 px-5 py-2.5 bg-[#0f5dd9] text-white rounded-xl font-medium hover:bg-[#0b4fc0] flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <Save size={18} />
+              {isSaving ? (
+                <Loader2 size={18} className="animate-spin" />
+              ) : (
+                <Save size={18} />
+              )}
               {editingBanner ? 'Cập nhật' : 'Lưu banner'}
             </button>
           </div>

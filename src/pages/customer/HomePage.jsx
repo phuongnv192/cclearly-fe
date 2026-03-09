@@ -1,8 +1,10 @@
+import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import heroWoman from '@/assets/homepage/hero_woman_v2.png';
 import polarizedImg from '@/assets/homepage/polarized_lenses.png';
 import virtualTryOnImg from '@/assets/homepage/virtual_try_on.png';
-import { useProducts } from '@/hooks/useProduct';
+import { useProducts, useActiveBanners } from '@/hooks/useProduct';
 
 const uspItems = [
   'Đổi trả 14 ngày',
@@ -120,6 +122,28 @@ const HomePage = () => {
     limit: 4,
   });
 
+  // Fetch active banners
+  const { data: allBanners } = useActiveBanners();
+  const headerBanners = allBanners?.filter((b) => b.position === 'HEADER') || [];
+  const mainBanners = allBanners?.filter((b) => b.position === 'HOME_MAIN') || [];
+  const promoBanners = allBanners?.filter((b) => b.position === 'HOME_PROMO') || [];
+
+  // Carousel state for HOME_MAIN
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const nextSlide = useCallback(() => {
+    setCurrentSlide((prev) => (prev + 1) % (mainBanners.length || 1));
+  }, [mainBanners.length]);
+  const prevSlide = () => {
+    setCurrentSlide((prev) => (prev - 1 + (mainBanners.length || 1)) % (mainBanners.length || 1));
+  };
+
+  // Auto-advance carousel
+  useEffect(() => {
+    if (mainBanners.length <= 1) return;
+    const timer = setInterval(nextSlide, 5000);
+    return () => clearInterval(timer);
+  }, [mainBanners.length, nextSlide]);
+
   // Mapping mock products to bestSellingItems UI format
   const bestSellingItems =
     productData?.content?.map((product) => {
@@ -141,6 +165,30 @@ const HomePage = () => {
 
   return (
     <div className="bg-white text-[#101010]">
+      {/* ─── HEADER Banner (announcement bar) ─── */}
+      {headerBanners.length > 0 && (
+        <section className="bg-[#141f36] text-white">
+          <div className="mx-auto flex max-w-[1240px] items-center justify-center gap-4 px-4 py-2.5 text-center">
+            {headerBanners[0].imageUrl && (
+              <img
+                src={headerBanners[0].imageUrl}
+                alt={headerBanners[0].title}
+                className="h-6 w-6 rounded object-cover"
+              />
+            )}
+            <p className="text-sm font-medium tracking-wide">
+              {headerBanners[0].title}
+            </p>
+            <Link
+              to="/products"
+              className="ml-2 rounded-full border border-white/40 px-4 py-0.5 text-xs font-medium transition hover:bg-white hover:text-[#141f36]"
+            >
+              Xem ngay
+            </Link>
+          </div>
+        </section>
+      )}
+
       <section className="relative overflow-hidden bg-[#efefef]">
         <div
           className="pointer-events-none absolute inset-0 opacity-95"
@@ -271,6 +319,70 @@ const HomePage = () => {
         </div>
       </section>
 
+      {/* ─── HOME_MAIN Banner Carousel ─── */}
+      {mainBanners.length > 0 && (
+        <section className="relative overflow-hidden bg-white">
+          <div className="relative mx-auto max-w-[1240px]">
+            <div className="relative overflow-hidden rounded-none sm:rounded-2xl sm:mx-4 sm:my-4">
+              <div
+                className="flex transition-transform duration-500 ease-out"
+                style={{ transform: `translateX(-${currentSlide * 100}%)` }}
+              >
+                {mainBanners.map((banner) => (
+                  <Link
+                    key={banner.bannerId}
+                    to="/products"
+                    className="relative w-full flex-shrink-0"
+                  >
+                    <img
+                      src={banner.imageUrl}
+                      alt={banner.title}
+                      className="h-[200px] w-full object-cover sm:h-[300px] lg:h-[400px]"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                    <div className="absolute bottom-6 left-6 right-6 text-white sm:bottom-10 sm:left-10">
+                      <h3 className="text-xl font-bold drop-shadow-lg sm:text-3xl lg:text-4xl">
+                        {banner.title}
+                      </h3>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+
+              {mainBanners.length > 1 && (
+                <>
+                  <button
+                    onClick={prevSlide}
+                    className="absolute left-3 top-1/2 z-10 -translate-y-1/2 rounded-full bg-white/80 p-2 shadow-lg transition hover:bg-white"
+                  >
+                    <ChevronLeft className="h-5 w-5 text-[#222]" />
+                  </button>
+                  <button
+                    onClick={nextSlide}
+                    className="absolute right-3 top-1/2 z-10 -translate-y-1/2 rounded-full bg-white/80 p-2 shadow-lg transition hover:bg-white"
+                  >
+                    <ChevronRight className="h-5 w-5 text-[#222]" />
+                  </button>
+                  <div className="absolute bottom-3 left-1/2 z-10 flex -translate-x-1/2 gap-2">
+                    {mainBanners.map((_, i) => (
+                      <button
+                        key={i}
+                        onClick={() => setCurrentSlide(i)}
+                        className={`h-2 rounded-full transition-all ${
+                          i === currentSlide
+                            ? 'w-6 bg-white'
+                            : 'w-2 bg-white/50'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </section>
+      )}
+
       <section className="bg-[#ececec] py-16">
         <div className="mx-auto flex max-w-[1180px] flex-col gap-8 px-4 sm:px-6 lg:flex-row lg:items-start">
           <div className="min-w-[220px] lg:pt-2">
@@ -389,6 +501,33 @@ const HomePage = () => {
           </div>
         </div>
       </section>
+
+      {/* ─── HOME_PROMO Banner ─── */}
+      {promoBanners.length > 0 && (
+        <section className="bg-[#f8f8f8]">
+          <div className="mx-auto grid max-w-[1240px] gap-4 px-4 py-6 sm:px-6 sm:grid-cols-2 lg:grid-cols-3">
+            {promoBanners.map((banner) => (
+              <Link
+                key={banner.bannerId}
+                to="/products"
+                className="group relative overflow-hidden rounded-2xl shadow-md transition hover:shadow-xl"
+              >
+                <img
+                  src={banner.imageUrl}
+                  alt={banner.title}
+                  className="h-[180px] w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                <div className="absolute bottom-4 left-4 right-4">
+                  <p className="text-lg font-bold text-white drop-shadow-lg">
+                    {banner.title}
+                  </p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
 
       <section className="relative overflow-hidden bg-[#1060db] py-16 text-white">
         <div

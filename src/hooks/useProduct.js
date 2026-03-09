@@ -40,6 +40,17 @@ export const useCategories = () => {
   });
 };
 
+// Get active banners (public, for homepage)
+export const useActiveBanners = (position) => {
+  return useQuery({
+    queryKey: position
+      ? [...QUERY_KEYS.ACTIVE_BANNERS, position]
+      : QUERY_KEYS.ACTIVE_BANNERS,
+    queryFn: () => productRequest.getActiveBanners(position),
+    staleTime: 5 * 60 * 1000,
+  });
+};
+
 // Get frames with filters
 export const useFrames = (params) => {
   return useQuery({

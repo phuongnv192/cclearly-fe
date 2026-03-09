@@ -40,6 +40,11 @@ export const ENDPOINT = {
   USER_ORDERS: '/users/orders',
   REQUEST_RETURN: (orderId) => `/users/orders/${orderId}/return`,
 
+  // Addresses
+  ADDRESSES: '/users/addresses',
+  ADDRESS_DETAIL: (id) => `/users/addresses/${id}`,
+  ADDRESS_DEFAULT: (id) => `/users/addresses/${id}/default`,
+
   // Admin
   ADMIN_DASHBOARD: '/admin/dashboard',
   ADMIN_USERS: '/admin/users',
@@ -50,6 +55,7 @@ export const ENDPOINT = {
 
   // Banners
   BANNERS: '/banners',
+  BANNERS_ACTIVE: '/banners/active',
   BANNER_DETAIL: (id) => `/banners/${id}`,
 
   // Promotions
@@ -103,6 +109,7 @@ export const QUERY_KEYS = {
 
   // Banners
   BANNERS: ['banners'],
+  ACTIVE_BANNERS: ['banners', 'active'],
 
   // Promotions
   PROMOTIONS: ['promotions'],
@@ -113,4 +120,7 @@ export const QUERY_KEYS = {
   // Returns
   RETURNS: ['returns'],
   RETURN_DETAIL: (id) => ['returns', id],
+
+  // Addresses
+  ADDRESSES: ['addresses'],
 };

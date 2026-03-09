@@ -611,7 +611,7 @@ const ProductListPage = ({ type }) => {
                 >
                   {PAGE_SIZE_OPTIONS.map((s) => (
                     <option key={s} value={s}>
-                      {s}/trang
+                      {s} / trang
                     </option>
                   ))}
                 </select>

@@ -25,4 +25,31 @@ export const userRequest = {
     const res = await http.post(ENDPOINT.REQUEST_RETURN(orderId), data);
     return res.data;
   },
+
+  // ── Addresses ──
+
+  getAddresses: async () => {
+    const res = await http.get(ENDPOINT.ADDRESSES);
+    return res.data;
+  },
+
+  createAddress: async (data) => {
+    const res = await http.post(ENDPOINT.ADDRESSES, data);
+    return res.data;
+  },
+
+  updateAddress: async (addressId, data) => {
+    const res = await http.put(ENDPOINT.ADDRESS_DETAIL(addressId), data);
+    return res.data;
+  },
+
+  deleteAddress: async (addressId) => {
+    const res = await http.delete(ENDPOINT.ADDRESS_DETAIL(addressId));
+    return res.data;
+  },
+
+  setDefaultAddress: async (addressId) => {
+    const res = await http.patch(ENDPOINT.ADDRESS_DEFAULT(addressId));
+    return res.data;
+  },
 };
