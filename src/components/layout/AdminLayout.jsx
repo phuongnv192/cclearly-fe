@@ -23,6 +23,14 @@ import { useState } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth, ROLES } from '@/contexts/AuthContext';
 
+const ROLE_LABELS = {
+  [ROLES.SALES]: 'Nhân viên bán hàng',
+  [ROLES.OPERATIONS]: 'Nhân viên vận hành',
+  [ROLES.MANAGER]: 'Quản lý',
+  [ROLES.ADMIN]: 'Quản trị viên',
+  [ROLES.CUSTOMER]: 'Khách hàng',
+};
+
 const getMenuItems = (role) => {
   const items = {
     // Sales: Order Management
@@ -163,21 +171,25 @@ export const AdminLayout = () => {
         {/* USER FOOTER */}
         <div className="p-4 border-t border-[#ececec] shrink-0 bg-white">
           <div className="flex items-center justify-between gap-3 px-1">
-            <div className="flex items-center gap-3 overflow-hidden">
+            <Link
+              to="/profile"
+              className="flex items-center gap-3 overflow-hidden hover:opacity-80 transition-opacity"
+              title="Trang cá nhân"
+            >
               <div className="w-10 h-10 bg-[#1f7a5a] rounded-full flex items-center justify-center text-white font-bold shrink-0">
-                {user?.name?.charAt(0) || 'A'}
+                {(user?.fullName || user?.name || 'A').charAt(0)}
               </div>
               {sidebarOpen && (
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold text-[#222] truncate">
-                    {user?.name || 'Sales User'}
+                    {user?.fullName || user?.name || 'Nhân viên'}
                   </p>
-                  <p className="text-[11px] text-[#717171] capitalize truncate">
-                    {user?.role || 'Sales'}
+                  <p className="text-[11px] text-[#717171] truncate">
+                    {ROLE_LABELS[user?.role] || user?.role || ''}
                   </p>
                 </div>
               )}
-            </div>
+            </Link>
             {sidebarOpen && (
               <button
                 onClick={handleLogout}
