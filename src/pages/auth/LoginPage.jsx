@@ -4,6 +4,13 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { useLogin, useLoginWithGoogle } from '@/hooks/useAuth';
 
+const STAFF_DASHBOARDS = {
+  ADMIN: '/admin',
+  MANAGER: '/manager',
+  SALES_STAFF: '/sales',
+  OPERATION_STAFF: '/operations',
+};
+
 const LoginPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -61,7 +68,9 @@ const LoginPage = () => {
         });
         return;
       }
-      navigate(from, { replace: true });
+      const role = data?.user?.role;
+      const dest = STAFF_DASHBOARDS[role] || from;
+      navigate(dest, { replace: true });
     } catch (error) {
       // Error handled by hook
     }
