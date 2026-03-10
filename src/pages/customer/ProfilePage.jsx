@@ -204,20 +204,24 @@ const ProfilePage = () => {
                   <User className="w-5 h-5" />
                   Thông tin tài khoản
                 </button>
-                <button
-                  onClick={() => setActiveTab('addresses')}
-                  className={`w-full text-left px-4 py-3 rounded-xl font-medium flex items-center gap-2 transition ${activeTab === 'addresses' ? 'bg-[#0f5dd9] text-white' : 'text-[#4f5562] hover:bg-[#f3f3f3]'}`}
-                >
-                  <MapPin className="w-5 h-5" />
-                  Sổ địa chỉ
-                </button>
-                <button
-                  onClick={() => navigate('/orders')}
-                  className="w-full text-left px-4 py-3 text-[#4f5562] hover:bg-[#f3f3f3] rounded-xl transition font-medium flex items-center gap-2"
-                >
-                  <ShoppingBag className="w-5 h-5" />
-                  Lịch sử đơn hàng
-                </button>
+                {displayRole === 'CUSTOMER' && (
+                  <>
+                    <button
+                      onClick={() => setActiveTab('addresses')}
+                      className={`w-full text-left px-4 py-3 rounded-xl font-medium flex items-center gap-2 transition ${activeTab === 'addresses' ? 'bg-[#0f5dd9] text-white' : 'text-[#4f5562] hover:bg-[#f3f3f3]'}`}
+                    >
+                      <MapPin className="w-5 h-5" />
+                      Sổ địa chỉ
+                    </button>
+                    <button
+                      onClick={() => navigate('/orders')}
+                      className="w-full text-left px-4 py-3 text-[#4f5562] hover:bg-[#f3f3f3] rounded-xl transition font-medium flex items-center gap-2"
+                    >
+                      <ShoppingBag className="w-5 h-5" />
+                      Lịch sử đơn hàng
+                    </button>
+                  </>
+                )}
                 <button
                   onClick={handleLogout}
                   className="w-full text-left px-4 py-3 text-red-500 hover:bg-red-50 rounded-xl transition font-medium flex items-center gap-2"
