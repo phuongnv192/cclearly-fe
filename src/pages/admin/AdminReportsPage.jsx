@@ -1,4 +1,5 @@
 // Admin Reports Page - Báo cáo cho System Admin
+import { useState, useRef, useEffect } from 'react';
 import {
   TrendingUp,
   TrendingDown,
@@ -31,10 +32,35 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 import { useAdminDashboard, useAdminRevenue } from '@/hooks/useAdmin';
 
+const FILTER_OPTIONS = [
+  { value: 7, label: '7 ngày qua' },
+  { value: 14, label: '14 ngày qua' },
+  { value: 30, label: '30 ngày qua' },
+  { value: 90, label: '90 ngày qua' },
+];
+
 const AdminReportsPage = () => {
   const { user } = useAuth();
   const { data: stats, isLoading: loadingStats } = useAdminDashboard();
-  const { data: revenueData, isLoading: loadingRevenue } = useAdminRevenue();
+
+  const [filterDays, setFilterDays] = useState(7);
+  const [showFilter, setShowFilter] = useState(false);
+  const filterRef = useRef(null);
+
+  const { data: revenueData, isLoading: loadingRevenue } = useAdminRevenue({ days: filterDays });
+
+  const selectedLabel = FILTER_OPTIONS.find((o) => o.value === filterDays)?.label;
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (filterRef.current && !filterRef.current.contains(e.target)) {
+        setShowFilter(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const formatCurrency = (amount) =>
     new Intl.NumberFormat('vi-VN', {
@@ -91,13 +117,35 @@ const AdminReportsPage = () => {
             Dữ liệu kinh doanh chi tiết của CClearly
           </p>
         </div>
-        <div className="flex items-center gap-3">
-          <button className="flex items-center gap-2 px-4 py-2.5 bg-white border border-[#e0e0e0] rounded-xl text-sm font-medium hover:bg-gray-50 transition">
-            <Filter size={16} />7 ngày qua
+        <div className="relative" ref={filterRef}>
+          <button
+            onClick={() => setShowFilter(!showFilter)}
+            className="flex items-center gap-2 px-4 py-2.5 bg-white border border-[#e0e0e0] rounded-xl text-sm font-medium hover:bg-gray-50 transition"
+          >
+            <Calendar size={16} className="text-[#0f5dd9]" />
+            {selectedLabel}
+            <ChevronDown size={14} className={`transition-transform ${showFilter ? 'rotate-180' : ''}`} />
           </button>
-          <button className="px-5 py-2.5 bg-[#141f36] text-white rounded-xl text-sm font-medium hover:bg-[#0d1322] transition shadow-lg shadow-black/10">
-            Xuất báo cáo
-          </button>
+          {showFilter && (
+            <div className="absolute right-0 mt-2 w-44 bg-white border border-[#e0e0e0] rounded-xl shadow-lg z-20 overflow-hidden">
+              {FILTER_OPTIONS.map((opt) => (
+                <button
+                  key={opt.value}
+                  onClick={() => {
+                    setFilterDays(opt.value);
+                    setShowFilter(false);
+                  }}
+                  className={`w-full text-left px-4 py-2.5 text-sm hover:bg-blue-50 transition ${
+                    filterDays === opt.value
+                      ? 'bg-blue-50 text-[#0f5dd9] font-semibold'
+                      : 'text-[#222]'
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
@@ -144,7 +192,7 @@ const AdminReportsPage = () => {
           <div className="flex items-center justify-between mb-8">
             <h3 className="text-lg font-bold text-[#222] flex items-center gap-2">
               <Calendar size={20} className="text-[#0f5dd9]" />
-              Doanh thu 7 ngày qua
+              Doanh thu {selectedLabel?.toLowerCase()}
             </h3>
             <div className="text-sm font-medium text-green-600 bg-green-50 px-3 py-1 rounded-full">
               Tăng trưởng ổn định
