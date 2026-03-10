@@ -6,12 +6,19 @@ import {
   CheckCircle,
   AlertCircle,
   Package,
+  Eye,
 } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'react-toastify';
 import ConfirmModal from '@/components/ui/ConfirmModal';
+import OrderDetailModal from '@/components/sale/OrderDetailModal';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAdminOrders, useUpdateOrderStatus } from '@/hooks/useOrder';
+
+const SHIPPING_CARRIERS = [
+  { value: 'Giao hàng tiết kiệm', label: 'Giao hàng tiết kiệm' },
+  { value: 'Giao hàng nhanh', label: 'Giao hàng nhanh' },
+];
 
 const OperationsShippingPage = () => {
   const [confirmModal, setConfirmModal] = useState({
@@ -32,15 +39,33 @@ const OperationsShippingPage = () => {
   const updateStatusMutation = useUpdateOrderStatus();
   const orders = orderData?.items || orderData || [];
   const [searchTerm, setSearchTerm] = useState('');
+  const [carrierFilter, setCarrierFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('all'); // all | SHIPPED | DELIVERED
+  const [selectedOrder, setSelectedOrder] = useState(null);
 
-  const shippedOrders = orders.filter((o) => o.status?.toLowerCase() === 'shipped');
+  // Include both SHIPPED and DELIVERED orders
+  const shippingOrders = orders.filter((o) => {
+    const s = (o.status || '').toUpperCase();
+    return s === 'SHIPPED' || s === 'DELIVERED';
+  });
 
-  const filteredOrders = shippedOrders.filter((order) => {
+  const filteredOrders = shippingOrders.filter((order) => {
     const id = (order.code || order.orderId || order.id || '').toString().toLowerCase();
-    const name = (order.recipientName || order.shippingAddress?.name || '').toLowerCase();
+    const name = (order.recipientName || '').toLowerCase();
     const tracking = (order.trackingNumber || '').toLowerCase();
     const term = searchTerm.toLowerCase();
-    return id.includes(term) || tracking.includes(term) || name.includes(term);
+    const matchSearch = id.includes(term) || tracking.includes(term) || name.includes(term);
+
+    // Filter by status tab
+    const s = (order.status || '').toUpperCase();
+    if (statusFilter !== 'all' && s !== statusFilter) return false;
+
+    // Filter by carrier (parsed from trackingNumber format: "[carrier] tracking")
+    if (carrierFilter !== 'all') {
+      const tn = order.trackingNumber || '';
+      return matchSearch && tn.includes(`[${carrierFilter}]`);
+    }
+    return matchSearch;
   });
 
   const formatCurrency = (amount) => {
@@ -58,11 +83,12 @@ const OperationsShippingPage = () => {
       message: `Xác nhận rằng đơn hàng ${orderId} đã được giao thành công cho khách hàng?`,
       onConfirm: () => {
         updateStatusMutation.mutate(
-          { id: orderId, status: 'delivered' },
+          { id: orderId, status: 'DELIVERED' },
           {
             onSuccess: () => toast.success(`Đã cập nhật đơn ${orderId} thành đã giao`),
           }
         );
+        setConfirmModal((m) => ({ ...m, isOpen: false }));
       },
     });
   };
@@ -87,11 +113,14 @@ const OperationsShippingPage = () => {
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+        <div
+          onClick={() => setStatusFilter('SHIPPED')}
+          className={`bg-white rounded-2xl p-6 shadow-sm border cursor-pointer transition ${statusFilter === 'SHIPPED' ? 'border-orange-300 ring-2 ring-orange-100' : 'border-gray-100 hover:border-orange-200'}`}
+        >
           <div className="flex justify-between items-start">
             <div>
               <p className="text-2xl font-bold text-orange-600">
-                {shippedOrders.length}
+                {shippingOrders.filter((o) => (o.status || '').toUpperCase() === 'SHIPPED').length}
               </p>
               <p className="text-sm text-[#4f5562] font-medium">
                 Đang giao hàng
@@ -102,11 +131,14 @@ const OperationsShippingPage = () => {
             </div>
           </div>
         </div>
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+        <div
+          onClick={() => setStatusFilter('DELIVERED')}
+          className={`bg-white rounded-2xl p-6 shadow-sm border cursor-pointer transition ${statusFilter === 'DELIVERED' ? 'border-green-300 ring-2 ring-green-100' : 'border-gray-100 hover:border-green-200'}`}
+        >
           <div className="flex justify-between items-start">
             <div>
               <p className="text-2xl font-bold text-green-600">
-                {orders.filter((o) => o.status?.toLowerCase() === 'delivered').length}
+                {shippingOrders.filter((o) => (o.status || '').toUpperCase() === 'DELIVERED').length}
               </p>
               <p className="text-sm text-[#4f5562] font-medium">
                 Đã giao thành công
@@ -117,11 +149,14 @@ const OperationsShippingPage = () => {
             </div>
           </div>
         </div>
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+        <div
+          onClick={() => setStatusFilter('all')}
+          className={`bg-white rounded-2xl p-6 shadow-sm border cursor-pointer transition ${statusFilter === 'all' ? 'border-blue-300 ring-2 ring-blue-100' : 'border-gray-100 hover:border-blue-200'}`}
+        >
           <div className="flex justify-between items-start">
             <div>
               <p className="text-2xl font-bold text-[#0f5dd9]">
-                {orders.filter((o) => o.trackingNumber).length}
+                {shippingOrders.length}
               </p>
               <p className="text-sm text-[#4f5562] font-medium">Tổng vận đơn</p>
             </div>
@@ -145,11 +180,17 @@ const OperationsShippingPage = () => {
               className="w-full pl-12 pr-4 py-3 bg-[#f9f9f9] border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-[#0f5dd9] text-sm"
             />
           </div>
-          <select className="bg-[#f9f9f9] border border-gray-200 rounded-full px-6 py-3 text-sm focus:outline-none">
-            <option>Tất cả đơn vị</option>
-            <option>GHN (Giao Hàng Nhanh)</option>
-            <option>GHTK (Giao Hàng Tiết Kiệm)</option>
-            <option>Viettel Post</option>
+          <select
+            value={carrierFilter}
+            onChange={(e) => setCarrierFilter(e.target.value)}
+            className="bg-[#f9f9f9] border border-gray-200 rounded-full px-6 py-3 text-sm focus:outline-none"
+          >
+            <option value="all">Tất cả đơn vị</option>
+            {SHIPPING_CARRIERS.map((c) => (
+              <option key={c.value} value={c.value}>
+                {c.label}
+              </option>
+            ))}
           </select>
         </div>
       </div>
@@ -164,7 +205,7 @@ const OperationsShippingPage = () => {
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
               <div className="flex items-center gap-4">
                 <div
-                  className={`w-14 h-14 rounded-2xl flex items-center justify-center ${order.status?.toLowerCase() === 'delivered' ? 'bg-green-100 text-green-600' : 'bg-orange-100 text-orange-600'}`}
+                  className={`w-14 h-14 rounded-2xl flex items-center justify-center ${(order.status || '').toUpperCase() === 'DELIVERED' ? 'bg-green-100 text-green-600' : 'bg-orange-100 text-orange-600'}`}
                 >
                   <Truck className="w-7 h-7" />
                 </div>
@@ -175,17 +216,17 @@ const OperationsShippingPage = () => {
                     </span>
                     <span
                       className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                        order.status?.toLowerCase() === 'delivered'
+                        (order.status || '').toUpperCase() === 'DELIVERED'
                           ? 'bg-green-100 text-green-700'
                           : 'bg-orange-100 text-orange-700'
                       }`}
                     >
-                      {order.status?.toLowerCase() === 'delivered' ? 'Đã giao' : 'Đang giao'}
+                      {(order.status || '').toUpperCase() === 'DELIVERED' ? 'Đã giao' : 'Đang giao'}
                     </span>
                   </div>
                   <p className="text-sm text-[#4f5562] mt-0.5">
-                    {order.recipientName || order.shippingAddress?.name} •{' '}
-                    {order.shippingPhone || order.shippingAddress?.phone}
+                    {order.recipientName} •{' '}
+                    {order.shippingPhone}
                   </p>
                 </div>
               </div>
@@ -212,7 +253,7 @@ const OperationsShippingPage = () => {
                     </p>
                   </div>
 
-                  {/* Custom Timeline */}
+                  {/* Timeline */}
                   <div className="relative pl-6 space-y-6 before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-gray-100">
                     <div className="relative">
                       <div className="absolute -left-5 top-1 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-white"></div>
@@ -220,30 +261,21 @@ const OperationsShippingPage = () => {
                         Đã lấy hàng thành công
                       </p>
                       <p className="text-[10px] text-[#4f5562]">
-                        Kho tổng CClearly • 09:30, 05/03/2026
-                      </p>
-                    </div>
-                    <div className="relative">
-                      <div className="absolute -left-5 top-1 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-white"></div>
-                      <p className="text-xs font-bold text-[#222]">
-                        Rời kho trung chuyển phía Bắc
-                      </p>
-                      <p className="text-[10px] text-[#4f5562]">
-                        Hub Hà Nội • 14:20, 05/03/2026
+                        Kho tổng CClearly
                       </p>
                     </div>
                     <div className="relative">
                       <div
-                        className={`absolute -left-5 top-1 w-2.5 h-2.5 rounded-full border-2 border-white ${order.status?.toLowerCase() === 'delivered' ? 'bg-green-500' : 'bg-blue-500 animate-pulse'}`}
+                        className={`absolute -left-5 top-1 w-2.5 h-2.5 rounded-full border-2 border-white ${(order.status || '').toUpperCase() === 'DELIVERED' ? 'bg-green-500' : 'bg-blue-500 animate-pulse'}`}
                       ></div>
                       <p className="text-xs font-bold text-[#222]">
-                        {order.status?.toLowerCase() === 'delivered'
+                        {(order.status || '').toUpperCase() === 'DELIVERED'
                           ? 'Giao hàng thành công'
-                          : 'Đang đến trạm giao hàng'}
+                          : 'Đang vận chuyển'}
                       </p>
                       <p className="text-[10px] text-[#4f5562]">
                         Cập nhật lần cuối •{' '}
-                        {new Date(order.updatedAt).toLocaleTimeString('vi-VN')}
+                        {new Date(order.createdAt).toLocaleTimeString('vi-VN')}
                       </p>
                     </div>
                   </div>
@@ -264,7 +296,11 @@ const OperationsShippingPage = () => {
                         Đơn vị vận chuyển
                       </p>
                       <p className="text-sm font-medium text-[#222]">
-                        {order.carrier || 'Chưa chỉ định'}
+                        {(() => {
+                          const tn = order.trackingNumber || '';
+                          const match = tn.match(/^\[(.+?)\]/);
+                          return match ? match[1] : 'Chưa chỉ định';
+                        })()}
                       </p>
                     </div>
                     <div>
@@ -273,7 +309,7 @@ const OperationsShippingPage = () => {
                       </p>
                       {order.trackingNumber ? (
                         <p className="text-sm font-mono font-bold text-[#0f5dd9] bg-blue-50 px-2 py-1 rounded inline-block mt-1">
-                          {order.trackingNumber}
+                          {order.trackingNumber.replace(/^\[.+?\]\s*/, '')}
                         </p>
                       ) : (
                         <p className="text-sm text-red-500 italic mt-1">
@@ -284,7 +320,7 @@ const OperationsShippingPage = () => {
                   </div>
                   {order.trackingNumber && (
                     <button className="mt-4 w-full text-[11px] font-bold text-[#0f5dd9] flex items-center justify-center gap-1 hover:underline">
-                      Xem hành trình thực tế trên {order.carrier}
+                      Xem hành trình thực tế
                     </button>
                   )}
                 </div>
@@ -309,7 +345,7 @@ const OperationsShippingPage = () => {
                 </button>
               )}
 
-              {order.status?.toLowerCase() !== 'delivered' && (
+              {(order.status || '').toUpperCase() !== 'DELIVERED' && (
                 <button
                   onClick={() => handleUpdateStatus(order.orderId || order.id)}
                   className="bg-[#0f5dd9] text-white px-6 py-3 rounded-full text-sm hover:bg-[#0b4fc0] transition"
@@ -317,6 +353,13 @@ const OperationsShippingPage = () => {
                   Xác nhận giao thành công
                 </button>
               )}
+
+              <button
+                onClick={() => setSelectedOrder(order)}
+                className="flex items-center gap-2 text-sm text-[#4f5562] hover:text-[#222] transition"
+              >
+                <Eye className="w-4 h-4" /> Xem chi tiết
+              </button>
 
               <button className="ml-auto text-sm text-[#4f5562] hover:text-[#222] transition">
                 In nhãn dán
@@ -342,12 +385,17 @@ const OperationsShippingPage = () => {
         type={confirmModal.type}
         title={confirmModal.title}
         message={confirmModal.message}
-        onConfirm={() => {
-          confirmModal.onConfirm();
-          setConfirmModal({ ...confirmModal, isOpen: false });
-        }}
-        onCancel={() => setConfirmModal({ ...confirmModal, isOpen: false })}
+        onConfirm={confirmModal.onConfirm}
+        onClose={() => setConfirmModal((m) => ({ ...m, isOpen: false }))}
       />
+
+      {/* Order Detail Modal */}
+      {selectedOrder && (
+        <OrderDetailModal
+          order={selectedOrder}
+          onClose={() => setSelectedOrder(null)}
+        />
+      )}
     </div>
   );
 };
