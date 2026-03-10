@@ -50,8 +50,6 @@ import SalesCustomersPage from './pages/sales/SalesCustomersPage';
 
 // Manager Pages
 import ManagerDashboardPage from './pages/manager/ManagerDashboardPage';
-import ManagerOrdersPage from './pages/manager/ManagerOrdersPage';
-import ManagerProductsPage from './pages/manager/ManagerProductsPage';
 import LensManagementPage from './pages/manager/LensManagementPage';
 import ManagerPolicyPage from './pages/admin/PolicyPage';
 import CartPage from './pages/customer/CartPage';
@@ -64,8 +62,6 @@ import ProductListPage from './pages/customer/ProductListPage';
 import ProfilePage from './pages/customer/ProfilePage';
 import ReturnPage from './pages/customer/ReturnPage';
 import WishlistPage from './pages/customer/WishlistPage';
-import ManagerInventoryPage from './pages/manager/InventoryPage';
-import ManagerReportsPage from './pages/manager/ManagerReportsPage';
 import PromotionPage from './pages/manager/PromotionPage';
 import StaffPage from './pages/manager/StaffPage';
 
@@ -195,14 +191,14 @@ function AppRoutes() {
           }
         >
           <Route path="/manager" element={<ManagerDashboardPage />} />
-          <Route path="/manager/orders" element={<ManagerOrdersPage />} />
-          <Route path="/manager/products" element={<ManagerProductsPage />} />
-          <Route path="/manager/inventory" element={<ManagerInventoryPage />} />
+          <Route path="/manager/orders" element={<AdminOrdersPage />} />
+          <Route path="/manager/products" element={<AdminProductsPage />} />
+          <Route path="/manager/inventory" element={<InventoryPage />} />
           <Route path="/manager/lenses" element={<LensManagementPage />} />
           <Route path="/manager/policies" element={<ManagerPolicyPage />} />
           <Route path="/manager/promotions" element={<PromotionPage />} />
           <Route path="/manager/staff" element={<StaffPage />} />
-          <Route path="/manager/reports" element={<ManagerReportsPage />} />
+          <Route path="/manager/reports" element={<AdminReportsPage />} />
         </Route>
 
         {/* Sales Routes */}
