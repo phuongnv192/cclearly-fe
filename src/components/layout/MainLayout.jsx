@@ -93,7 +93,8 @@ const socialLinks = [
 
 const MainLayout = () => {
   const { isAuthenticated, user, logout } = useAuth();
-  const { data: cartData } = useCart();
+  const isCustomer = !user?.role || user.role === ROLES.CUSTOMER;
+  const { data: cartData } = useCart({ enabled: isAuthenticated && isCustomer });
   const navigate = useNavigate();
   const [isProductsOpen, setIsProductsOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
