@@ -1,42 +1,30 @@
 import {
   Globe,
-  Store,
   CreditCard,
   Truck,
-  ShieldCheck,
-  Bell,
   Save,
   ChevronRight,
-  MapPin,
-  Wrench,
   Mail,
-  Eye,
-  EyeOff,
-  Send,
-  AlertTriangle,
+  Wrench,
   Loader2,
 } from 'lucide-react';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 
-// Import components con
 import PaymentTab from '@/components/admin/setting/PaymentTab';
 import {
   SectionHeader,
   FormField,
-  SelectField,
 } from '@/components/common/CommonControls';
 import { useAdminSettings, useUpdateSettings } from '@/hooks/useAdmin';
 
 const AdminSettingsPage = () => {
   const [activeTab, setActiveTab] = useState('general');
-  const [showPassword, setShowPassword] = useState(false);
   const [localSettings, setLocalSettings] = useState({});
 
   const { data: settingsData, isLoading } = useAdminSettings();
   const updateSettingsMutation = useUpdateSettings();
 
-  // Build settings map from API data
   useEffect(() => {
     if (settingsData) {
       const settingsArray = Array.isArray(settingsData) ? settingsData : [];
@@ -73,26 +61,13 @@ const AdminSettingsPage = () => {
       key: 'shipping',
       label: 'Vận chuyển',
       icon: Truck,
-      description: 'Phí ship',
+      description: 'Phí vận chuyển',
     },
     {
-      key: 'maintenance',
-      label: 'Bảo trì',
-      icon: Wrench,
-      description: 'Chế độ bảo trì hệ thống',
-    },
-    { key: 'email', label: 'Email', icon: Mail, description: 'Cấu hình SMTP' },
-    {
-      key: 'security',
-      label: 'Bảo mật',
-      icon: ShieldCheck,
-      description: '2FA, mật khẩu',
-    },
-    {
-      key: 'notifications',
-      label: 'Thông báo',
-      icon: Bell,
-      description: 'Email & SMS',
+      key: 'email',
+      label: 'Email',
+      icon: Mail,
+      description: 'Header & footer email hệ thống',
     },
   ];
 
@@ -129,7 +104,7 @@ const AdminSettingsPage = () => {
                 label="Tên cửa hàng"
                 defaultValue={getSetting(
                   'store_name',
-                  'CClearly - Eye Care Center'
+                  'CClearly - Eye Care Center',
                 )}
                 onChange={(e) => updateLocal('store_name', e.target.value)}
               />
@@ -142,7 +117,7 @@ const AdminSettingsPage = () => {
                 label="Email hỗ trợ"
                 defaultValue={getSetting(
                   'support_email',
-                  'support@cclearly.com'
+                  'support@cclearly.com',
                 )}
                 onChange={(e) => updateLocal('support_email', e.target.value)}
               />
@@ -452,9 +427,9 @@ const AdminSettingsPage = () => {
                   activeTab === tab.key ? 'text-blue-600' : 'text-gray-400'
                 }
               />
-              <div className="flex-1">
+              <div className="flex-1 text-left">
                 <div className="text-sm font-medium">{tab.label}</div>
-                <div className="text-xs text-gray-400 truncate w-40">
+                <div className="text-xs text-gray-400 truncate">
                   {tab.description}
                 </div>
               </div>
@@ -462,7 +437,9 @@ const AdminSettingsPage = () => {
             </button>
           ))}
         </div>
-        <div className="col-span-9 bg-white border rounded-xl p-8 shadow-sm min-h-[500px]">
+
+        {/* Main panel */}
+        <div className="col-span-9 bg-white border border-gray-100 rounded-xl p-8 min-h-[500px]">
           {renderTabContent()}
         </div>
       </div>
