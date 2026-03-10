@@ -9,18 +9,18 @@ import {
 import { ResponsiveContainer, BarChart, Bar, XAxis, Tooltip } from 'recharts';
 import { useAuth, ROLES } from '@/contexts/AuthContext';
 import { useAdminDashboard } from '@/hooks/useAdmin';
-import { useOrders } from '@/hooks/useOrder';
+import { useAdminOrders } from '@/hooks/useOrder';
 
 const AdminDashboard = () => {
   const { user, hasRole } = useAuth();
 
   const { data: stats, isLoading: loadingStats } = useAdminDashboard();
-  const { data: ordersData, isLoading: loadingOrders } = useOrders({
-    page: 0,
+  const { data: ordersData, isLoading: loadingOrders } = useAdminOrders({
+    page: 1,
     size: 5,
   });
 
-  const recentOrders = ordersData?.content || ordersData || [];
+  const recentOrders = ordersData?.items || [];
 
   const formatCurrency = (amount) =>
     new Intl.NumberFormat('vi-VN', {
@@ -32,9 +32,13 @@ const AdminDashboard = () => {
     const s = status?.toUpperCase();
     const map = {
       PENDING: 'bg-yellow-100 text-yellow-800',
+      CONFIRMED: 'bg-blue-100 text-blue-800',
       PROCESSING: 'bg-purple-100 text-purple-800',
+      SHIPPED: 'bg-orange-100 text-orange-800',
       DELIVERED: 'bg-green-100 text-green-800',
       CANCELLED: 'bg-red-100 text-red-800',
+      RETURN_REQUESTED: 'bg-pink-100 text-pink-800',
+      RETURNED: 'bg-gray-200 text-gray-800',
     };
 
     return map[s] || 'bg-gray-100 text-gray-800';
@@ -43,10 +47,14 @@ const AdminDashboard = () => {
   const getStatusLabel = (status) => {
     const s = status?.toUpperCase();
     const map = {
-      PENDING: 'Chờ xử lý',
-      PROCESSING: 'Đang gia công',
+      PENDING: 'Chờ xác nhận',
+      CONFIRMED: 'Đã xác nhận',
+      PROCESSING: 'Đang xử lý',
+      SHIPPED: 'Đang giao',
       DELIVERED: 'Hoàn thành',
       CANCELLED: 'Đã hủy',
+      RETURN_REQUESTED: 'Yêu cầu đổi trả',
+      RETURNED: 'Đã trả hàng',
     };
     return map[s] || status;
   };
@@ -171,14 +179,14 @@ const AdminDashboard = () => {
                   (order) => (
                     <tr key={order.orderId || order.id} className="border-b">
                       <td className="py-3 font-medium">
-                        {order.orderId || order.id}
+                        {order.code || order.orderId}
                       </td>
 
                       <td>
-                        {order.customerName || order.shippingAddress?.name}
+                        {order.recipientName || 'N/A'}
                       </td>
 
-                      <td>{formatCurrency(order.totalAmount)}</td>
+                      <td>{formatCurrency(order.finalAmount)}</td>
 
                       <td>
                         <span
