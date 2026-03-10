@@ -7,6 +7,8 @@ import {
   AlertCircle,
   Package,
   Eye,
+  CreditCard,
+  Banknote,
 } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'react-toastify';
@@ -234,6 +236,11 @@ const OperationsShippingPage = () => {
                 <p className="text-lg font-bold text-[#222]">
                   {formatCurrency(order.finalAmount || order.totalAmount)}
                 </p>
+                {(order.shippingFee != null && order.shippingFee > 0) && (
+                  <p className="text-xs text-orange-500 font-medium">
+                    (Phí ship: {formatCurrency(order.shippingFee)})
+                  </p>
+                )}
                 <p className="text-xs text-[#4f5562]">
                   {new Date(order.createdAt).toLocaleString('vi-VN', {
                     dateStyle: 'short',
@@ -243,7 +250,7 @@ const OperationsShippingPage = () => {
               </div>
             </div>
 
-            <div className="grid lg:grid-cols-3 gap-6 mb-6">
+            <div className="grid lg:grid-cols-4 gap-6 mb-6">
               <div className="lg:col-span-2">
                 <div className="bg-[#fcfcfc] rounded-2xl p-5 border border-gray-50 h-full">
                   <div className="flex items-center gap-2 mb-4">
@@ -323,6 +330,74 @@ const OperationsShippingPage = () => {
                       Xem hành trình thực tế
                     </button>
                   )}
+                </div>
+              </div>
+
+              {/* Payment Info */}
+              <div>
+                <div className="bg-[#fcfcfc] rounded-2xl p-5 border border-gray-50 h-full flex flex-col">
+                  <div className="flex items-center gap-2 mb-4">
+                    <CreditCard className="w-4 h-4 text-[#0f5dd9]" />
+                    <p className="text-sm font-bold text-[#222]">
+                      Thanh toán
+                    </p>
+                  </div>
+                  <div className="space-y-3 flex-1">
+                    <div>
+                      <p className="text-[10px] text-[#4f5562] uppercase font-bold tracking-wider">
+                        Hình thức
+                      </p>
+                      <p className="text-sm font-medium text-[#222]">
+                        {order.paymentMethod === 'PAYOS'
+                          ? 'Chuyển khoản (PayOS)'
+                          : order.paymentMethod === 'COD'
+                          ? 'Thanh toán khi nhận hàng'
+                          : order.paymentMethod === 'BANK_TRANSFER'
+                          ? 'Chuyển khoản'
+                          : order.isPreorder
+                          ? 'Đặt cọc + COD'
+                          : order.paymentMethod || 'Chưa xác định'}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-[#4f5562] uppercase font-bold tracking-wider">
+                        Đã thanh toán
+                      </p>
+                      <p className="text-sm font-bold text-green-600">
+                        {formatCurrency(order.paidAmount || 0)}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-[#4f5562] uppercase font-bold tracking-wider">
+                        Cần thu (COD)
+                      </p>
+                      <p className={`text-sm font-bold ${(order.codAmount || 0) > 0 ? 'text-orange-600' : 'text-green-600'}`}>
+                        {(order.codAmount || 0) > 0
+                          ? formatCurrency(order.codAmount)
+                          : 'Đã thanh toán đủ'}
+                      </p>
+                    </div>
+                    {order.shippingFee != null && (
+                      <div>
+                        <p className="text-[10px] text-[#4f5562] uppercase font-bold tracking-wider">
+                          Phí vận chuyển
+                        </p>
+                        <p className={`text-sm font-bold ${order.shippingFee > 0 ? 'text-orange-600' : 'text-green-600'}`}>
+                          {order.shippingFee > 0
+                            ? formatCurrency(order.shippingFee)
+                            : 'Miễn phí'}
+                        </p>
+                      </div>
+                    )}
+                    {order.isPreorder && (
+                      <div className="mt-1 px-2 py-1 bg-blue-50 rounded-lg">
+                        <p className="text-[10px] font-bold text-blue-700">
+                          <Banknote className="w-3 h-3 inline mr-1" />
+                          Đơn Pre-order — Đặt cọc 50%
+                        </p>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>

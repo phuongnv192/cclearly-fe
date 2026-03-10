@@ -183,6 +183,14 @@ const OrderDetailModal = ({ order, onClose, onConfirm, onCancel }) => {
                   {fmt(order.finalAmount)}
                 </span>
               </div>
+              {order.shippingFee != null && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-[#4f5562]">Phí vận chuyển (đã tính trong tổng):</span>
+                  <span className={`font-medium ${order.shippingFee > 0 ? 'text-orange-600' : 'text-green-600'}`}>
+                    {order.shippingFee > 0 ? fmt(order.shippingFee) : 'Miễn phí'}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
 

@@ -314,11 +314,19 @@ const PreorderReceivePage = () => {
                       <div className="flex items-center gap-1.5">
                         <CreditCard className="w-3.5 h-3.5 text-[#4f5562]" />
                         <span className="text-xs font-medium">
-                          {order.paymentType === 'DEPOSIT' ? 'Đặt cọc 50%' : 'Thanh toán full'}
+                          Đặt cọc + COD
                         </span>
                       </div>
-                      <p className="text-xs font-bold text-[#222] mt-1">
-                        {formatCurrency(order.finalAmount)}
+                      <div className="mt-1 space-y-0.5">
+                        <p className="text-[11px] text-green-600 font-bold">
+                          Đã cọc: {formatCurrency(order.paidAmount || 0)}
+                        </p>
+                        <p className="text-[11px] text-orange-600 font-bold">
+                          Cần thu: {formatCurrency(order.codAmount || 0)}
+                        </p>
+                      </div>
+                      <p className="text-[10px] text-[#4f5562] mt-0.5">
+                        Tổng: {formatCurrency(order.finalAmount)}
                       </p>
                     </td>
 
