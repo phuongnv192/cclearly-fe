@@ -2,6 +2,7 @@
 import { Plus, X, Save, Loader2, Search, Edit2, Lock, Unlock } from 'lucide-react';
 import { useState } from 'react';
 import ConfirmModal from '@/components/ui/ConfirmModal';
+import { useAuth } from '@/contexts/AuthContext';
 import {
   useAdminUsers,
   useCreateUser,
@@ -43,6 +44,7 @@ const StaffPage = () => {
   const [formData, setFormData] = useState(emptyForm);
   const [lockModal, setLockModal] = useState({ isOpen: false, user: null });
 
+  const { user: currentUser } = useAuth();
   const { data: allUsers = [], isLoading } = useAdminUsers({ page: 1, size: 100 });
   const createUser = useCreateUser();
   const updateUser = useUpdateUser();
@@ -229,21 +231,23 @@ const StaffPage = () => {
                       >
                         <Edit2 className="w-4 h-4" />
                       </button>
-                      <button
-                        onClick={() => setLockModal({ isOpen: true, user })}
-                        className={`p-2 rounded-lg transition ${
-                          user.status === 'ACTIVE'
-                            ? 'text-gray-400 hover:text-orange-500 hover:bg-orange-50'
-                            : 'text-gray-400 hover:text-green-600 hover:bg-green-50'
-                        }`}
-                        title={user.status === 'ACTIVE' ? 'Khóa tài khoản' : 'Mở khóa tài khoản'}
-                      >
-                        {user.status === 'ACTIVE' ? (
-                          <Lock className="w-4 h-4" />
-                        ) : (
-                          <Unlock className="w-4 h-4" />
-                        )}
-                      </button>
+                      {String(user.userId) !== String(currentUser?.userId) && (
+                        <button
+                          onClick={() => setLockModal({ isOpen: true, user })}
+                          className={`p-2 rounded-lg transition ${
+                            user.status === 'ACTIVE'
+                              ? 'text-gray-400 hover:text-orange-500 hover:bg-orange-50'
+                              : 'text-gray-400 hover:text-green-600 hover:bg-green-50'
+                          }`}
+                          title={user.status === 'ACTIVE' ? 'Khóa tài khoản' : 'Mở khóa tài khoản'}
+                        >
+                          {user.status === 'ACTIVE' ? (
+                            <Lock className="w-4 h-4" />
+                          ) : (
+                            <Unlock className="w-4 h-4" />
+                          )}
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>

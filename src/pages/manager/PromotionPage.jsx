@@ -6,6 +6,8 @@ import {
   Ticket,
   CheckCircle,
   XCircle,
+  Filter,
+  Package,
   X,
 } from 'lucide-react';
 import { useState } from 'react';
@@ -158,175 +160,217 @@ const PromotionPage = () => {
   const disabledVouchers = totalVouchers - activeVouchers;
   const totalUsage = coupons.reduce((s, c) => s + (c.usageCount || 0), 0);
 
-  const Stat = ({ icon: Icon, label, value, color = 'text-gray-700' }) => (
-    <div className="bg-white border rounded-xl p-5 flex items-center gap-4">
-      <div className={`p-2.5 rounded-lg bg-gray-50 ${color}`}>
-        <Icon size={20} />
-      </div>
-      <div>
-        <div className="text-xs text-gray-500">{label}</div>
-        <div className="text-xl font-bold">{value}</div>
-      </div>
-    </div>
-  );
-
   return (
-    <div className="p-8 space-y-8 max-w-[1400px] mx-auto">
-      {/* HEADER */}
-      <div className="flex justify-between items-center">
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex justify-between items-start">
         <div>
-          <h1 className="text-2xl font-bold">Quản lý Voucher</h1>
+          <h1 className="text-2xl font-semibold text-gray-800">
+            Quản lý Voucher
+          </h1>
           <p className="text-gray-500 text-sm">Tạo và quản lý mã giảm giá</p>
         </div>
 
         <button
           onClick={openAddCoupon}
-          className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-gray-900 text-white text-sm hover:bg-gray-800"
+          className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-900 text-white text-sm hover:bg-gray-800 transition-colors"
         >
           <Plus size={16} />
           Tạo Voucher
         </button>
       </div>
 
-      {/* STATS */}
-      <div className="grid grid-cols-4 gap-5">
-        <Stat icon={Ticket} label="Tổng voucher" value={totalVouchers} />
-        <Stat icon={CheckCircle} label="Đang hoạt động" value={activeVouchers} color="text-green-600" />
-        <Stat icon={XCircle} label="Đã tắt" value={disabledVouchers} color="text-gray-400" />
-        <Stat icon={Ticket} label="Lượt sử dụng" value={totalUsage} color="text-blue-600" />
+      {/* Stats */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {[
+          {
+            label: 'Tổng voucher',
+            val: totalVouchers,
+            icon: Ticket,
+            color: 'text-gray-600',
+            bg: 'bg-gray-50',
+          },
+          {
+            label: 'Đang hoạt động',
+            val: activeVouchers,
+            icon: CheckCircle,
+            color: 'text-green-600',
+            bg: 'bg-green-50',
+          },
+          {
+            label: 'Đã tắt',
+            val: disabledVouchers,
+            icon: XCircle,
+            color: 'text-red-600',
+            bg: 'bg-red-50',
+          },
+          {
+            label: 'Lượt sử dụng',
+            val: totalUsage,
+            icon: Package,
+            color: 'text-blue-600',
+            bg: 'bg-blue-50',
+          },
+        ].map((item, idx) => (
+          <div
+            key={idx}
+            className="bg-white p-4 rounded-xl border border-gray-100 flex items-center gap-3"
+          >
+            <div className={`p-2 rounded-lg ${item.bg} ${item.color}`}>
+              <item.icon size={20} />
+            </div>
+            <div>
+              <p className="text-lg font-medium text-gray-800">{item.val}</p>
+              <p className="text-xs text-gray-500">{item.label}</p>
+            </div>
+          </div>
+        ))}
       </div>
 
-      {/* VOUCHER TABLE */}
-      <div className="bg-white border rounded-xl">
-        <div className="p-5 flex justify-between items-center border-b">
-          <h2 className="font-semibold flex items-center gap-2">
-            <Ticket size={18} />
-            Danh sách Voucher
-          </h2>
-
-          <div className="flex gap-3">
-            <div className="relative">
-              <Search size={16} className="absolute left-2.5 top-2.5 text-gray-400" />
-              <input
-                value={couponSearch}
-                onChange={(e) => setCouponSearch(e.target.value)}
-                placeholder="Tìm theo mã..."
-                className="pl-8 pr-3 py-2 border rounded-lg text-sm w-48"
-              />
-            </div>
-
-            <select
-              value={couponFilter}
-              onChange={(e) => setCouponFilter(e.target.value)}
-              className="border rounded-lg text-sm px-3 py-2"
-            >
-              <option value="all">Tất cả</option>
-              <option value="active">Đang hoạt động</option>
-              <option value="disabled">Đã tắt</option>
-            </select>
-          </div>
+      {/* Filters */}
+      <div className="bg-white rounded-xl p-4 border border-gray-100 flex gap-4 items-center">
+        <div className="flex-1 relative">
+          <Search
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+            size={18}
+          />
+          <input
+            type="text"
+            placeholder="Tìm theo mã voucher..."
+            value={couponSearch}
+            onChange={(e) => setCouponSearch(e.target.value)}
+            className="w-full pl-9 pr-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-200 outline-none"
+          />
         </div>
 
+        <div className="flex items-center gap-2 border rounded-lg px-3 py-2 text-sm">
+          <Filter size={16} />
+          <select
+            value={couponFilter}
+            onChange={(e) => setCouponFilter(e.target.value)}
+            className="outline-none bg-transparent"
+          >
+            <option value="all">Tất cả</option>
+            <option value="active">Đang hoạt động</option>
+            <option value="disabled">Đã tắt</option>
+          </select>
+        </div>
+      </div>
+
+      {/* Table */}
+      <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
         {isLoading ? (
-          <div className="p-10 text-center text-gray-400">Đang tải...</div>
+          <div className="text-center py-12 text-gray-400">Đang tải...</div>
         ) : filteredCoupons.length === 0 ? (
-          <div className="p-10 text-center text-gray-400">
+          <div className="text-center py-12 text-gray-400">
+            <Ticket className="w-10 h-10 mx-auto mb-2 text-gray-300" />
             {couponSearch || couponFilter !== 'all'
               ? 'Không tìm thấy voucher nào'
               : 'Chưa có voucher nào. Nhấn "Tạo Voucher" để bắt đầu.'}
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-gray-50 text-gray-500">
-                <tr>
-                  <th className="text-left p-3 font-medium">Mã</th>
-                  <th className="text-left p-3 font-medium">Loại</th>
-                  <th className="text-left p-3 font-medium">Giảm giá</th>
-                  <th className="text-left p-3 font-medium">Đơn tối thiểu</th>
-                  <th className="text-left p-3 font-medium">Giảm tối đa</th>
-                  <th className="text-left p-3 font-medium">Sử dụng</th>
-                  <th className="text-left p-3 font-medium">Mô tả</th>
-                  <th className="text-left p-3 font-medium">Trạng thái</th>
-                  <th className="text-right p-3 font-medium"></th>
-                </tr>
-              </thead>
+          <table className="w-full text-sm">
+            <thead className="bg-gray-50 text-gray-500">
+              <tr>
+                <th className="px-5 py-3 text-left">Mã</th>
+                <th className="px-5 py-3 text-left">Loại</th>
+                <th className="px-5 py-3 text-left">Giảm giá</th>
+                <th className="px-5 py-3 text-left">Đơn tối thiểu</th>
+                <th className="px-5 py-3 text-left">Giảm tối đa</th>
+                <th className="px-5 py-3 text-left">Sử dụng</th>
+                <th className="px-5 py-3 text-left">Mô tả</th>
+                <th className="px-5 py-3 text-center">Trạng thái</th>
+                <th className="px-5 py-3 text-right">Thao tác</th>
+              </tr>
+            </thead>
 
-              <tbody>
-                {filteredCoupons.map((coupon) => (
-                  <tr key={coupon.promotionId || coupon.code} className="border-t hover:bg-gray-50">
-                    <td className="p-3">
-                      <span className="font-mono font-semibold bg-gray-100 px-2 py-0.5 rounded text-xs">
-                        {coupon.code}
-                      </span>
-                    </td>
+            <tbody className="divide-y">
+              {filteredCoupons.map((coupon) => (
+                <tr
+                  key={coupon.promotionId || coupon.code}
+                  className="hover:bg-gray-50"
+                >
+                  <td className="px-5 py-3">
+                    <span className="font-mono font-semibold bg-gray-100 px-2 py-0.5 rounded text-xs">
+                      {coupon.code}
+                    </span>
+                  </td>
 
-                    <td className="p-3 text-gray-500">
+                  <td className="px-5 py-3">
+                    <span
+                      className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        isPercent(coupon.discountType)
+                          ? 'bg-blue-100 text-blue-700'
+                          : 'bg-green-100 text-green-700'
+                      }`}
+                    >
                       {isPercent(coupon.discountType) ? 'Phần trăm' : 'Cố định'}
-                    </td>
+                    </span>
+                  </td>
 
-                    <td className="p-3 font-semibold text-blue-700">
-                      {formatDiscount(coupon)}
-                    </td>
+                  <td className="px-5 py-3 font-medium text-[#0f5dd9]">
+                    {formatDiscount(coupon)}
+                  </td>
 
-                    <td className="p-3 text-gray-600">
-                      {formatCurrency(coupon.minOrder)}
-                    </td>
+                  <td className="px-5 py-3 text-gray-600">
+                    {formatCurrency(coupon.minOrder)}
+                  </td>
 
-                    <td className="p-3 text-gray-600">
-                      {formatCurrency(coupon.maxDiscount)}
-                    </td>
+                  <td className="px-5 py-3 text-gray-600">
+                    {formatCurrency(coupon.maxDiscount)}
+                  </td>
 
-                    <td className="p-3">
-                      <span className="text-gray-700">
-                        {coupon.usageCount || 0}
-                      </span>
-                      <span className="text-gray-400">
-                        /{coupon.usageLimit || '∞'}
-                      </span>
-                    </td>
+                  <td className="px-5 py-3">
+                    <span className="text-gray-700 font-medium">
+                      {coupon.usageCount || 0}
+                    </span>
+                    <span className="text-gray-400">
+                      /{coupon.usageLimit || '∞'}
+                    </span>
+                  </td>
 
-                    <td className="p-3 text-gray-500 max-w-[200px] truncate" title={coupon.description}>
-                      {coupon.description || '—'}
-                    </td>
+                  <td className="px-5 py-3 text-gray-500 max-w-[200px] truncate" title={coupon.description}>
+                    {coupon.description || '—'}
+                  </td>
 
-                    <td className="p-3">
-                      <button
-                        onClick={() => toggleCouponStatus(coupon)}
-                        disabled={togglePromotionMutation.isPending}
-                        className={`text-xs px-2.5 py-1 rounded-full font-medium transition-colors
-                        ${
-                          coupon.isActive
-                            ? 'bg-green-100 text-green-700 hover:bg-green-200'
-                            : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
-                        }`}
-                      >
-                        {coupon.isActive ? 'Active' : 'Disabled'}
-                      </button>
-                    </td>
+                  <td className="px-5 py-3 text-center">
+                    <button
+                      onClick={() => toggleCouponStatus(coupon)}
+                      disabled={togglePromotionMutation.isPending}
+                      className={`text-xs px-2 py-1 rounded-full font-medium transition-colors
+                      ${
+                        coupon.isActive
+                          ? 'bg-green-100 text-green-700 hover:bg-green-200'
+                          : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                      }`}
+                    >
+                      {coupon.isActive ? 'Active' : 'Disabled'}
+                    </button>
+                  </td>
 
-                    <td className="p-3 text-right">
+                  <td className="px-5 py-3 text-right">
+                    <div className="flex justify-end gap-1">
                       <button
                         onClick={() => openEditCoupon(coupon)}
-                        className="mr-2 text-gray-500 hover:text-blue-600"
+                        className="p-1.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors"
                         title="Sửa"
                       >
-                        <Edit2 size={16} />
+                        <Edit2 size={15} />
                       </button>
 
                       <button
                         onClick={() => handleDeleteRequest(coupon.promotionId)}
-                        className="text-gray-500 hover:text-red-600"
+                        className="p-1.5 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors"
                         title="Xóa"
                       >
-                        <Trash2 size={16} />
+                        <Trash2 size={15} />
                       </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         )}
       </div>
 
