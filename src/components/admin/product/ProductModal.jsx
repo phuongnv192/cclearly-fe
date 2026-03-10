@@ -8,8 +8,10 @@ import {
   Plus,
   Loader2,
 } from 'lucide-react';
-import React, { useState } from 'react';
+import React, { useState, useRef, useMemo } from 'react';
 import { toast } from 'react-toastify';
+import ReactQuill from 'react-quill-new';
+import 'react-quill-new/dist/quill.snow.css';
 import {
   FRAME_MATERIALS,
   FRAME_SHAPES,
@@ -35,8 +37,92 @@ const ProductModal = ({
   isPending,
 }) => {
   const [uploading, setUploading] = useState(false);
+  const quillRef = useRef(null);
+
+  // Quill image handler: upload to Cloudinary then insert URL
+  const quillImageHandler = () => {
+    const input = document.createElement('input');
+    input.setAttribute('type', 'file');
+    input.setAttribute('accept', 'image/*');
+    input.click();
+    input.onchange = async () => {
+      const file = input.files[0];
+      if (!file) return;
+      try {
+        const url = await uploadRequest.uploadImage(file, 'products/description');
+        const quill = quillRef.current?.getEditor();
+        if (quill) {
+          const range = quill.getSelection(true);
+          quill.insertEmbed(range.index, 'image', url);
+          quill.setSelection(range.index + 1);
+        }
+      } catch {
+        toast.error('Upload ảnh thất bại');
+      }
+    };
+  };
+
+  const quillModules = useMemo(
+    () => ({
+      toolbar: {
+        container: [
+          [{ header: [1, 2, 3, false] }],
+          ['bold', 'italic', 'underline', 'strike'],
+          [{ color: [] }, { background: [] }],
+          [{ list: 'ordered' }, { list: 'bullet' }],
+          [{ align: [] }],
+          ['link', 'image'],
+          ['clean'],
+        ],
+        handlers: {
+          image: quillImageHandler,
+        },
+      },
+    }),
+    [],
+  );
 
   if (!show) return null;
+
+  // Quill image handler: upload to Cloudinary then insert URL
+  const quillImageHandler = () => {
+    const input = document.createElement('input');
+    input.setAttribute('type', 'file');
+    input.setAttribute('accept', 'image/*');
+    input.click();
+    input.onchange = async () => {
+      const file = input.files[0];
+      if (!file) return;
+      try {
+        const url = await uploadRequest.uploadImage(file, 'products/description');
+        const quill = quillRef.current?.getEditor();
+        if (quill) {
+          const range = quill.getSelection(true);
+          quill.insertEmbed(range.index, 'image', url);
+          quill.setSelection(range.index + 1);
+        }
+      } catch {
+        toast.error('Upload ảnh thất bại');
+      }
+    };
+  };
+
+  const quillModules = useMemo(() => ({
+    toolbar: {
+      container: [
+        [{ header: [1, 2, 3, false] }],
+        ['bold', 'italic', 'underline', 'strike'],
+        [{ color: [] }, { background: [] }],
+        [{ list: 'ordered' }, { list: 'bullet' }],
+        [{ align: [] }],
+        ['link', 'image'],
+        ['clean'],
+      ],
+      handlers: {
+        image: quillImageHandler,
+      },
+    },
+  }), []);
 
   const handleImageUpload = async (e) => {
     const files = Array.from(e.target.files);
@@ -102,20 +188,6 @@ const ProductModal = ({
                     required
                     className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 outline-none transition"
                     placeholder="VD: Gọng kính Ray-Ban Aviator"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wider">
-                    Mô tả sản phẩm
-                  </label>
-                  <textarea
-                    value={formData.description || ''}
-                    onChange={(e) =>
-                      setFormData({ ...formData, description: e.target.value })
-                    }
-                    rows={3}
-                    className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 outline-none transition resize-none"
-                    placeholder="Mô tả chi tiết về sản phẩm..."
                   />
                 </div>
                 <div className={`grid ${formData.type === 'accessory' ? 'grid-cols-2' : 'grid-cols-1'} gap-3`}>
@@ -196,6 +268,25 @@ const ProductModal = ({
                     </label>
                   </div>
                 </div>
+              </div>
+            </div>
+
+            {/* Section: Mô tả sản phẩm - Rich text editor */}
+            <div>
+              <label className="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wider">
+                Mô tả sản phẩm
+              </label>
+              <div className="border border-gray-200 rounded-lg overflow-hidden [&_.ql-toolbar]:border-0 [&_.ql-toolbar]:border-b [&_.ql-toolbar]:border-gray-200 [&_.ql-toolbar]:bg-gray-50 [&_.ql-container]:border-0 [&_.ql-editor]:min-h-[150px] [&_.ql-editor]:max-h-[300px] [&_.ql-editor]:overflow-y-auto">
+                <ReactQuill
+                  ref={quillRef}
+                  theme="snow"
+                  value={formData.description || ''}
+                  onChange={(value) =>
+                    setFormData({ ...formData, description: value === '<p><br></p>' ? '' : value })
+                  }
+                  modules={quillModules}
+                  placeholder="Mô tả chi tiết về sản phẩm (hỗ trợ định dạng văn bản và hình ảnh)..."
+                />
               </div>
             </div>
 

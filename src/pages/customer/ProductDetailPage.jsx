@@ -218,11 +218,6 @@ const ProductDetailPage = () => {
               )}
             </div>
 
-            {/* SHORT DESCRIPTION */}
-            {product.description && (
-              <p className="text-gray-600 mb-6">{product.description}</p>
-            )}
-
             {/* VARIANT SELECTOR */}
             {product.variants?.length > 0 && (
               <div className="mb-6">
@@ -230,7 +225,14 @@ const ProductDetailPage = () => {
                   {product.type === 'lens' ? 'Chỉ số khúc xạ' : 'Màu sắc'}
                 </label>
                 <div className="flex flex-wrap gap-3">
-                  {product.variants.map((variant) => {
+                  {[...product.variants]
+                    .sort((a, b) => {
+                      if (product.type === 'lens') {
+                        return (a.refractiveIndex || 0) - (b.refractiveIndex || 0);
+                      }
+                      return 0;
+                    })
+                    .map((variant) => {
                     const isSelected = selectedVariant?.variantId === variant.variantId;
                     const label =
                       product.type === 'lens'
@@ -253,14 +255,6 @@ const ProductDetailPage = () => {
                         }`}
                       >
                         {label}
-                        {variant.salePrice && variant.salePrice !== product.basePrice && (
-                          <span className="ml-2 text-xs text-gray-500">
-                            {new Intl.NumberFormat('vi-VN', {
-                              style: 'currency',
-                              currency: 'VND',
-                            }).format(variant.salePrice)}
-                          </span>
-                        )}
                       </button>
                     );
                   })}
@@ -405,9 +399,26 @@ const ProductDetailPage = () => {
           {/* TAB CONTENT */}
 
           {activeTab === 'description' && (
-            <div className="text-gray-600 leading-relaxed space-y-4">
+            <div className="text-gray-600 leading-relaxed">
               {product.description ? (
-                <p className="whitespace-pre-line">{product.description}</p>
+                <div
+                  className="prose prose-sm max-w-none
+                    [&_h1]:text-2xl [&_h1]:font-bold [&_h1]:mb-3
+                    [&_h2]:text-xl [&_h2]:font-bold [&_h2]:mb-2
+                    [&_h3]:text-lg [&_h3]:font-semibold [&_h3]:mb-2
+                    [&_p]:mb-3 [&_p]:leading-relaxed
+                    [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:mb-3
+                    [&_ol]:list-decimal [&_ol]:pl-6 [&_ol]:mb-3
+                    [&_li]:mb-1
+                    [&_strong]:font-bold
+                    [&_em]:italic
+                    [&_u]:underline
+                    [&_s]:line-through
+                    [&_a]:text-blue-600 [&_a]:underline
+                    [&_img]:rounded-lg [&_img]:my-4 [&_img]:max-w-full [&_img]:h-auto
+                    [&_blockquote]:border-l-4 [&_blockquote]:border-gray-300 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-gray-500"
+                  dangerouslySetInnerHTML={{ __html: product.description }}
+                />
               ) : (
                 <p className="text-gray-400 italic">Chưa có mô tả cho sản phẩm này.</p>
               )}
