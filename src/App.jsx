@@ -1,4 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import { useEffect } from 'react';
 import { AdminLayout } from './components/layout/AdminLayout';
 import { AuthLayout } from './components/layout/AuthLayout';
 import { MainLayout } from './components/layout/MainLayout';
@@ -9,6 +11,11 @@ import {
   OperationsRoute,
   ManagerRoute,
 } from './components/ProtectedRoute';
+import { useAuth } from './contexts/AuthContext';
+import http from './lib/http/client';
+import { useSessionStore } from './stores/sessionStore';
+import { ENDPOINT, QUERY_KEYS } from './utils/endpoints';
+import MaintenancePage from './pages/MaintenancePage';
 
 // Customer Pages
 import NotificationPage from './pages/customer/NotificationPage';
@@ -73,7 +80,53 @@ import PreorderReceivePage from './pages/operations/PreorderReceivePage';
 function App() {
   return (
     <BrowserRouter>
+      <AppRoutes />
+    </BrowserRouter>
+  );
+}
+
+function AppRoutes() {
+  const { user } = useAuth();
+  const clearSession = useSessionStore((s) => s.clearSession);
+  const isAdmin = user?.role === 'ADMIN';
+
+  const { data: maintenanceData } = useQuery({
+    queryKey: QUERY_KEYS.MAINTENANCE_STATUS,
+    queryFn: async () => {
+      const res = await http.get(ENDPOINT.MAINTENANCE_STATUS);
+      return res.data;
+    },
+    refetchInterval: 60 * 1000, // re-check every 60s
+    staleTime: 30 * 1000,
+  });
+
+  const isMaintenance = maintenanceData?.maintenance === true;
+
+  // Auto sign-out non-admin users when maintenance mode is turned on
+  useEffect(() => {
+    if (isMaintenance && user && !isAdmin) {
+      clearSession();
+    }
+  }, [isMaintenance, user, isAdmin, clearSession]);
+
+  // Show maintenance page for non-admin users when maintenance is on
+  // Allow /login route so admin can log in
+  if (isMaintenance && !isAdmin) {
+    return (
       <Routes>
+        {/* Auth routes — admin needs to log in */}
+        <Route element={<AuthLayout />}>
+          <Route path="/login" element={<LoginPage />} />
+        </Route>
+
+        {/* Everything else → maintenance page */}
+        <Route path="*" element={<MaintenancePage />} />
+      </Routes>
+    );
+  }
+
+  return (
+    <Routes>
         {/* Customer Routes */}
         <Route element={<MainLayout />}>
           <Route path="/" element={<HomePage />} />
@@ -194,7 +247,6 @@ function App() {
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-    </BrowserRouter>
   );
 }
 

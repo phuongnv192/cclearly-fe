@@ -83,6 +83,7 @@ export const ENDPOINT = {
 
   // Public config
   SHIPPING_CONFIG: '/public/shipping-config',
+  MAINTENANCE_STATUS: '/public/maintenance-status',
 };
 
 // Query Keys for React Query
@@ -133,4 +134,7 @@ export const QUERY_KEYS = {
 
   // Shipping config
   SHIPPING_CONFIG: ['shipping-config'],
+
+  // Maintenance
+  MAINTENANCE_STATUS: ['maintenance-status'],
 };
