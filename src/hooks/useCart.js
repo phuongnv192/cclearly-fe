@@ -5,7 +5,7 @@ import { handleErrorApi } from '@/lib/errors/handleError';
 import { QUERY_KEYS } from '@/utils/endpoints';
 
 // Get cart
-export const useCart = () => {
+export const useCart = (options = {}) => {
   return useQuery({
     queryKey: QUERY_KEYS.CART,
     queryFn: async () => {
@@ -13,6 +13,7 @@ export const useCart = () => {
       return data;
     },
     staleTime: 0, // Always fetch fresh
+    ...options,
   });
 };
 
