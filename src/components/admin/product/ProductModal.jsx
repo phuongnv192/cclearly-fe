@@ -104,6 +104,20 @@ const ProductModal = ({
                     placeholder="VD: Gọng kính Ray-Ban Aviator"
                   />
                 </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wider">
+                    Mô tả sản phẩm
+                  </label>
+                  <textarea
+                    value={formData.description || ''}
+                    onChange={(e) =>
+                      setFormData({ ...formData, description: e.target.value })
+                    }
+                    rows={3}
+                    className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 outline-none transition resize-none"
+                    placeholder="Mô tả chi tiết về sản phẩm..."
+                  />
+                </div>
                 <div className={`grid ${formData.type === 'accessory' ? 'grid-cols-2' : 'grid-cols-1'} gap-3`}>
                   {formData.type === 'accessory' && (
                     <div>
