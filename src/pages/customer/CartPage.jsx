@@ -2,12 +2,15 @@ import { ShoppingCart, Glasses, Minus, Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { useQuery } from '@tanstack/react-query';
 import {
   useCart,
   useUpdateCartItem,
   useRemoveCartItem,
   useClearCart,
 } from '@/hooks/useCart';
+import { productRequest } from '@/api/product';
+import { QUERY_KEYS } from '@/utils/endpoints';
 
 const CartPage = () => {
   const navigate = useNavigate();
@@ -37,7 +40,16 @@ const CartPage = () => {
     (sum, item) => sum + item.price * item.quantity,
     0
   );
-  const shippingFee = subtotal > 500000 ? 0 : 30000;
+
+  // Fetch shipping config from server (same as CheckoutPage)
+  const { data: shippingConfigData } = useQuery({
+    queryKey: QUERY_KEYS.SHIPPING_CONFIG,
+    queryFn: () => productRequest.getShippingConfig(),
+    staleTime: 5 * 60 * 1000,
+  });
+  const defaultShippingFee = shippingConfigData?.data?.defaultShippingFee ?? 30000;
+  const freeShippingThreshold = shippingConfigData?.data?.freeShippingThreshold ?? 500000;
+  const shippingFee = subtotal >= freeShippingThreshold ? 0 : defaultShippingFee;
   const [voucherCode, setVoucherCode] = useState('');
   const [discount, setDiscount] = useState(0);
 

@@ -2,9 +2,12 @@ import { Glasses, Tag, FileText, Check } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCart, useClearCart } from '@/hooks/useCart';
 import { useCreateOrder } from '@/hooks/useOrder';
+import { productRequest } from '@/api/product';
+import { QUERY_KEYS } from '@/utils/endpoints';
 
 const CheckoutPage = () => {
   const navigate = useNavigate();
@@ -19,7 +22,17 @@ const CheckoutPage = () => {
     (sum, item) => sum + item.price * item.quantity,
     0
   );
-  const shippingFee = subtotal > 500000 ? 0 : 30000;
+
+  // Fetch shipping config from server
+  const { data: shippingConfig } = useQuery({
+    queryKey: QUERY_KEYS.SHIPPING_CONFIG,
+    queryFn: () => productRequest.getShippingConfig(),
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const defaultShippingFee = shippingConfig?.data?.defaultShippingFee ?? 30000;
+  const freeShippingThreshold = shippingConfig?.data?.freeShippingThreshold ?? 500000;
+  const shippingFee = subtotal >= freeShippingThreshold ? 0 : defaultShippingFee;
 
   // Get prescriptions from sessionStorage (passed from CartPage)
   const [prescriptions, setPrescriptions] = useState({});
