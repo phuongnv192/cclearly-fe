@@ -56,4 +56,10 @@ export const productRequest = {
     const res = await http.get(ENDPOINT.BANNERS_ACTIVE, { query: params });
     return res.data;
   },
+
+  // Get shipping config (public)
+  getShippingConfig: async () => {
+    const res = await http.get(ENDPOINT.SHIPPING_CONFIG);
+    return res.data;
+  },
 };

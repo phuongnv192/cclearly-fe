@@ -80,6 +80,9 @@ export const ENDPOINT = {
 
   // Upload
   UPLOAD_IMAGE: '/upload/image',
+
+  // Public config
+  SHIPPING_CONFIG: '/public/shipping-config',
 };
 
 // Query Keys for React Query
@@ -127,4 +130,7 @@ export const QUERY_KEYS = {
 
   // Addresses
   ADDRESSES: ['addresses'],
+
+  // Shipping config
+  SHIPPING_CONFIG: ['shipping-config'],
 };
