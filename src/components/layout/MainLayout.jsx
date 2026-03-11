@@ -328,18 +328,6 @@ const MainLayout = () => {
                 // Not logged in - show Cart + Login buttons
                 <div className="flex items-center gap-3">
                   <Link
-                    to="/cart"
-                    className="relative flex items-center justify-center w-10 h-10 rounded-full hover:bg-[#f3f3f3] transition"
-                    title="Giỏ hàng"
-                  >
-                    <ShoppingBag className="h-5 w-5 text-[#222]" />
-                    {cartItemCount > 0 && (
-                      <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-[#0f5dd9] text-[10px] font-bold text-white">
-                        {cartItemCount}
-                      </span>
-                    )}
-                  </Link>
-                  <Link
                     to="/login"
                     state={{ from: location.pathname }}
                     className="flex items-center gap-2 px-5 py-2 bg-[#0f5dd9] text-white rounded-full text-sm font-medium hover:bg-[#0b4fc0] transition"
